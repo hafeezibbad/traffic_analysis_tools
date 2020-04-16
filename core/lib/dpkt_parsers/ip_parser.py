@@ -1,0 +1,64 @@
+import logging
+from typing import Tuple
+
+import binascii
+import dpkt
+from dpkt.ip import IP
+from munch import Munch
+
+from core.configuration.data import ConfigurationData
+from core.lib.dpkt_parsers.base import PacketParserInterface
+from core.lib.ip_utils import IpAddrUtils
+from core.static.utils import StaticData
+
+
+class IpPacketParser(PacketParserInterface):
+    def __init__(self, config: ConfigurationData):
+        self.config = config
+        self.ip_utils = IpAddrUtils()
+        self.ip_options_data = StaticData.load_ip_options_data()
+        self.ip_proto_data = StaticData.load_ip_protocols_data()
+
+    def extract_data(self, packet: IP) -> Munch:
+        data = Munch()
+        try:
+            data.src_ip, data.dst_ip = self.extract_src_dest_ip(packet)
+            data.ip_proto = self.get_ip_proto_name(packet.p)
+            data.ip_payload_size = len(packet.data)
+            data.ip_ttl = packet.ttl
+            data.ip_tos = packet.tos
+            data.ip_do_not_fragment = bool(packet.off & dpkt.ip.IP_DF)
+            data.ip_more_fragment = bool(packet.off & dpkt.ip.IP_MF)
+            data.ip_opts = self.parse_ip_options(packet.opts) or ''
+
+        except BaseException as ex:
+            logging.warning('Unable to extract data from `{}`.Error: `{}`'.format(type(packet), ex))
+
+        return data
+
+    def extract_src_dest_ip(self, ip_packet: IP) -> Tuple:
+        return self.ip_utils.inet_to_str(ip_packet.src), self.ip_utils.inet_to_str(ip_packet.dst)
+
+    def parse_ip_options(self, ip_options: bytes) -> str:
+        # Split 4 bytes \x94\x04\x00\x00 to single bytes [94, 04, 00, 00]
+        options = binascii.hexlify(ip_options).decode('utf-8')
+        if not options:
+            return ''
+
+        options = [options[i:i+2] for i in range(0, len(options), 2)]
+        # first byte gives information of IP options
+        hex_option = '0x' + options[0]
+
+        return self.ip_options_data.get(hex_option, {}).get('abbrv') or hex_option
+
+    def get_ip_proto_name(self, proto_num: int) -> str:
+        try:
+            proto_key = str(proto_num)
+        except ValueError:
+            return proto_num
+
+        proto_name = ''
+        if proto_key in self.ip_proto_data:
+            proto_name = self.ip_proto_data.get(proto_key, {}).get('keyword', '')
+
+        return proto_name or proto_key

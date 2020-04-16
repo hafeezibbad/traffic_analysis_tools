@@ -1,0 +1,432 @@
+{
+  "total": {
+    "last_ts": 0,
+    "dpp": {
+      "all": []
+    },
+    "iad": {
+      "all": []
+    }
+  },
+  "ip4": {
+    "last_ts": 0,
+    "dpp": {
+      "all": []
+    },
+    "iad": {
+      "all": []
+    }
+  },
+  "ip4bd": {
+    "tcp4": {
+      "last_ts": 0,
+      "dpp": {
+        "all": []
+      },
+      "iad": {
+        "all": []
+      },
+      "flags": {
+        "no": 0,
+        "fin": 0,
+        "syn": 0,
+        "rst": 0,
+        "psh": 0,
+        "ack": 0,
+        "urg": 0
+      }
+    },
+    "tcp4bd": {
+      "http": {
+
+        "last_ts": 0,
+
+        "dpp": {
+          "all": []
+        },
+        "iad": {
+          "all": []
+        }
+      },
+      "https": {
+
+        "last_ts": 0,
+
+        "dpp": {
+          "all": []
+        },
+        "iad": {
+          "all": []
+        }
+      },
+      "smtp": {
+
+        "last_ts": 0,
+
+        "dpp": {
+          "all": []
+        },
+        "iad": {
+          "all": []
+        }
+      },
+      "ftp": {
+
+        "last_ts": 0,
+
+        "dpp": {
+          "all": []
+        },
+        "iad": {
+          "all": []
+        }
+      },
+      "ssh": {
+
+        "last_ts": 0,
+
+        "dpp": {
+          "all": []
+        },
+        "iad": {
+          "all": []
+        }
+      },
+      "dns": {
+
+        "last_ts": 0,
+
+        "dpp": {
+          "all": []
+        },
+        "iad": {
+          "all": []
+        }
+      },
+      "bgp": {
+
+        "last_ts": 0,
+
+        "dpp": {
+          "all": []
+        },
+        "iad": {
+          "all": []
+        }
+      },
+      "other": {
+
+        "last_ts": 0,
+
+        "dpp": {
+          "all": []
+        },
+        "iad": {
+          "all": []
+        }
+      }
+    },
+    "udp4": {
+
+      "last_ts": 0,
+
+      "dpp": {
+        "all": []
+      },
+      "iad": {
+        "all": []
+      }
+    },
+    "udp4bd": {
+      "dns": {
+
+        "last_ts": 0,
+
+        "dpp": {
+          "all": []
+        },
+        "iad": {
+          "all": []
+        }
+      },
+      "other": {
+
+        "last_ts": 0,
+
+        "dpp": {
+          "all": []
+        },
+        "iad": {
+          "all": []
+        }
+      }
+    },
+    "icmp": {
+
+      "last_ts": 0,
+
+      "dpp": {
+        "all": []
+      },
+      "iad": {
+        "all": []
+      }
+    },
+    "ipip": {
+
+      "last_ts": 0,
+
+      "dpp": {
+        "all": []
+      },
+      "iad": {
+        "all": []
+      }
+    },
+    "gre": {
+
+      "last_ts": 0,
+
+      "dpp": {
+        "all": []
+      },
+      "iad": {
+        "all": []
+      }
+    },
+    "ipsec": {
+
+      "last_ts": 0,
+
+      "dpp": {
+        "all": []
+      },
+      "iad": {
+        "all": []
+      }
+    },
+    "ip6": {
+
+      "last_ts": 0,
+
+      "dpp": {
+        "all": []
+      },
+      "iad": {
+        "all": []
+      }
+    },
+    "frag": {
+
+      "last_ts": 0,
+
+      "dpp": {
+        "all": []
+      },
+      "iad": {
+        "all": []
+      }
+    }
+  },
+  "ip6": {
+
+    "last_ts": 0,
+
+    "dpp": {
+      "all": []
+    },
+    "iad": {
+      "all": []
+    }
+  },
+  "ip6bd": {
+    "tcp6": {
+
+      "last_ts": 0,
+
+      "dpp": {
+        "all": []
+      },
+      "iad": {
+        "all": []
+      }
+    },
+    "tcp6bd": {
+      "http": {
+
+        "last_ts": 0,
+
+        "dpp": {
+          "all": []
+        },
+        "iad": {
+          "all": []
+        }
+      },
+      "https": {
+
+        "last_ts": 0,
+
+        "dpp": {
+          "all": []
+        },
+        "iad": {
+          "all": []
+        }
+      },
+      "smtp": {
+
+        "last_ts": 0,
+
+        "dpp": {
+          "all": []
+        },
+        "iad": {
+          "all": []
+        }
+      },
+      "ftp": {
+
+        "last_ts": 0,
+
+        "dpp": {
+          "all": []
+        },
+        "iad": {
+          "all": []
+        }
+      },
+      "ssh": {
+
+        "last_ts": 0,
+
+        "dpp": {
+          "all": []
+        },
+        "iad": {
+          "all": []
+        }
+      },
+      "dns": {
+
+        "last_ts": 0,
+
+        "dpp": {
+          "all": []
+        },
+        "iad": {
+          "all": []
+        }
+      },
+      "bgp": {
+
+        "last_ts": 0,
+
+        "dpp": {
+          "all": []
+        },
+        "iad": {
+          "all": []
+        }
+      },
+      "other": {
+
+        "last_ts": 0,
+
+        "dpp": {
+          "all": []
+        },
+        "iad": {
+          "all": []
+        }
+      }
+    },
+    "udp6": {
+
+      "last_ts": 0,
+
+      "dpp": {
+        "all": []
+      },
+      "iad": {
+        "all": []
+      }
+    },
+    "udp6bd": {
+      "dns": {
+
+        "last_ts": 0,
+
+        "dpp": {
+          "all": []
+        },
+        "iad": {
+          "all": []
+        }
+      },
+      "other": {
+
+        "last_ts": 0,
+
+        "dpp": {
+          "all": []
+        },
+        "iad": {
+          "all": []
+        }
+      }
+    },
+    "icmp6": {
+
+      "last_ts": 0,
+
+      "dpp": {
+        "all": []
+      },
+      "iad": {
+        "all": []
+      }
+    },
+    "ip": {
+
+      "last_ts": 0,
+
+      "dpp": {
+        "all": []
+      },
+      "iad": {
+        "all": []
+      }
+    },
+    "pim6": {
+      "last_ts": 0,
+      "dpp": {
+        "all": []
+      },
+      "iad": {
+        "all": []
+      }
+    },
+    "other6": {
+
+      "last_ts": 0,
+
+      "dpp": {
+        "all": []
+      },
+      "iad": {
+        "all": []
+      }
+    }
+  },
+  "other": {},
+  "unrecognized": {
+    "last_ts": 0,
+    "dpp": {
+      "all": []
+    },
+    "iad": {
+      "all": []
+    }
+  }
+}

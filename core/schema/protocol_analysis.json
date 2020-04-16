@@ -1,0 +1,166 @@
+{
+  "ip4": {
+    "ts": [],
+    "data": []
+  },
+  "ip4bd": {
+    "tcp4": {
+      "ts": [],
+      "data": []
+    },
+    "tcp4bd": {
+      "http": {
+        "ts": [],
+        "data": []
+      },
+      "https": {
+        "ts": [],
+        "data": []
+      },
+      "smtp": {
+        "ts": [],
+        "data": []
+      },
+      "ftp": {
+        "ts": [],
+        "data": []
+      },
+      "ssh": {
+        "ts": [],
+        "data": []
+      },
+      "dns": {
+        "ts": [],
+        "data": []
+      },
+      "bgp": {
+        "ts": [],
+        "data": []
+      },
+      "other": {
+        "ts": [],
+        "data": []
+      }
+    },
+    "udp4": {
+      "ts": [],
+      "data": []
+    },
+    "udp4bd": {
+      "dns": {
+        "ts": [],
+        "data": []
+      },
+      "other": {
+        "ts": [],
+        "data": []
+      }
+    },
+    "icmp": {
+      "ts": [],
+      "data": []
+    },
+    "ipip": {
+      "ts": [],
+      "data": []
+    },
+    "gre": {
+      "ts": [],
+      "data": []
+    },
+    "ipsec": {
+      "ts": [],
+      "data": []
+    },
+    "ip6": {
+      "ts": [],
+      "data": []
+    },
+    "frag": {
+      "ts": [],
+      "data": []
+    }
+  },
+  "ip6": {
+    "ts": [],
+    "data": []
+  },
+  "ip6bd": {
+    "tcp6": {
+      "ts": [],
+      "data": []
+    },
+    "tcp6bd": {
+      "http": {
+        "ts": [],
+        "data": []
+      },
+      "https": {
+        "ts": [],
+        "data": []
+      },
+      "smtp": {
+        "ts": [],
+        "data": []
+      },
+      "ftp": {
+        "ts": [],
+        "data": []
+      },
+      "ssh": {
+        "ts": [],
+        "data": []
+      },
+      "dns": {
+        "ts": [],
+        "data": []
+      },
+      "bgp": {
+        "ts": [],
+        "data": []
+      },
+      "other": {
+        "ts": [],
+        "data": []
+      }
+    },
+    "udp6": {
+      "ts": [],
+      "data": []
+    },
+    "udp6bd": {
+      "dns": {
+        "ts": [],
+        "data": []
+      },
+      "other": {
+        "ts": [],
+        "data": []
+      }
+    },
+    "icmp6": {
+      "ts": [],
+      "data": []
+    },
+    "ip": {
+      "ts": [],
+      "data": []
+    },
+    "pim6": {
+      "ts": [],
+      "data": []
+    },
+    "other6": {
+      "ts": [],
+      "data": []
+    }
+  },
+  "other": {
+    "ts": [],
+    "data": []
+  },
+  "unrecognized": {
+    "ts": [],
+    "data": []
+  }
+}

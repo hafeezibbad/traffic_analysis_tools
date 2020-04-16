@@ -1,0 +1,242 @@
+{
+  "0x00": {
+    "abbrv": "EOOL",
+    "desc": "End of Options List",
+    "copy": "0",
+    "class": "0",
+    "number": "0",
+    "reference": "[RFC791][Jon_Postel]"
+  },
+  "0x01": {
+    "abbrv": "NOP",
+    "desc": "No Operation",
+    "copy": "0",
+    "class": "0",
+    "number": "1",
+    "reference": "[RFC791][Jon_Postel]"
+  },
+  "0x82": {
+    "abbrv": "SEC",
+    "desc": "Security",
+    "copy": "1",
+    "class": "0",
+    "number": "2",
+    "reference": "[RFC1108]"
+  },
+  "0x83": {
+    "abbrv": "LSR",
+    "desc": "Loose Source Route",
+    "copy": "1",
+    "class": "0",
+    "number": "3",
+    "reference": "[RFC791][Jon_Postel]"
+  },
+  "0x44": {
+    "abbrv": "TS",
+    "desc": "Time Stamp",
+    "copy": "0",
+    "class": "2",
+    "number": "4",
+    "reference": "[RFC791][Jon_Postel]"
+  },
+  "0x85": {
+    "abbrv": "ESEC",
+    "desc": "Extended Security",
+    "copy": "1",
+    "class": "0",
+    "number": "5",
+    "reference": "[RFC1108]"
+  },
+  "0x86": {
+    "abbrv": "CIPSO",
+    "desc": "Commercial Security",
+    "copy": "1",
+    "class": "0",
+    "number": "6",
+    "reference": "[draft-ietf-cipso-ipsecurity-01]"
+  },
+  "0x7": {
+    "abbrv": "RR",
+    "desc": "Record Route",
+    "copy": "0",
+    "class": "0",
+    "number": "7",
+    "reference": "[RFC791][Jon_Postel]"
+  },
+  "0x88": {
+    "abbrv": "SID",
+    "desc": "Stream ID",
+    "copy": "1",
+    "class": "0",
+    "number": "8",
+    "reference": "[RFC791][Jon_Postel][RFC6814][1]"
+  },
+  "0x89": {
+    "abbrv": "SSR",
+    "desc": "Strict Source Route",
+    "copy": "1",
+    "class": "0",
+    "number": "9",
+    "reference": "[RFC791][Jon_Postel]"
+  },
+  "0xa": {
+    "abbrv": "ZSU",
+    "desc": "Experimental Measurement",
+    "copy": "0",
+    "class": "0",
+    "number": "10",
+    "reference": "[ZSu]"
+  },
+  "0xb": {
+    "abbrv": "MTUP",
+    "desc": "MTU Probe",
+    "copy": "0",
+    "class": "0",
+    "number": "11",
+    "reference": "[RFC1063][RFC1191][1]"
+  },
+  "0xc": {
+    "abbrv": "MTUR",
+    "desc": "MTU Reply",
+    "copy": "0",
+    "class": "0",
+    "number": "12",
+    "reference": "[RFC1063][RFC1191][1]"
+  },
+  "0xcd": {
+    "abbrv": "FINN",
+    "desc": "Experimental Flow Control",
+    "copy": "1",
+    "class": "2",
+    "number": "13",
+    "reference": "[Greg_Finn]"
+  },
+  "0x8e": {
+    "abbrv": "VISA",
+    "desc": "Experimental Access Control",
+    "copy": "1",
+    "class": "0",
+    "number": "14",
+    "reference": "[Deborah_Estrin][RFC6814][1]"
+  },
+  "0xf": {
+    "abbrv": "ENCODE",
+    "desc": "",
+    "copy": "0",
+    "class": "0",
+    "number": "15",
+    "reference": "[VerSteeg][RFC6814][1]"
+  },
+  "0x90": {
+    "abbrv": "IMITD",
+    "desc": "IMI Traffic Descriptor",
+    "copy": "1",
+    "class": "0",
+    "number": "16",
+    "reference": "[Lee]"
+  },
+  "0x91": {
+    "abbrv": "EIP",
+    "desc": "Extended Internet Protocol",
+    "copy": "1",
+    "class": "0",
+    "number": "17",
+    "reference": "[RFC1385][RFC6814][1]"
+  },
+  "0x52": {
+    "abbrv": "TR",
+    "desc": "Traceroute",
+    "copy": "0",
+    "class": "2",
+    "number": "18",
+    "reference": "[RFC1393][RFC6814][1]"
+  },
+  "0x93": {
+    "abbrv": "ADDEXT",
+    "desc": "Address Extension",
+    "copy": "1",
+    "class": "0",
+    "number": "19",
+    "reference": "[Ullmann IPv7][RFC6814][1]"
+  },
+  "0x94": {
+    "abbrv": "RTRALT",
+    "desc": "Router Alert",
+    "copy": "1",
+    "class": "0",
+    "number": "20",
+    "reference": "[RFC2113]"
+  },
+  "0x95": {
+    "abbrv": "SDB",
+    "desc": "Selective Directed Broadcast",
+    "copy": "1",
+    "class": "0",
+    "number": "21",
+    "reference": "[Charles_Bud_Graff][RFC6814][1]"
+  },
+  "0x96": {
+    "abbrv": "",
+    "desc": "Unassigned (Released 18 October 2005)",
+    "copy": "1",
+    "class": "0",
+    "number": "22",
+    "reference": ""
+  },
+  "0x97": {
+    "abbrv": "DPS",
+    "desc": "Dynamic Packet State",
+    "copy": "1",
+    "class": "0",
+    "number": "23",
+    "reference": "[Andy_Malis][RFC6814][1]"
+  },
+  "0x98": {
+    "abbrv": "UMP",
+    "desc": "Upstream Multicast Pkt.",
+    "copy": "1",
+    "class": "0",
+    "number": "24",
+    "reference": "[Dino_Farinacci][RFC6814][1]"
+  },
+  "0x19": {
+    "abbrv": "QS",
+    "desc": "Quick Start",
+    "copy": "0",
+    "class": "0",
+    "number": "25",
+    "reference": "[RFC4782]"
+  },
+  "0x1e": {
+    "abbrv": "EXP",
+    "desc": "RFC3692-style Experiment [2]",
+    "copy": "0",
+    "class": "0",
+    "number": "30",
+    "reference": "[RFC4727]"
+  },
+  "0x5e": {
+    "abbrv": "EXP",
+    "desc": "RFC3692-style Experiment [2]",
+    "copy": "0",
+    "class": "2",
+    "number": "30",
+    "reference": "[RFC4727]"
+  },
+  "0x9e": {
+    "abbrv": "EXP",
+    "desc": "RFC3692-style Experiment [2]",
+    "copy": "1",
+    "class": "0",
+    "number": "30",
+    "reference": "[RFC4727]"
+  },
+  "0xde": {
+    "abbrv": "EXP",
+    "desc": "RFC3692-style Experiment [2]",
+    "copy": "1",
+    "class": "2",
+    "number": "30",
+    "reference": "[RFC4727]"
+  }
+}
