@@ -29,6 +29,7 @@ class BaseIcmpPacketParser(PacketParserInterface):
             )
         except BaseException as ex:
             logging.warning('Unable to extract data from `{}`.Error: `{}`'.format(type(packet), ex))
+            raise ex
 
         return data
 

@@ -18,26 +18,22 @@ class MdnsPacketParser(PacketParserInterface):
 
     @staticmethod
     def load_mdns_packet_from_ip_packet(ip_packet: IP) -> Optional[Mdns]:
-        mdns = None
         try:
             udp_packet = UDP(ip_packet.data)
-            mdns = MdnsPacketParser.load_mdns_packet_from_udp_packet(udp_packet)
+            return MdnsPacketParser.load_mdns_packet_from_udp_packet(udp_packet)
 
         except BaseException as ex:
             logging.warning('Can not extract mDNS packet from IP packet. Error: {}'.format(ex))
-
-        return mdns
+            raise ex
 
     @staticmethod
     def load_mdns_packet_from_udp_packet(udp_packet: IP) -> Optional[Mdns]:
-        mdns = None
         try:
-            mdns = Mdns(udp_packet.data)
+            return Mdns(udp_packet.data)
 
         except BaseException as ex:
             logging.warning('Can not extract mDNS packet from IP packet. Error: {}'.format(ex))
-
-        return mdns
+            raise ex
 
     def is_mdns_packet_valid_for_processing(self, mdns_packet: Mdns) -> bool:
         if mdns_packet.is_response() is False:
@@ -224,11 +220,12 @@ class MdnsPacketParser(PacketParserInterface):
                 data.mdns_hostname, data.mdns_services = self.find_hostname_and_services_from_dns_packet(packet)
 
             elif packet.question_count != 1:
-                logging.warning("Expecting 1 mDNS question, got {}".format(packet.question_count))
+                logging.debug("Expecting 1 mDNS question, got {}".format(packet.question_count))
                 # This is a seriously fucked up poor son of a bitch packet, but we do not care. We just go on.
                 data.mdns_hostname, data.mdns_services = self.find_hostname_and_services_from_complex_dns_packet(packet)
 
         except BaseException as ex:
-            logging.warning('Unable to extract data from `{}`.Error: `{}`'.format(type(packet), ex))
+            logging.warning('Unable to extract data from DNS packet `{}`.Error: `{}`'.format(packet, ex))
+            raise ex
 
         return data

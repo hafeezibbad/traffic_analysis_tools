@@ -7,8 +7,6 @@ from munch import Munch
 
 from core.configuration.data import ConfigurationData
 from core.lib.dpkt_parsers.base import PacketParserInterface
-from core.lib.dpkt_parsers.errors import PacketParserError
-from core.models.packet_data import PacketData
 
 
 class DhcpPacketParser(PacketParserInterface):
@@ -30,6 +28,7 @@ class DhcpPacketParser(PacketParserInterface):
 
         except BaseException as ex:
             logging.warning('Unable to extract data from `{}`.Error: `{}`'.format(type(packet), ex))
+            raise ex
 
         return data
 

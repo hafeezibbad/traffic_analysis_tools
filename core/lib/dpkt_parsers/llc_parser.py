@@ -9,7 +9,7 @@ class LlcPacketParser(PacketParserInterface):
     def __init__(self, config: ConfigurationData):
         self.config = config
 
-    def extract_data(self, packet: LLC) -> Munch:
+    def extract_data(self, llc_packet: LLC) -> Munch:
         data = Munch()
         # TODO: Implement
         return data

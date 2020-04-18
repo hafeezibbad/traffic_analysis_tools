@@ -12,6 +12,14 @@ from core.static.CONSTANTS import IP_PROTOCOLS_DATA_FILE_PATH, LAYER4_PORTS_DATA
 
 
 class StaticData:
+    def __init__(self):
+        self.ip_protocol_data = self.load_ip_protocols_data()
+        self.ip_options_data = self.load_ip_options_data()
+        self.layer4_ports_data = self.load_layer4_ports_data()
+        self.tcp_flag_data = self.load_tcp_flag_data()
+        self.ether_types_data = self.load_ether_types_data()
+        self.manuf_data = self.load_manuf_data()
+
     @staticmethod
     def load_manuf_data(file_path: str = MANUF_DATA_FILE_PATH) -> Optional[Munch]:
         manuf_data = load_manuf_file(manuf_file_path=file_path)
