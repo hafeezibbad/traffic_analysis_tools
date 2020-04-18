@@ -4,6 +4,7 @@ it processes all pcap files to extract the data in form of a csv file. These CSV
 results directory.
 """
 #!/usr/bin/python
+import gc
 import os
 import sys
 import time
@@ -29,15 +30,17 @@ config = config_manager.load_data_from_configuration_file(file_path=os.path.join
 stdout_file = os.path.join(RESULTS_DIR_PATH, 'prog_stdout.json')
 # Get list of PCAP files
 pcap_files = recursive_listdir(directory=PCAP_DIR_PATH, extension='pcap')
-
 static_data = StaticData()
 pcap_processor = PcapProcessor(config=config, static_data=static_data)
 
 summary_stats_pcap = dict(items=[])
-
+OVERWRITE_OLD_RESULTS = True
 for pcap_file in pcap_files:
+    gc.collect()
     file_name, ext = get_filename_and_ext(pcap_file)
     result_file_path = pcap_file.replace(PCAP_DIR_PATH, RESULTS_DIR_PATH)[:-(len(ext)+1)] + '_data.csv'
+    if os.path.exists(result_file_path) and OVERWRITE_OLD_RESULTS is False:
+        continue
     st = time.time()
     print('Start processing file: {}'.format(pcap_file))
     # Read and process the file

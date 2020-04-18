@@ -181,8 +181,6 @@ class PcapProcessor(BaseProcessor):
                 packet_data.layer3_undecoded_data = layer3_packet
 
         except Exception as ex:
-            traceback.print_exc()
             logging.error('Error in processing packet at ref_time: {}.Error: {}'.format(packet_data.ref_time, ex))
-            exit(0)
 
         return packet_data
