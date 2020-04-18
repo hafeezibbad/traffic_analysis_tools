@@ -2,6 +2,7 @@
 
 import os
 import sys
+import time
 
 sys.path.append(os.getcwd())
 
@@ -15,10 +16,11 @@ config.p0f_wd = os.path.join(PROJECT_DIR_PATH, config.p0f_wd)
 pcap_processor = PcapProcessor(config=config)
 
 # Read and process the file
+start_time = time.time()
 trace_info, status = pcap_processor.process(
-    input_file=os.path.join(PCAP_DIR_PATH, 'dcs-942l-eth0-30min-capture-30.pcap'),
-    # input_file=os.path.join(PCAP_DIR_PATH, 'ssdp_packets.pcap'),
+    input_file=os.path.join(PCAP_DIR_PATH, 'test_data.pcap'),
     output_file=os.path.join(RESULTS_DIR_PATH, 'results.csv')
 )
+print('processing_time: ', time.time()-start_time)
 
 print(trace_info.get_summary(output_format='json'))

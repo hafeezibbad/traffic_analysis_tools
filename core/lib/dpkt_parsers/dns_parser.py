@@ -60,6 +60,7 @@ class DnsPacketParser(PacketParserInterface):
 
         except BaseException as ex:
             logging.warning('Unable to extract data from `{}`.Error: `{}`'.format(type(packet), ex))
+            raise ex
 
         return data
 
@@ -75,6 +76,7 @@ class DnsPacketParser(PacketParserInterface):
 
         except BaseException as ex:
             logging.warning('Unable to extract data from `{}`.Error: `{}`'.format(type(dns_packet), ex))
+            raise ex
 
         return data
 

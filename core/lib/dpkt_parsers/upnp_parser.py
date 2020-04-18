@@ -1,5 +1,4 @@
 import logging
-from typing import Optional
 
 import dpkt
 from dpkt.ip import IP
@@ -17,38 +16,30 @@ class UpnpPacketParser(PacketParserInterface):
 
     @staticmethod
     def extract_upnp_request_from_ip_packet(ip_packet: IP) -> UpnpRequest:
-        upnp_request = None
         try:
             udp_packet = UDP(ip_packet.data)
-            upnp_request = UpnpRequest(udp_packet.data)
+            return UpnpRequest(udp_packet.data)
 
         except BaseException as ex:
             logging.warning('Can not extract UPnP request from IP packet. Error: {}'.format(ex))
-
-        return upnp_request
+            raise ex
 
     @staticmethod
     def extract_upnp_request_from_udp_packet(udp_packet: UDP) -> UpnpRequest:
-        upnp_request = None
         try:
-            upnp_request = UpnpRequest(udp_packet.data)
+            return UpnpRequest(udp_packet.data)
 
         except BaseException as ex:
-            print()
-            logging.warning('Can not extract UPnP request from UDP packet. Error: {}'.format(ex))
-            exit(0)
+            logging.error('Can not extract UPnP request from UDP packet. Error: {}'.format(ex))
+            raise ex
 
-        return upnp_request
-
-    def extract_http_response_from_udp_packet(self, udp_packet: dpkt.udp.UDP) -> Optional[dpkt.http.Response]:
-        http_response = None
+    def extract_http_response_from_udp_packet(self, udp_packet: dpkt.udp.UDP) -> dpkt.http.Response:
         try:
-            http_response = dpkt.http.Response(udp_packet.data)
+            return dpkt.http.Response(udp_packet.data)
 
         except BaseException as ex:
             logging.warning('Can not extract HTTP Response from UPnP packet. Error: {}'.format(ex))
-
-        return http_response
+            raise ex
 
     def extract_fingerprint_from_notify_message(self, http_packet: dpkt.http.Request) -> Munch:
         # Note that the library will accept any case of header, they are lowercase in the result
@@ -88,8 +79,9 @@ class UpnpPacketParser(PacketParserInterface):
                 # A client that wishes to discover available services on a network, uses method M-SEARCH
                 fingerprint = self.extract_fingerprint_from_msearch_message(http_packet)
 
-        except AttributeError:
+        except AttributeError as ex:
             logging.warning('HTTP packet extracted from UPnP packet does not have attribute `method`')
+            raise ex
 
         return fingerprint
 
@@ -122,6 +114,6 @@ class UpnpPacketParser(PacketParserInterface):
                 data[key] = value
 
         except BaseException as ex:
-            logging.warning('Unable to extract data from UPnP. Error: `{}`'.format(ex))
+            raise ex
 
         return data

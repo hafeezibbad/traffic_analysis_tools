@@ -14,9 +14,9 @@ from core.static.utils import StaticData
 
 
 class Layer4PacketParser(PacketParserInterface):
-    def __init__(self, config: ConfigurationData, *args, **kwargs):
+    def __init__(self, config: ConfigurationData, static_data: StaticData = None, *args, **kwargs):
         self.config = config
-        self.layer4_ports_data = StaticData.load_layer4_ports_data()
+        self.static_data = static_data or StaticData()
 
     def extract_data(self, packet) -> Munch:
         raise NotImplementedError
@@ -34,6 +34,7 @@ class Layer4PacketParser(PacketParserInterface):
 
         except BaseException as ex:
             logging.warning('Unable to extract data from `{}`.Error: `{}`'.format(type(packet), ex))
+            raise ex
 
         return data
 
@@ -59,7 +60,7 @@ class Layer4PacketParser(PacketParserInterface):
     def get_protocol_info_from_port(self, port_number: int, protocol_type: str) -> Optional[str]:
         # FIXME: Check if we need to find protocol abbrv for source port as well
         port_number = str(port_number)
-        protocol_data = self.layer4_ports_data.get(port_number)
+        protocol_data = self.static_data.layer4_ports_data.get(port_number)
         if protocol_data is None:
             return None
 
@@ -103,8 +104,8 @@ class Layer4PacketParser(PacketParserInterface):
 
 
 class TcpPacketParser(Layer4PacketParser):
-    def __init__(self, config: ConfigurationData,  *args, **kwargs):
-        super(TcpPacketParser, self).__init__(config, *args, **kwargs)
+    def __init__(self, config: ConfigurationData, static_data: StaticData = None,  *args, **kwargs):
+        super(TcpPacketParser, self).__init__(config, static_data, *args, **kwargs)
 
     def extract_data(self, packet: TCP) -> Munch:
         tcp_packet_data = Munch()
@@ -129,8 +130,8 @@ class TcpPacketParser(Layer4PacketParser):
 
 
 class UDPPacketParser(Layer4PacketParser):
-    def __init__(self, config: ConfigurationData, *args, **kwargs):
-        super(UDPPacketParser, self).__init__(config, *args, **kwargs)
+    def __init__(self, config: ConfigurationData, static_data: StaticData = None, *args, **kwargs):
+        super(UDPPacketParser, self).__init__(config, static_data, *args, **kwargs)
 
     def extract_data(self, packet: Union[UDP, TCP]) -> Munch:
         return self.extract_common_data(protocol_type='udp', packet=packet)

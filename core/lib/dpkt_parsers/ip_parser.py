@@ -13,11 +13,10 @@ from core.static.utils import StaticData
 
 
 class IpPacketParser(PacketParserInterface):
-    def __init__(self, config: ConfigurationData):
+    def __init__(self, config: ConfigurationData, static_data: StaticData = None):
         self.config = config
         self.ip_utils = IpAddrUtils()
-        self.ip_options_data = StaticData.load_ip_options_data()
-        self.ip_proto_data = StaticData.load_ip_protocols_data()
+        self.static_data = static_data or StaticData()
 
     def extract_data(self, packet: IP) -> Munch:
         data = Munch()
@@ -33,6 +32,7 @@ class IpPacketParser(PacketParserInterface):
 
         except BaseException as ex:
             logging.warning('Unable to extract data from `{}`.Error: `{}`'.format(type(packet), ex))
+            raise ex
 
         return data
 
@@ -49,7 +49,7 @@ class IpPacketParser(PacketParserInterface):
         # first byte gives information of IP options
         hex_option = '0x' + options[0]
 
-        return self.ip_options_data.get(hex_option, {}).get('abbrv') or hex_option
+        return self.static_data.ip_options_data.get(hex_option, {}).get('abbrv') or hex_option
 
     def get_ip_proto_name(self, proto_num: int) -> str:
         try:
@@ -58,7 +58,7 @@ class IpPacketParser(PacketParserInterface):
             return proto_num
 
         proto_name = ''
-        if proto_key in self.ip_proto_data:
-            proto_name = self.ip_proto_data.get(proto_key, {}).get('keyword', '')
+        if proto_key in self.static_data.ip_protocol_data:
+            proto_name = self.static_data.ip_protocol_data.get(proto_key, {}).get('keyword', '')
 
         return proto_name or proto_key

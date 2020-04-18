@@ -13,6 +13,7 @@ class PacketData(Model):
     dst_mac: Optional[str] 
     eth_type: Optional[str] 
     eth_frame_payload_size: Optional[int]  # Bytes
+    layer3_undecoded_data: Optional[str]  # bytes object containing ethernet frame data for packets which are not parsed
     # Layer 3: Network layer
     src_ip: Optional[str] 
     dst_ip: Optional[str] 
@@ -131,6 +132,7 @@ class PacketData(Model):
             self.dst_mac,
             self.eth_type,
             self.eth_frame_payload_size,
+            self.layer3_undecoded_data,
             # Layer 3: Network layer
             self.src_ip,
             self.dst_ip,
@@ -240,6 +242,7 @@ class PacketData(Model):
             "dst_mac",
             "eth_type",
             "eth_frame_payload_size",
+            "layer3_undecoded_data",
             # Layer 3: Network layer
             "src_ip",
             "dst_ip",

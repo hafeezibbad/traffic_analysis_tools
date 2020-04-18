@@ -11,10 +11,10 @@ from core.static.utils import StaticData
 
 
 class EthernetFrameParser(PacketParserInterface):
-    def __init__(self, config: ConfigurationData):
+    def __init__(self, config: ConfigurationData, static_data: StaticData = None):
         self.config = config
-        self.ether_type_data = StaticData.load_ether_types_data()
         self.mac_utils = MacAddressUtils()
+        self.static_data = static_data or StaticData()
 
     def extract_data(self, packet: Ethernet) -> Munch:
         data = Munch()
@@ -25,12 +25,13 @@ class EthernetFrameParser(PacketParserInterface):
 
         except BaseException as ex:
             logging.warning('Unable to extract data from `{}`.Error: `{}`'.format(type(packet), ex))
+            raise ex
 
         return data
 
     def get_eth_type_name(self, eth_frame: Ethernet) -> str:
         eth_type = str(hex(eth_frame.type)[2:])
-        eth_type_str = self.ether_type_data.get(eth_type, {}).get('protocol_abbrv', '').lower()
+        eth_type_str = self.static_data.ether_types_data.get(eth_type, {}).get('protocol_abbrv', '').lower()
         if not eth_type_str:
             eth_type_str = eth_type
 

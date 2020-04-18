@@ -1,4 +1,5 @@
 import json
+from typing import Union, Dict
 
 from typing_extensions import Literal
 
@@ -19,6 +20,7 @@ class PcapFileInfo(Model):
     data_rate: float = 0                # Data/second observed in trace
     average_packet_size: float = 0      # Average packet size observed in trace
     packet_rate: float = 0              # Packet/second observed in trace
+    processing_time: float = 0          # Time taken to process the pcap file
 
     def calculate_summary_stats(self) -> None:
         # Calculate summary statistics for the for trace file summary information
@@ -28,7 +30,7 @@ class PcapFileInfo(Model):
             self.packet_rate = self.packet_count / self.total_time
             self.average_packet_size = self.total_data / self.packet_count
 
-    def get_summary(self, output_format: Literal['json', 'csv'] = 'json'):
+    def get_summary(self, output_format: Literal['json', 'csv'] = 'json') -> Union[Dict[str, str], str]:
         self.calculate_summary_stats()
         self.file_size = FileProcessorBase().get_file_size(file_path=self.file_name)
         if output_format.lower() == 'json':
@@ -37,7 +39,7 @@ class PcapFileInfo(Model):
         elif output_format.lower() == 'csv':
             return self.to_csv_string()
 
-    def get_trace_file_info_csv_headers(self, delimiter: str = ','):
+    def get_trace_file_info_csv_headers(self, delimiter: str = ',') -> str:
         return delimiter.join([
             "file_name",
             "results_file_name",
@@ -53,7 +55,7 @@ class PcapFileInfo(Model):
             "packet_rate"
         ])
 
-    def to_csv_string(self, delimiter: str = ','):
+    def to_csv_string(self, delimiter: str = ',') -> str:
         return delimiter.join([
             self.file_name,
             self.results_file_name,

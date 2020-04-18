@@ -1,5 +1,6 @@
 import logging
 import os
+import traceback
 from pathlib import Path
 from typing import Tuple
 
@@ -11,14 +12,18 @@ from core.errors import FileError, FileErrorTypes
 from core.lib.dpkt_utils import DpktUtils
 from core.models.packet_data import PacketData
 from core.models.pcap_file_info import PcapFileInfo
+from core.static.utils import StaticData
 
 
 class PcapProcessor(BaseProcessor):
 
-    def __init__(self, config: ConfigurationData):
+    def __init__(self, config: ConfigurationData, static_data: StaticData = None):
         self.pcap_file_info = PcapFileInfo()
-        self.dpkt_utils = DpktUtils(config=config)
         self.config = config
+        self.static_data = static_data
+        if self.static_data is None or not isinstance(self.static_data, StaticData):
+            self.static_data = StaticData()
+        self.dpkt_utils = DpktUtils(config=config, static_data=static_data)
 
     def open_file(self, file_path: str = None, mode='r'):
         if not file_path:
@@ -52,11 +57,11 @@ class PcapProcessor(BaseProcessor):
         :return:
         :raises: FileError
         """
+        print('input_file:', input_file)
         pcap_file, captures = self.load_pcap_file_for_reading(input_file, pcap_filter)
         pcap_file_info = PcapFileInfo()
         if pcap_file is None:
             return pcap_file_info, False
-
         result_file = self.open_output_file_and_write_headers(output_file)
         initial_ts = 0
         # Process packets in PCAP file
@@ -150,8 +155,10 @@ class PcapProcessor(BaseProcessor):
             if eth.type in [
                 dpkt.ethernet.ETH_TYPE_ARP,
                 6,                  # IEEE 802.1 Link Layer Control
-                34958               # IEEE 802.1X Authentication
+                34958,              # IEEE 802.1X Authentication
+                35085               # TDLS Discovery request
             ]:
+                packet_data.layer3_undecoded_data = eth.data
                 return packet_data
 
             layer4_packet = layer3_packet.data
@@ -168,8 +175,14 @@ class PcapProcessor(BaseProcessor):
                 layer4_packet=layer4_packet,
                 packet_data=packet_data
             )
+        except AttributeError:
+            if not hasattr(layer3_packet, 'data'):
+                # Save the data for packets which we were not able to parse as IP packets.
+                packet_data.layer3_undecoded_data = layer3_packet
 
         except Exception as ex:
+            traceback.print_exc()
             logging.error('Error in processing packet at ref_time: {}.Error: {}'.format(packet_data.ref_time, ex))
+            exit(0)
 
         return packet_data
