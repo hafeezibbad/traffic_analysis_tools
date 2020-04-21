@@ -26,6 +26,7 @@ class DnsPacketParser(PacketParserInterface):
 
         except BaseException as ex:
             logging.warning('Can not extract DNS packet from UDP packet. Error: {}'.format(ex))
+            raise ex
 
         return dns
 
@@ -59,7 +60,7 @@ class DnsPacketParser(PacketParserInterface):
                 data.update(self.extract_data_from_dns_response(packet))
 
         except BaseException as ex:
-            logging.warning('Unable to extract data from `{}`.Error: `{}`'.format(type(packet), ex))
+            logging.warning('Unable to extract DNS from `{}`. Error: `{}`'.format(type(packet), ex))
             raise ex
 
         return data
@@ -75,7 +76,7 @@ class DnsPacketParser(PacketParserInterface):
             data.dns_query_cls = self.config.FieldDelimiter.join([str(q.cls) for q in dns_packet.qd])
 
         except BaseException as ex:
-            logging.warning('Unable to extract data from `{}`.Error: `{}`'.format(type(dns_packet), ex))
+            logging.warning('Unable to extract DNS from `{}`. Error: `{}`'.format(type(dns_packet), ex))
             raise ex
 
         return data
@@ -109,5 +110,6 @@ class DnsPacketParser(PacketParserInterface):
 
         except Exception as ex:
             logging.error('Unable to process dns answers packet. Error: {}'.format(ex))
+            raise ex
 
         return data

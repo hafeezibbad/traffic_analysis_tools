@@ -107,6 +107,6 @@ class IpAddrUtils:
                 return ip
 
         except Exception as ex:
-            logging.error('Unable to convert Inet address to readable string.Error: {}'.format(ex))
+            logging.error('Unable to convert Inet address to readable string. Error: {}'.format(ex))
 
         return None

@@ -1,10 +1,8 @@
 import logging
-from typing import Callable, Union
+from typing import Union
 
 import dpkt
 from dpkt.arp import ARP
-from dpkt.dhcp import DHCP, DHCP_OPT_POP3SERVER
-from dpkt.dns import DNS
 from dpkt.ethernet import Ethernet
 from dpkt.icmp import ICMP
 from dpkt.icmp6 import ICMP6
@@ -171,7 +169,8 @@ class DpktUtils:
         return packet_data
 
     def extract_data_from_layer7_protocols(self, layer4_packet, packet_data: PacketData) -> PacketData:
-        if packet_data.src_port == 53 or packet_data.dst_port == 53:  # DNS Packet
+        if packet_data.ip_proto == dpkt.ip.IP_PROTO_UDP and \
+                (packet_data.src_port == 53 or packet_data.dst_port == 53):  # DNS Packet
             packet_data = self.extract_and_load_data_from_dns_packet(layer4_packet, packet_data)
 
         elif packet_data.src_port == 123 or packet_data.dst_port == 123:  # NTP packet

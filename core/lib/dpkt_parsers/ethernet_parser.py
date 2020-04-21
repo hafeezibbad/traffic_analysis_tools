@@ -24,7 +24,7 @@ class EthernetFrameParser(PacketParserInterface):
             data.eth_frame_payload_size = len(packet.data)
 
         except BaseException as ex:
-            logging.warning('Unable to extract data from `{}`.Error: `{}`'.format(type(packet), ex))
+            logging.warning('Unable to extract ETH from `{}`. Error: `{}`'.format(type(packet), ex))
             raise ex
 
         return data
