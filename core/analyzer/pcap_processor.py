@@ -79,7 +79,7 @@ class PcapProcessor(BaseProcessor):
                 if packet_data is None:
                     pass
                 result_file.write(packet_data.to_csv_string(delimiter=self.config.ResultFileDelimiter) + '\n')
-                print(count)
+                
             except Exception as ex:
                 logging.warning('Unable to process packet at ts:{} Error: {}'.format(ts, ex))
                 raise ex
@@ -179,14 +179,11 @@ class PcapProcessor(BaseProcessor):
             if not hasattr(layer3_packet, 'data'):
                 # Save the data for packets which we were not able to parse as IP packets.
                 packet_data.layer3_undecoded_data = layer3_packet
-            print('timestamp: ', ts)
-            print('fragmented: ', packet_data.ip_more_fragment)
-            print('fragmented: ', packet_data.ip_do_not_fragment)
             logging.error('Error in processing packet at ref_time: {}'.format(packet_data.ref_time))
-            exit(0)
+            exit(1)
 
         except Exception as ex:
             logging.error('Error in processing packet at ref_time: {}'.format(packet_data.ref_time, ex))
-            exit(0)
+            exit(1)
 
         return packet_data

@@ -32,6 +32,10 @@ class Layer4PacketParser(PacketParserInterface):
                 port_number=data.layer7_proto, protocol_type=protocol_type
             )
 
+        except AttributeError:
+            logging.debug('This a fragmented packet, so capturing raw bytes')
+            data.data_from_fragment = packet.decode('utf-8')
+
         except BaseException as ex:
             logging.warning('Unable to extract Layer4 from `{}`. Error: `{}`'.format(type(packet), ex))
             raise ex
@@ -134,8 +138,8 @@ class UDPPacketParser(Layer4PacketParser):
         super(UDPPacketParser, self).__init__(config, static_data, *args, **kwargs)
 
     def extract_data(self, packet: Union[UDP, TCP]) -> Munch:
-        print(type(packet))
-        print(packet)
-        print(packet.data)
-        print('-' * 80)
+        # print(type(packet))
+        # print(packet)
+        # print(packet.data)
+        # print('-' * 80)
         return self.extract_common_data(protocol_type='udp', packet=packet)

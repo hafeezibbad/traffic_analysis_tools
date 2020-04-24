@@ -9,20 +9,20 @@ class PacketData(Model):
     size: float = 0  # Bytes
     outgoing: bool = False
     # Layer 2: Data link layer
-    src_mac: Optional[str] 
-    dst_mac: Optional[str] 
-    eth_type: Optional[str] 
+    src_mac: Optional[str]
+    dst_mac: Optional[str]
+    eth_type: Optional[str]
     eth_frame_payload_size: Optional[int]  # Bytes
     layer3_undecoded_data: Optional[str]  # bytes object containing ethernet frame data for packets which are not parsed
     # Layer 3: Network layer
-    src_ip: Optional[str] 
-    dst_ip: Optional[str] 
+    src_ip: Optional[str]
+    dst_ip: Optional[str]
     ip_tos: Optional[int]
-    ip_ttl: Optional[int] 
-    ip_opts: Optional[int] 
-    ip_proto: Optional[int] 
-    ip_payload_size: Optional[int] 
-    ip6_nxt_hdr: Optional[str] 
+    ip_ttl: Optional[int]
+    ip_opts: Optional[int]
+    ip_proto: Optional[int]
+    ip_payload_size: Optional[int]
+    ip6_nxt_hdr: Optional[str]
     ip_do_not_fragment: bool = True
     ip_more_fragment: bool = False
     do_not_fragment: bool = True
@@ -32,14 +32,15 @@ class PacketData(Model):
     # Layer 4: ICMP packets
     icmp_type: Optional[int]
     icmp_code: Optional[int]
-    icmp_message: Optional[str] 
+    icmp_message: Optional[str]
     # Layer 4: IGMP Packets
     igmp_type: Optional[int]   # 3: Change to Include Mode (Leave group), 4: Change to exclude mode (Join Group)
     igmp_addr: Optional[str]    # IGMP Multicast address
     # Layer 4: Transport layer
-    src_port: Optional[int] 
-    dst_port: Optional[int] 
-    layer4_payload_size: Optional[int] 
+    src_port: Optional[int]
+    dst_port: Optional[int]
+    layer4_payload_size: Optional[int]
+    data_from_fragment: Optional[str]
     # Layer 4: TCP flags
     tcp_fin_flag: bool = False
     tcp_syn_flag: bool = False
@@ -53,55 +54,55 @@ class PacketData(Model):
     syn_signature: Optional[str]
     client_os: Optional[str]
     # Layer 7: Application layer
-    layer7_proto: Optional[int] 
-    layer7_proto_name: Optional[str] 
-    dhcp_opts: Optional[str] 
-    payload_size: Optional[int] 
+    layer7_proto: Optional[int]
+    layer7_proto_name: Optional[str]
+    dhcp_opts: Optional[str]
+    payload_size: Optional[int]
     # Layer 7: DNS queries
-    dns_type: Optional[int] 
-    dns_rcode: Optional[int] 
-    dns_op: Optional[int] 
-    dns_query_domain: Optional[str] 
-    dns_query_type: Optional[int] 
-    dns_query_cls: Optional[int] 
+    dns_type: Optional[int]
+    dns_rcode: Optional[int]
+    dns_op: Optional[int]
+    dns_query_domain: Optional[str]
+    dns_query_type: Optional[int]
+    dns_query_cls: Optional[int]
     dns_query_multiple_domains: bool = False
     # Layer 7: DNS answers
-    dns_ans_type: Optional[str] 
-    dns_ans_cname: Optional[str] 
-    dns_ans_cname_ttl: Optional[int] 
-    dns_ans_name: Optional[str] 
-    dns_ans_ip: Optional[str] 
-    dns_ans_ttl: Optional[str] 
+    dns_ans_type: Optional[str]
+    dns_ans_cname: Optional[str]
+    dns_ans_cname_ttl: Optional[int]
+    dns_ans_name: Optional[str]
+    dns_ans_ip: Optional[str]
+    dns_ans_ttl: Optional[str]
     # Layer 7: ARP data
     arp_request_src: Optional[int]   # '-1': client, '1': server
-    arp_src_mac: Optional[str] 
-    arp_src_ip: Optional[str] 
-    arp_dst_mac: Optional[str] 
-    arp_dst_ip: Optional[str] 
+    arp_src_mac: Optional[str]
+    arp_src_ip: Optional[str]
+    arp_dst_mac: Optional[str]
+    arp_dst_ip: Optional[str]
     # Layer 7: NTP
     ntp_mode: Optional[int]   # -1= client, 1= Server
     ntp_interval: Optional[int]   # Polling interval choice 5 (means 32 seconds polling interval)
-    ntp_reference_id: Optional[str] 
+    ntp_reference_id: Optional[str]
     ntp_stratum: Optional[int]   # 1: primary reference, 2: secondary reference, Layer 7: DHCP
-    dhcp_fingerprint: Optional[str] 
-    dhcp_vendor: Optional[str] 
-    dhcp_hostname: Optional[str] 
+    dhcp_fingerprint: Optional[str]
+    dhcp_vendor: Optional[str]
+    dhcp_hostname: Optional[str]
     # Layer 7: mDNS
     mdns_packet_type: Optional[int]   # 1: Query, 2: Response
-    mdns_hostname: Optional[str] 
-    mdns_services: Optional[str] 
+    mdns_hostname: Optional[str]
+    mdns_services: Optional[str]
     # Layer 7: UPnP message, SSDP Protocol
     upnp_packet_type: Optional[int]   # 1: Notify Request 2: M-SEARCH request, 3: Response
     upnp_location: Optional[str]   # URL where an XML formatted file can be downloaded
-    upnp_server: Optional[str] 
+    upnp_server: Optional[str]
     upnp_cache: Optional[int]    # Cache-Control
-    upnp_uns: Optional[str] 
-    upnp_nt: Optional[str] 
+    upnp_uns: Optional[str]
+    upnp_nt: Optional[str]
     upnp_nts: Optional[str]   # Message Type
-    upnp_host: Optional[str] 
-    upnp_st: Optional[str] 
-    upnp_man: Optional[str] 
-    upnp_mx: Optional[str] 
+    upnp_host: Optional[str]
+    upnp_st: Optional[str]
+    upnp_man: Optional[str]
+    upnp_mx: Optional[str]
 
     @staticmethod
     def is_valid_value(value) -> bool:
@@ -158,6 +159,7 @@ class PacketData(Model):
             self.src_port,
             self.dst_port,
             self.layer4_payload_size,
+            self.data_from_fragment,
             # Layer 4: TCP flags
             self.tcp_fin_flag,
             self.tcp_syn_flag,
@@ -268,6 +270,7 @@ class PacketData(Model):
             "src_port",
             "dst_port",
             "layer4_payload_size",
+            "data_from_fragment",
             # Layer 4: TCP flags
             "tcp_fin_flag",
             "tcp_syn_flag",
