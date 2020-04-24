@@ -52,6 +52,16 @@ class PacketData(Model):
     # TCP Syn packet data
     syn_signature: Optional[str]
     client_os: Optional[str]
+    # Layer 4: NAT-PMP data
+    natpmp_version: Optional[int]  # 0: NAT-PMP, 1: PCP (recommended over NAT-PMP)
+    natpmp_opcode: Optional[int]
+    natpmp_reserved: Optional[int]
+    natpmp_result: Optional[int]
+    natpmp_sssoe: Optional[int]
+    natpmp_lifetime: Optional[int]
+    natpmp_external_ip: Optional[str]
+    natpmp_internal_port: Optional[int]
+    natpmp_external_port: Optional[int]
     # Layer 7: Application layer
     layer7_proto: Optional[int]
     layer7_proto_name: Optional[str]
@@ -171,6 +181,16 @@ class PacketData(Model):
             # TCP Syn packet data
             self.syn_signature,
             self.client_os,
+            # Layer 4: NAT-PMP data
+            self.natpmp_version,
+            self.natpmp_opcode,
+            self.natpmp_reserved,
+            self.natpmp_result,
+            self.natpmp_sssoe,
+            self.natpmp_lifetime,
+            self.natpmp_external_ip,
+            self.natpmp_internal_port,
+            self.natpmp_external_port,
             # Layer 7: Application layer
             self.layer7_proto,
             self.layer7_proto_name,
@@ -223,7 +243,7 @@ class PacketData(Model):
             self.upnp_man,
             self.upnp_mx
         ]:
-            if attr:
+            if attr is not None and attr is not False:
                 values.append(str(attr))
             else:
                 values.append('')
@@ -282,6 +302,16 @@ class PacketData(Model):
             # TCP Syn packet data
             "syn_signature",
             "client_os",
+            # Layer 4: NAT-PMP data
+            "natpmp_version",
+            "natpmp_opcode",
+            "natpmp_reserved",
+            "natpmp_result",
+            "natpmp_sssoe",
+            "natpmp_lifetime",
+            "natpmp_external_ip",
+            "natpmp_internal_port",
+            "natpmp_external_port",
             # Layer 7: Application layer
             "layer7_proto",
             "layer7_proto_name",

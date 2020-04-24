@@ -79,7 +79,7 @@ class PcapProcessor(BaseProcessor):
                 if packet_data is None:
                     pass
                 result_file.write(packet_data.to_csv_string(delimiter=self.config.ResultFileDelimiter) + '\n')
-                print(count)
+
             except Exception as ex:
                 logging.warning('Unable to process packet at ts:{} Error: {}'.format(ts, ex))
                 raise ex

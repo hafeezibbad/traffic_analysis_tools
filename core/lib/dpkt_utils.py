@@ -35,6 +35,8 @@ from core.lib.dpkt_parsers.layer4_parser import UDPPacketParser
 from core.lib.dpkt_parsers.llc_parser import LlcPacketParser
 from core.lib.dpkt_parsers.mdns_parser import MdnsPacketParser
 from core.lib.dpkt_parsers.mdns_unpacker import Mdns
+from core.lib.dpkt_parsers.nat_pmp_parser import NatpmpPacketParser
+from core.lib.dpkt_parsers.natpmp import Natpmp
 from core.lib.dpkt_parsers.ntp_parser import NtpPacketParser
 from core.lib.dpkt_parsers.syn_parser import SynPacketParser
 from core.lib.dpkt_parsers.upnp_parser import UpnpPacketParser
@@ -66,19 +68,19 @@ class DpktUtils:
         Take an ethernet frame and parse its data as layer3 packet. Currently supported protocols are IPv4, IPv6, ARP,
         LLC, IEEE80211
         """
-        if eth_frame.type == dpkt.ethernet.ETH_TYPE_IP:               # IPv4 Packet
+        if eth_frame.type == dpkt.ethernet.ETH_TYPE_IP: # IPv4 Packet
             return IpPacketParser.load_ip_packet_from_ethernet_frame(eth_frame.data)
 
-        elif eth_frame.type == dpkt.ethernet.ETH_TYPE_IP6:            # IPv6 Packet
+        elif eth_frame.type == dpkt.ethernet.ETH_TYPE_IP6:  # IPv6 Packet
             return eth_frame.data
 
-        elif eth_frame.type == dpkt.ethernet.ETH_TYPE_ARP:            # ARP packet
+        elif eth_frame.type == dpkt.ethernet.ETH_TYPE_ARP:  # ARP packet
             return eth_frame.data
 
-        elif isinstance(eth_frame.data, dpkt.llc.LLC):           # IEEE 802.3 Logical Link Control
+        elif isinstance(eth_frame.data, dpkt.llc.LLC):  # IEEE 802.3 Logical Link Control
             return eth_frame.data
 
-        elif eth_frame.type == IEEE80211_PROTOCOL_NUMBER:             # IEEE 802.1X Authentication
+        elif eth_frame.type == IEEE80211_PROTOCOL_NUMBER:  # IEEE 802.1X Authentication
             return eth_frame.data
 
         else:  # TODO: Handle other layer 3 protocols
@@ -199,11 +201,10 @@ class DpktUtils:
 
         return packet_data
 
-    def load_layer7_packet(self, layer4_packet: Packet, packet_data: PacketData) -> Optional[Packet]:
+    def load_layer7_packet(self, layer4_packet: Packet, packet_data: PacketData) -> Optional[Union[Natpmp, Packet]]:
         if isinstance(layer4_packet, UDP):
             if packet_data.src_port == 5351 or packet_data.dst_port == 5351:  # This is a NAT-PMP packet.
-                # FIXME: There must be a better way to do this
-                return NatPmpPacketParser.load_nat_pmp_packet_from_udp_packet(layer4_packet)
+                return Natpmp(buf=layer4_packet.data)
 
             elif packet_data.src_port == 53 or packet_data.dst_port == 53:  # DNS packet
                 return DnsPacketParser.load_dns_packet_from_udp_packet(layer4_packet)
@@ -225,7 +226,11 @@ class DpktUtils:
     def extract_data_from_layer7_packet(self, layer7_packet: Packet, packet_data: PacketData) -> PacketData:
         """Currently supported Layer 7 protocols are DHCP, UPNP, MDNS, DNS, NTP"""
         data = Munch()
-        if isinstance(layer7_packet, DNS):  # DNS packet
+        # This needs to be the first in order
+        if isinstance(layer7_packet, Natpmp):  # NAT-PMP packet
+            data = self.extract_data_from_natpmp_packet(layer7_packet)
+
+        elif isinstance(layer7_packet, DNS):  # DNS packet
             data = self.extract_data_from_dns_packet(layer7_packet)
 
         elif isinstance(layer7_packet, Mdns):  # mDNS packet
@@ -261,6 +266,10 @@ class DpktUtils:
     def extract_data_from_dhcp_packet(self, dhcp_packet: DHCP) -> Union[Munch, dict]:
         dhcp_packet_parser = DhcpPacketParser(config=self.config)
         return dhcp_packet_parser.extract_data(dhcp_packet)
+
+    def extract_data_from_natpmp_packet(self, natpmp_packet: Natpmp) -> Union[Munch, dict]:
+        nat_packet_parser = NatpmpPacketParser(config=self.config)
+        return nat_packet_parser.extract_data(natpmp_packet)
 
     def load_protocol_data_to_packet_data(
             self,

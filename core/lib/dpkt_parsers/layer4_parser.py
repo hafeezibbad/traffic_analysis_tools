@@ -138,8 +138,4 @@ class UDPPacketParser(Layer4PacketParser):
         super(UDPPacketParser, self).__init__(config, static_data, *args, **kwargs)
 
     def extract_data(self, packet: Union[UDP, TCP]) -> Munch:
-        # print(type(packet))
-        # print(packet)
-        # print(packet.data)
-        # print('-' * 80)
         return self.extract_common_data(protocol_type='udp', packet=packet)

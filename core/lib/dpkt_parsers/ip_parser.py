@@ -49,8 +49,6 @@ class IpPacketParser(PacketParserInterface):
             data.ip_opts = self.parse_ip_options(packet.opts) or ''
 
         except BaseException as ex:
-            print(packet)
-            print(type(packet))
             logging.warning('Unable to extract IP4 from `{}`.Error: `{}`'.format(type(packet), ex))
             raise ex
 
