@@ -22,8 +22,12 @@ class IpPacketParser(PacketParserInterface):
 
     @staticmethod
     def load_ip_packet_from_ethernet_frame(packet_data: bytes) -> Union[IP, IP6]:
+        if isinstance(packet_data, IP) or isinstance(packet_data, IP6):
+            return packet_data
+
+        # Packet data is bytes because it is a fragmented packet.
         try:
-            return IP(packet_data)
+                return IP(packet_data)
 
         except dpkt.dpkt.UnpackError:
             return IP6(packet_data)  # When IPv6 packet is encapsulated in IPv4 packet
@@ -34,13 +38,6 @@ class IpPacketParser(PacketParserInterface):
 
     def extract_data(self, packet: IP) -> Munch:
         data = Munch()
-        decoded_packet = binascii.hexlify(packet).decode('utf-8')
-        if decoded_packet[:2] == '60':
-            ip6_packet = IP6(packet)
-
-            print(ip6_packet.src)
-            print('This is an IP v6 packet encapsulated in IPv4')
-            exit(0)
         try:
             data.src_ip, data.dst_ip = self.extract_src_dest_ip(packet)
             data.ip_proto = self.get_ip_proto_name(packet.p)

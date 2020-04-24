@@ -1,7 +1,5 @@
-import binascii
 import logging
 import os
-import traceback
 from pathlib import Path
 from typing import Tuple
 
@@ -15,7 +13,6 @@ from core.lib.dpkt_utils import DpktUtils
 from core.models.packet_data import PacketData
 from core.models.pcap_file_info import PcapFileInfo
 from core.static.utils import StaticData
-from scripts.analyze_extracted_pcap_data import print_as_json
 
 
 class PcapProcessor(BaseProcessor):
@@ -141,48 +138,45 @@ class PcapProcessor(BaseProcessor):
         packet_data.ref_time = ts - initial_timestamp
         packet_data.size = len(packet)
         try:
+            # Handle Layer 2: Ethernet
             eth = dpkt.ethernet.Ethernet(packet)
             packet_data = self.dpkt_utils.extract_data_from_eth_frame(
                 eth_frame=eth,
                 packet_data=packet_data
             )
-            print('1' * 80)
+            # Handle Layer 3: IP, IGMP, ARP, LLC
             layer3_packet = self.dpkt_utils.load_layer3_packet(eth)
             if layer3_packet is None:
                 logging.warning('Unable to extract data from ethernet frame')
                 return packet_data
-            print('2' * 80)
             packet_data = self.dpkt_utils.extract_data_from_layer3_packet(layer3_packet, packet_data=packet_data)
             # Skip further processing for packets which do not have layer 4 data
-            print('3' * 80)
             if eth.type in [
                 dpkt.ethernet.ETH_TYPE_ARP,
-                6,                  # IEEE 802.1 Link Layer Control
+                6,                  # IEEE 802.1 Link Layer Controlt
                 34958,              # IEEE 802.1X Authentication
                 35085               # TDLS Discovery request
             ]:
                 packet_data.layer3_undecoded_data = eth.data
                 return packet_data
-            print('4' * 80)
-            print_json(vars(packet_data))
+
+            # Handler Layer 4: TCP, UDP, ICMP
             layer4_packet = self.dpkt_utils.load_layer4_packet(layer3_packet)
             if layer4_packet is None:
                 logging.warning('Unable to extract data from layer3 packet')
                 return packet_data
-            print('5' * 80)
+
             packet_data = self.dpkt_utils.extract_data_from_layer4_packet(layer4_packet, packet_data)
-            print('6' * 80)
             if packet_data.tcp_syn_flag is True and packet_data.tcp_ack_flag is False:
                 packet_data = self.dpkt_utils.extract_tcp_syn_signature(eth.data, packet_data)
-            print('7' * 80)
+
+            # Handler Layer 7: DNS, UPnP, DHCP, mDNS, NTP
             layer7_packet = self.dpkt_utils.load_layer7_packet(layer4_packet, packet_data)
             if layer7_packet is None:
-                logging.warning('Unable to extract layer7 packet with src port `{}`, dst port `{}`'.format(
+                logging.debug('Unable to extract layer7 packet with src port `{}`, dst port `{}`'.format(
                     packet_data.src_port, packet_data.dst_port
                 ))
-            print('8' * 80)
             packet_data = self.dpkt_utils.extract_data_from_layer7_packet(layer7_packet, packet_data)
-            print('9' * 80)
         except AttributeError as ex:
             if not hasattr(layer3_packet, 'data'):
                 # Save the data for packets which we were not able to parse as IP packets.

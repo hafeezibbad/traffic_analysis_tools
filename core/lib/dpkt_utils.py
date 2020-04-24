@@ -70,16 +70,16 @@ class DpktUtils:
             return IpPacketParser.load_ip_packet_from_ethernet_frame(eth_frame.data)
 
         elif eth_frame.type == dpkt.ethernet.ETH_TYPE_IP6:            # IPv6 Packet
-            return IP6(eth_frame.data)
+            return eth_frame.data
 
         elif eth_frame.type == dpkt.ethernet.ETH_TYPE_ARP:            # ARP packet
-            return ARP(eth_frame.data)
+            return eth_frame.data
 
         elif isinstance(eth_frame.data, dpkt.llc.LLC):           # IEEE 802.3 Logical Link Control
-            return LLC(eth_frame.data)
+            return eth_frame.data
 
         elif eth_frame.type == IEEE80211_PROTOCOL_NUMBER:             # IEEE 802.1X Authentication
-            return IEEE80211(eth_frame.data)
+            return eth_frame.data
 
         else:  # TODO: Handle other layer 3 protocols
             _protocol = self.ether_type_data.get(str(hex(eth_frame.type)[2:]))
@@ -130,23 +130,21 @@ class DpktUtils:
     def load_layer4_packet(self, layer3_packet: Packet) -> Optional[Packet]:
         if layer3_packet is None:
             return None
-        print('*' * 80)
-        print(layer3_packet)
-        print('*' * 80)
+
         if layer3_packet.p == dpkt.ip.IP_PROTO_TCP:  # TCP packet
-            return TCP(layer3_packet.data)
+            return layer3_packet.data
 
         elif layer3_packet.p == dpkt.ip.IP_PROTO_UDP:  # UDP packet
-            return UDP(layer3_packet.data)
+            return layer3_packet.data
 
         elif layer3_packet.p == dpkt.ip.IP_PROTO_ICMP:  # ICMP packet
-            return ICMP(layer3_packet.data)
+            return layer3_packet.data
 
         elif layer3_packet.p == dpkt.ip.IP_PROTO_ICMP6:  # ICMPv6 packet
-            return ICMP6(layer3_packet.data)
+            return layer3_packet.data
 
         elif layer3_packet.p == dpkt.ip.IP_PROTO_IGMP:  # IGMP packet
-            return IGMP(layer3_packet.data)
+            return layer3_packet.data
 
         else:
             logging.warning('Unidentified Protocol. Proto Num: {}, Type: {}'.format(
@@ -203,7 +201,11 @@ class DpktUtils:
 
     def load_layer7_packet(self, layer4_packet: Packet, packet_data: PacketData) -> Optional[Packet]:
         if isinstance(layer4_packet, UDP):
-            if packet_data.src_port == 53 or packet_data.dst_port == 53:  # DNS packet
+            if packet_data.src_port == 5351 or packet_data.dst_port == 5351:  # This is a NAT-PMP packet.
+                # FIXME: There must be a better way to do this
+                return NatPmpPacketParser.load_nat_pmp_packet_from_udp_packet(layer4_packet)
+
+            elif packet_data.src_port == 53 or packet_data.dst_port == 53:  # DNS packet
                 return DnsPacketParser.load_dns_packet_from_udp_packet(layer4_packet)
 
             elif packet_data.src_port == 123 or packet_data.dst_port == 123:  # NTP packet
@@ -230,10 +232,10 @@ class DpktUtils:
             data = self.extract_data_from_mdns_packet(layer7_packet)
 
         elif isinstance(layer7_packet, NTP):  # NTP packet
-            data = self.extract_data_from_dns_packet(layer7_packet)
+            data = self.extract_data_from_ntp_packet(layer7_packet)
 
         elif isinstance(layer7_packet, UpnpRequest) or isinstance(layer7_packet, dpkt.http.Response):  # UPnP packet
-            data = self.extract_data_from_dns_packet(layer7_packet)
+            data = self.extract_data_from_upnp_packet(layer7_packet)
 
         elif isinstance(layer7_packet, DHCP):  # DNS packet
             data = self.extract_data_from_dhcp_packet(layer7_packet)

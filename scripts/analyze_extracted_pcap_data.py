@@ -19,8 +19,8 @@ DATA_FILE_NAME = 'results.csv'
 DATA_FILE_PATH = DATA_DIR_PATH / DATA_FILE_NAME
 
 if DATA_FILE_PATH.exists() is False:
-    print('The path specified for file containing data extracted from Pcap file does not exist, please recheck')
-    exit(1)
+    print('The path specified for file containing data extracted from PCAP does not exist, please recheck')
+    # exit(1)
 
 
 def print_as_json(data, indent=2, sort_keys=False) -> None:
