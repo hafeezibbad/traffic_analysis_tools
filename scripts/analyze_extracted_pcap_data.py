@@ -19,7 +19,7 @@ DATA_FILE_NAME = 'results.csv'
 DATA_FILE_PATH = DATA_DIR_PATH / DATA_FILE_NAME
 
 if DATA_FILE_PATH.exists() is False:
-    print('The path you specified for file containing data extracted from Pcap file does not exist, please recheck')
+    print('The path specified for file containing data extracted from Pcap file does not exist, please recheck')
     exit(1)
 
 

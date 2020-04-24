@@ -1,3 +1,4 @@
+import binascii
 import logging
 import os
 import traceback
@@ -9,10 +10,12 @@ import dpkt
 from core.analyzer.base_processor import BaseProcessor
 from core.configuration.data import ConfigurationData
 from core.errors import FileError, FileErrorTypes
+from core.lib.common import print_json
 from core.lib.dpkt_utils import DpktUtils
 from core.models.packet_data import PacketData
 from core.models.pcap_file_info import PcapFileInfo
 from core.static.utils import StaticData
+from scripts.analyze_extracted_pcap_data import print_as_json
 
 
 class PcapProcessor(BaseProcessor):
@@ -79,7 +82,7 @@ class PcapProcessor(BaseProcessor):
                 if packet_data is None:
                     pass
                 result_file.write(packet_data.to_csv_string(delimiter=self.config.ResultFileDelimiter) + '\n')
-                
+                print(count)
             except Exception as ex:
                 logging.warning('Unable to process packet at ts:{} Error: {}'.format(ts, ex))
                 raise ex
@@ -143,15 +146,15 @@ class PcapProcessor(BaseProcessor):
                 eth_frame=eth,
                 packet_data=packet_data
             )
-
-            layer3_packet = eth.data
-            packet_data = self.dpkt_utils.extract_data_from_layer3_protocols(
-                protocol=eth.type,
-                layer3_packet=eth.data,
-                packet_data=packet_data
-            )
-
+            print('1' * 80)
+            layer3_packet = self.dpkt_utils.load_layer3_packet(eth)
+            if layer3_packet is None:
+                logging.warning('Unable to extract data from ethernet frame')
+                return packet_data
+            print('2' * 80)
+            packet_data = self.dpkt_utils.extract_data_from_layer3_packet(layer3_packet, packet_data=packet_data)
             # Skip further processing for packets which do not have layer 4 data
+            print('3' * 80)
             if eth.type in [
                 dpkt.ethernet.ETH_TYPE_ARP,
                 6,                  # IEEE 802.1 Link Layer Control
@@ -160,30 +163,37 @@ class PcapProcessor(BaseProcessor):
             ]:
                 packet_data.layer3_undecoded_data = eth.data
                 return packet_data
-
-            layer4_packet = layer3_packet.data
-            packet_data = self.dpkt_utils.extract_data_from_layer4_protocols(
-                protocol=layer3_packet.p,
-                layer4_packet=layer4_packet,
-                packet_data=packet_data
-            )
-
+            print('4' * 80)
+            print_json(vars(packet_data))
+            layer4_packet = self.dpkt_utils.load_layer4_packet(layer3_packet)
+            if layer4_packet is None:
+                logging.warning('Unable to extract data from layer3 packet')
+                return packet_data
+            print('5' * 80)
+            packet_data = self.dpkt_utils.extract_data_from_layer4_packet(layer4_packet, packet_data)
+            print('6' * 80)
             if packet_data.tcp_syn_flag is True and packet_data.tcp_ack_flag is False:
-                packet_data = self.dpkt_utils.extract_tcp_syn_signature(layer3_packet, packet_data)
-
-            packet_data = self.dpkt_utils.extract_data_from_layer7_protocols(
-                layer4_packet=layer4_packet,
-                packet_data=packet_data
-            )
-        except AttributeError:
+                packet_data = self.dpkt_utils.extract_tcp_syn_signature(eth.data, packet_data)
+            print('7' * 80)
+            layer7_packet = self.dpkt_utils.load_layer7_packet(layer4_packet, packet_data)
+            if layer7_packet is None:
+                logging.warning('Unable to extract layer7 packet with src port `{}`, dst port `{}`'.format(
+                    packet_data.src_port, packet_data.dst_port
+                ))
+            print('8' * 80)
+            packet_data = self.dpkt_utils.extract_data_from_layer7_packet(layer7_packet, packet_data)
+            print('9' * 80)
+        except AttributeError as ex:
             if not hasattr(layer3_packet, 'data'):
                 # Save the data for packets which we were not able to parse as IP packets.
                 packet_data.layer3_undecoded_data = layer3_packet
             logging.error('Error in processing packet at ref_time: {}'.format(packet_data.ref_time))
+            raise ex
             exit(1)
 
         except Exception as ex:
             logging.error('Error in processing packet at ref_time: {}'.format(packet_data.ref_time, ex))
+            raise ex
             exit(1)
 
         return packet_data

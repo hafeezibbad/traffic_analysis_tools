@@ -25,7 +25,6 @@ class PacketData(Model):
     ip6_nxt_hdr: Optional[str]
     ip_do_not_fragment: bool = True
     ip_more_fragment: bool = False
-    do_not_fragment: bool = True
     # Layer 3: IEEE-8-1211.Auth
     ieee80211_version: Optional[int]
     ieee80211_payload_size: Optional[int]
