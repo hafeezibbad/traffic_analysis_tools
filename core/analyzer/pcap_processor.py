@@ -139,26 +139,40 @@ class PcapProcessor(BaseProcessor):
         packet_data.size = len(packet)
         try:
             # Handle Layer 2: Ethernet
-            eth = dpkt.ethernet.Ethernet(packet)
+            try:
+                eth = dpkt.ethernet.Ethernet(packet)
+
+            except IndexError:
+                # This is a Malformed data, experienced in Apple deviecs. Since rest of packet is malformed,
+                # we only extract source, destination MAC address and IP protocol
+                data = self.dpkt_utils.parse_byte_data_as_ethernet_headers(packet)
+
+                packet_data.src_mac = data.src_mac
+                packet_data.dst_mac = data.dst_mac
+                packet_data.eth_type = data.eth_type
+                packet_data.eth_frame_payload_size = data.payload_size
+
+                return packet_data
+
             packet_data = self.dpkt_utils.extract_data_from_eth_frame(
                 eth_frame=eth,
                 packet_data=packet_data
             )
-            # Handle Layer 3: IP, IGMP, ARP, LLC
-            layer3_packet = self.dpkt_utils.load_layer3_packet(eth)
-            if layer3_packet is None:
-                logging.warning('Unable to extract data from ethernet frame')
-                return packet_data
-            packet_data = self.dpkt_utils.extract_data_from_layer3_packet(layer3_packet, packet_data=packet_data)
             # Skip further processing for packets which do not have layer 4 data
             if eth.type in [
                 dpkt.ethernet.ETH_TYPE_ARP,
-                6,                  # IEEE 802.1 Link Layer Controlt
-                34958,              # IEEE 802.1X Authentication
-                35085               # TDLS Discovery request
+                6,  # IEEE 802.1 Link Layer Control
+                34958,  # IEEE 802.1X Authentication
+                35085  # TDLS Discovery request
             ]:
-                packet_data.layer3_undecoded_data = eth.data
                 return packet_data
+
+            # Handle Layer 3: IP, IGMP, ARP, LLC
+            layer3_packet = self.dpkt_utils.load_layer3_packet(eth)
+            if layer3_packet is None:
+                return packet_data
+
+            packet_data = self.dpkt_utils.extract_data_from_layer3_packet(layer3_packet, packet_data=packet_data)
 
             # Handler Layer 4: TCP, UDP, ICMP
             layer4_packet = self.dpkt_utils.load_layer4_packet(layer3_packet)
@@ -177,17 +191,8 @@ class PcapProcessor(BaseProcessor):
                     packet_data.src_port, packet_data.dst_port
                 ))
             packet_data = self.dpkt_utils.extract_data_from_layer7_packet(layer7_packet, packet_data)
-        except AttributeError as ex:
-            if not hasattr(layer3_packet, 'data'):
-                # Save the data for packets which we were not able to parse as IP packets.
-                packet_data.layer3_undecoded_data = layer3_packet
-            logging.error('Error in processing packet at ref_time: {}'.format(packet_data.ref_time))
-            raise ex
-            exit(1)
-
+            
         except Exception as ex:
-            logging.error('Error in processing packet at ref_time: {}'.format(packet_data.ref_time, ex))
-            raise ex
-            exit(1)
+            logging.error('Error in processing packet at ref_time: {}. Error: {}'.format(packet_data.ref_time, ex))
 
         return packet_data

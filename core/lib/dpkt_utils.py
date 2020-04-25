@@ -83,7 +83,8 @@ class DpktUtils:
         elif eth_frame.type == IEEE80211_PROTOCOL_NUMBER:  # IEEE 802.1X Authentication
             return eth_frame.data
 
-        else:  # TODO: Handle other layer 3 protocols
+        else:
+            # TODO: Handle other layer 3 packets, e.g. TDLS discovery requests
             _protocol = self.ether_type_data.get(str(hex(eth_frame.type)[2:]))
             if _protocol is None:
                 logging.warning('Unable to get protocol from ether_type (int): {}'.format(_protocol))
@@ -270,6 +271,19 @@ class DpktUtils:
     def extract_data_from_natpmp_packet(self, natpmp_packet: Natpmp) -> Union[Munch, dict]:
         nat_packet_parser = NatpmpPacketParser(config=self.config)
         return nat_packet_parser.extract_data(natpmp_packet)
+
+    def parse_byte_data_as_ethernet_headers(self, packet_data: bytes) -> Munch:
+        data = Munch()
+
+        decoded_data = binascii.hexlify(packet_data).decode('utf-8')
+        src_mac_int = int(decoded_data[:12], 16)
+        data.src_mac = self.mac_utils.int2mac(src_mac_int)
+        dst_mac_int = int(decoded_data[12:24], 16)
+        data.dst_mac = self.mac_utils.int2mac(dst_mac_int)
+        data.eth_type = decoded_data[24:28]
+        data.payload_size = len(decoded_data[28:])/2
+
+        return data
 
     def load_protocol_data_to_packet_data(
             self,

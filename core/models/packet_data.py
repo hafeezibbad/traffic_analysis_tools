@@ -12,8 +12,7 @@ class PacketData(Model):
     src_mac: Optional[str]
     dst_mac: Optional[str]
     eth_type: Optional[str]
-    eth_frame_payload_size: Optional[int]  # Bytes
-    layer3_undecoded_data: Optional[str]  # bytes object containing ethernet frame data for packets which are not parsed
+    eth_payload_size: Optional[int]  # Bytes
     # Layer 3: Network layer
     src_ip: Optional[str]
     dst_ip: Optional[str]
@@ -141,8 +140,7 @@ class PacketData(Model):
             self.src_mac,
             self.dst_mac,
             self.eth_type,
-            self.eth_frame_payload_size,
-            self.layer3_undecoded_data,
+            self.eth_payload_size,
             # Layer 3: Network layer
             self.src_ip,
             self.dst_ip,
@@ -250,6 +248,17 @@ class PacketData(Model):
 
         return delimiter.join(values)
 
+    def to_numeric(self):
+        """
+        This function converts all string fields, for example MAC addresses, IP Addresses, ethernet type,
+        layer5 protocols etc. to integer values, instead of their string values. This will be used in feature
+        analysis. Categorical features are not handled in this function so values, dns_ans_ip, dns_ans_ttl,
+        upnp_location, upnp server values will be nullified.
+        """
+        # TODO: implement
+
+
+
     @staticmethod
     def packet_data_file_headers(delimiter: str = ','):
         """The sequence of headers should be same as sequence of items in to_csv_string()"""
@@ -262,8 +271,7 @@ class PacketData(Model):
             "src_mac",
             "dst_mac",
             "eth_type",
-            "eth_frame_payload_size",
-            "layer3_undecoded_data",
+            "eth_payload_size",
             # Layer 3: Network layer
             "src_ip",
             "dst_ip",

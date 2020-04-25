@@ -19,30 +19,22 @@ class DnsPacketParser(PacketParserInterface):
 
     @staticmethod
     def load_dns_packet_from_ip_packet(ip_packet: IP) -> Optional[DNS]:
-        dns = None
         try:
             udp_packet = UDP(ip_packet.data)
-            dns = DnsPacketParser.load_dns_packet_from_udp_packet(udp_packet)
+            return DnsPacketParser.load_dns_packet_from_udp_packet(udp_packet)
 
         except BaseException as ex:
             logging.warning('Can not extract DNS packet from UDP packet. Error: {}'.format(ex))
             raise ex
 
-        return dns
-
     @staticmethod
     def load_dns_packet_from_udp_packet(udp_packet: UDP) -> Optional[DNS]:
-        dns = None
         try:
-            dns = DNS(udp_packet.data)
-
-        except dpkt.dpkt.NeedData:
-            logging.warning('Not enough data to extract DNS packet from UDP packet')
+            return DNS(udp_packet.data)
 
         except Exception as ex:
             logging.warning('Can not extract DNS packet from UDP packet. Error: {}'.format(ex))
-
-        return dns
+            raise ex
 
     def extract_data(self, packet: DNS) -> Munch:
         data = Munch()

@@ -42,12 +42,13 @@ class Layer4PacketParser(PacketParserInterface):
 
         return data
 
-    def is_packet_outgoing(self, packet: Union[UDP, TCP]) -> bool:
+    def is_packet_outgoing(self, packet: Union[UDP, TCP]) -> Union[int, bool]:
         # FIXME: This can be improved?
+        outgoing = False
         if 10000 <= packet.sport < 65536:     # Lower limit from static/layer4_port_data.json
-            return True
+            outgoing = True
 
-        return False
+        return outgoing
 
     def extract_src_dest_port(self, packet: Union[UDP, TCP]) -> Tuple:
         return packet.sport, packet.dport

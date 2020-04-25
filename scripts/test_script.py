@@ -19,8 +19,8 @@ pcap_processor = PcapProcessor(config=config)
 start_time = time.time()
 trace_info, status = pcap_processor.process(
     # input_file=os.path.join(PCAP_DIR_PATH, '16-11-22.pcap'),
-    input_file=os.path.join(PCAP_DIR_PATH, 'natpmp_packets.pcap'),
-    output_file=os.path.join(RESULTS_DIR_PATH, 'results.csv')
+    input_file=os.path.join(PCAP_DIR_PATH, '16-11-22.pcap'),
+    output_file=os.path.join(RESULTS_DIR_PATH, '16-11-22.csv')
 )
 print('processing_time: ', time.time()-start_time)
 
