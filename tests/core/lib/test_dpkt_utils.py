@@ -30,7 +30,7 @@ class DpktUtilsTest(unittest.TestCase):
         self.assertEqual(src_mac, packet_data.src_mac)
         self.assertEqual(dst_mac, packet_data.dst_mac)
         self.assertEqual('ipv4', packet_data.eth_type)
-        self.assertNotEqual(0, packet_data.eth_frame_payload_size)
+        self.assertNotEqual(0, packet_data.eth_payload_size)
 
     def test_extract_data_from_layer3_packet_works_as_expected_for_ip6_packets(self):
         mock_src_ip6 = '786b:a7d6:fc04:1d14:dfcd:5005:655e:f092'

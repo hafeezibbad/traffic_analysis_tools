@@ -12,7 +12,7 @@ from core.static.CONSTANTS import MAC_REGEX
 
 
 class MacAddressUtils:
-    def int2mac(self, mac_integer: int) -> Optional[str]:
+    def int_to_mac(self, mac_integer: int) -> Optional[str]:
         """
         Converts integer form of mac address to string form i.e.
         ('aa:bb:cc:dd:ee:ff')
@@ -70,7 +70,7 @@ class MacAddressUtils:
 
         return bytearray.fromhex(mac_address.replace('-', '').replace(':', ''))
 
-    def mac2int(self, mac_address: str) -> Optional[int]:
+    def mac_to_int(self, mac_address: str) -> Optional[int]:
         """
         Converts MAC address string ('aa:bb:cc:dd:ee:ff') to integer representation.
         :param mac_address: MAC address in string form
@@ -128,4 +128,3 @@ class MacAddressUtils:
                 return False
 
         return True
-    

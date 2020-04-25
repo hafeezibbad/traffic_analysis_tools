@@ -24,6 +24,12 @@ class ArpPacketParser(PacketParserInterface):
             data.arp_dst_mac = self.mac_utils.convert_hexadecimal_mac_to_readable_mac(packet.tha)
             data.arp_dst_ip = self.ip_utils.inet_to_str(packet.tpa)
 
+            if self.config.use_numeric_values is True:
+                data.arp_src_mac = self.mac_utils.mac_to_int(data.arp_src_mac)
+                data.arp_dst_mac = self.mac_utils.mac_to_int(data.arp_dst_mac)
+                data.arc_src_ip = self.ip_utils.ip_to_int(data.arp_src_ip)
+                data.arc_dst_ip = self.ip_utils.ip_to_int(data.arp_src_ip)
+
         except BaseException as ex:
             logging.warning('Unable to extract ARP from `{}`.Error: `{}`'.format(type(packet), ex))
             raise ex

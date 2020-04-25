@@ -7,6 +7,7 @@ from dpkt.udp import UDP
 from munch import Munch
 
 from core.configuration.data import ConfigurationData
+from core.lib.converters import bool_to_integer
 from core.lib.dpkt_parsers.base import PacketParserInterface
 from core.models.packet_data import PacketData
 from core.static.CONSTANTS import LAYER4_PROTOCOLS
@@ -27,14 +28,10 @@ class Layer4PacketParser(PacketParserInterface):
             data.layer4_payload_size = len(packet.data)
             data.src_port, data.dst_port = self.extract_src_dest_port(packet)
             data.outgoing = self.is_packet_outgoing(packet)
-            data.layer7_proto = self.get_layer7_proto_number(packet)
-            data.layer7_proto_name = self.get_protocol_info_from_port(
-                port_number=data.layer7_proto, protocol_type=protocol_type
-            )
+            data.layer7_proto = self.get_layer7_protocol(protocol_type=protocol_type, packet=packet)
 
         except AttributeError:
             logging.debug('This a fragmented packet, so capturing raw bytes')
-            data.data_from_fragment = packet.decode('utf-8')
 
         except BaseException as ex:
             logging.warning('Unable to extract Layer4 from `{}`. Error: `{}`'.format(type(packet), ex))
@@ -48,19 +45,38 @@ class Layer4PacketParser(PacketParserInterface):
         if 10000 <= packet.sport < 65536:     # Lower limit from static/layer4_port_data.json
             outgoing = True
 
+        if self.config.use_numeric_values is True:
+            return 1 if outgoing is True else 0
+
         return outgoing
 
     def extract_src_dest_port(self, packet: Union[UDP, TCP]) -> Tuple:
         return packet.sport, packet.dport
 
-    def get_layer7_proto_number(self, packet: Union[UDP, TCP]) -> Optional[int]:
+    def get_layer7_protocol(self, protocol_type: str, packet: Union[UDP, TCP]) -> Optional[Union[int, str]]:
+        """
+        Identify the layer7 protocol for given packet (being processed). Layer7 protocol is identified from TCP/UDP
+        port numbers. If a packet is outgoing, its destination port number is used to identify layer7 protocol,
+        otherwise source port number is used to identify layer7 protocol.
+        If `use_numeric_values` configuration option is enabled, this function returns port number, otherwise it
+        returns protocol name or protocol abbreviation, for example, HTTPS.
+        """
+        layer7_port = None
         if packet is None:
-            return None
+            return layer7_port
 
         if self.is_packet_outgoing(packet):
-            return packet.dport
+            layer7_port = packet.dport
 
-        return packet.sport
+        else:
+            layer7_port = packet.sport
+
+        if self.config.use_numeric_values is True:
+            return layer7_port
+
+        return self.get_protocol_info_from_port(
+            port_number=layer7_port, protocol_type=protocol_type
+        )
 
     def get_protocol_info_from_port(self, port_number: int, protocol_type: str) -> Optional[str]:
         # FIXME: Check if we need to find protocol abbrv for source port as well
@@ -130,6 +146,10 @@ class TcpPacketParser(Layer4PacketParser):
         flags.tcp_urg_flag = (packet.flags & dpkt.tcp.TH_URG) != 0
         flags.tcp_ece_flag = (packet.flags & dpkt.tcp.TH_ECE) != 0
         flags.tcp_cwr_flag = (packet.flags & dpkt.tcp.TH_CWR) != 0
+
+        if self.config.use_numeric_values:
+            for k, v in flags.items():
+                flags[k] = bool_to_integer(v)
 
         return flags
 
