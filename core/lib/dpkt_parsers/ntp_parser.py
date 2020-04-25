@@ -20,29 +20,25 @@ class NtpPacketParser(PacketParserInterface):
 
     @staticmethod
     def load_ntp_packet_from_ip_packet(ip_packet: IP) -> Optional[NTP]:
-        ntp = None
         try:
             udp_packet = UDP(ip_packet.data)
-            ntp = NtpPacketParser.load_ntp_packet_from_udp_packet(udp_packet)
+            return NtpPacketParser.load_ntp_packet_from_udp_packet(udp_packet)
 
         except BaseException as ex:
             logging.warning('Can not extract NTP packet from UDP packet. Error: {}'.format(ex))
-
-        return ntp
+            raise ex
 
     @staticmethod
     def load_ntp_packet_from_udp_packet(udp_packet: UDP) -> Optional[NTP]:
-        ntp = None
         try:
-            ntp = NTP(udp_packet.data)
+            return NTP(udp_packet.data)
 
         except dpkt.dpkt.NeedData:
             logging.warning('Not enough data to extract NTP packet from UDP packet')
 
         except BaseException as ex:
             logging.warning('Can not extract NTP packet from UDP packet. Error: {}'.format(ex))
-
-        return ntp
+            raise ex
 
     def extract_data(self, packet: NTP) -> Munch:
         data = Munch()
@@ -53,7 +49,7 @@ class NtpPacketParser(PacketParserInterface):
             data.ntp_reference_id = self.resolve_ntp_reference(packet)
 
         except BaseException as ex:
-            logging.warning('Unable to extract data from `{}`.Error: `{}`'.format(type(packet), ex))
+            logging.warning('Unable to extract NTP from `{}`. Error: `{}`'.format(type(packet), ex))
             raise ex
 
         return data

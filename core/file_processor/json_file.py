@@ -24,7 +24,7 @@ class JsonFileProcessor(FileProcessorBase):
 
         except Exception as ex:
             raise FileError(
-                message='Unable to load specified json file from path: {}.Error: {}'.format(file_path, ex),
+                message='Unable to load specified json file from path: {}. Error: {}'.format(file_path, ex),
                 error_type=FileErrorTypes.FILE_PROCESSING_ERROR
             )
 
@@ -36,6 +36,6 @@ class JsonFileProcessor(FileProcessorBase):
                 return True
 
         except Exception as e:
-            logging.error('Unable to write json file to specified path: {}.Error: {}'.format(file_path, e))
+            logging.error('Unable to write json file to specified path: {}. Error: {}'.format(file_path, e))
 
         return False

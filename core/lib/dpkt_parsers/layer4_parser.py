@@ -32,18 +32,23 @@ class Layer4PacketParser(PacketParserInterface):
                 port_number=data.layer7_proto, protocol_type=protocol_type
             )
 
+        except AttributeError:
+            logging.debug('This a fragmented packet, so capturing raw bytes')
+            data.data_from_fragment = packet.decode('utf-8')
+
         except BaseException as ex:
-            logging.warning('Unable to extract data from `{}`.Error: `{}`'.format(type(packet), ex))
+            logging.warning('Unable to extract Layer4 from `{}`. Error: `{}`'.format(type(packet), ex))
             raise ex
 
         return data
 
-    def is_packet_outgoing(self, packet: Union[UDP, TCP]) -> bool:
+    def is_packet_outgoing(self, packet: Union[UDP, TCP]) -> Union[int, bool]:
         # FIXME: This can be improved?
+        outgoing = False
         if 10000 <= packet.sport < 65536:     # Lower limit from static/layer4_port_data.json
-            return True
+            outgoing = True
 
-        return False
+        return outgoing
 
     def extract_src_dest_port(self, packet: Union[UDP, TCP]) -> Tuple:
         return packet.sport, packet.dport

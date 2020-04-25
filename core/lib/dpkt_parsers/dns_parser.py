@@ -19,29 +19,22 @@ class DnsPacketParser(PacketParserInterface):
 
     @staticmethod
     def load_dns_packet_from_ip_packet(ip_packet: IP) -> Optional[DNS]:
-        dns = None
         try:
             udp_packet = UDP(ip_packet.data)
-            dns = DnsPacketParser.load_dns_packet_from_udp_packet(udp_packet)
+            return DnsPacketParser.load_dns_packet_from_udp_packet(udp_packet)
 
         except BaseException as ex:
             logging.warning('Can not extract DNS packet from UDP packet. Error: {}'.format(ex))
-
-        return dns
+            raise ex
 
     @staticmethod
     def load_dns_packet_from_udp_packet(udp_packet: UDP) -> Optional[DNS]:
-        dns = None
         try:
-            dns = DNS(udp_packet.data)
-
-        except dpkt.dpkt.NeedData:
-            logging.warning('Not enough data to extract DNS packet from UDP packet')
+            return DNS(udp_packet.data)
 
         except Exception as ex:
             logging.warning('Can not extract DNS packet from UDP packet. Error: {}'.format(ex))
-
-        return dns
+            raise ex
 
     def extract_data(self, packet: DNS) -> Munch:
         data = Munch()
@@ -59,7 +52,7 @@ class DnsPacketParser(PacketParserInterface):
                 data.update(self.extract_data_from_dns_response(packet))
 
         except BaseException as ex:
-            logging.warning('Unable to extract data from `{}`.Error: `{}`'.format(type(packet), ex))
+            logging.warning('Unable to extract DNS from `{}`. Error: `{}`'.format(type(packet), ex))
             raise ex
 
         return data
@@ -75,7 +68,7 @@ class DnsPacketParser(PacketParserInterface):
             data.dns_query_cls = self.config.FieldDelimiter.join([str(q.cls) for q in dns_packet.qd])
 
         except BaseException as ex:
-            logging.warning('Unable to extract data from `{}`.Error: `{}`'.format(type(dns_packet), ex))
+            logging.warning('Unable to extract DNS from `{}`. Error: `{}`'.format(type(dns_packet), ex))
             raise ex
 
         return data
@@ -109,5 +102,6 @@ class DnsPacketParser(PacketParserInterface):
 
         except Exception as ex:
             logging.error('Unable to process dns answers packet. Error: {}'.format(ex))
+            raise ex
 
         return data

@@ -27,21 +27,19 @@ class DhcpPacketParser(PacketParserInterface):
             data.dhcp_hostname = self.extract_dhcp_hostname_from_dhcp_options(dhcp_options) or ''
 
         except BaseException as ex:
-            logging.warning('Unable to extract data from `{}`.Error: `{}`'.format(type(packet), ex))
+            logging.warning('Unable to extract DHCP from `{}`. Error: `{}`'.format(type(packet), ex))
             raise ex
 
         return data
 
     def extract_dhcp_options_from_dhcp_packet(self, dhcp_packet: DHCP) -> Optional[dict]:
-        dhcp_options = None
         try:
-            dhcp_options = dict(dhcp_packet.opts)
+           return dict(dhcp_packet.opts)
 
-        except ValueError:
+        except ValueError as ex:
             logging.warning('Failed to extract dhcp_options from DHCP packet. Invalid type: `{}` of '
                             '`dhcp_packet.opts`'.format(type(dhcp_packet.opts)))
-
-        return dhcp_options
+            raise ex
 
     def extract_fingerprint_from_dhcp_options(self, dhcp_options: dict) -> Optional[str]:
         if dpkt.dhcp.DHCP_OPT_PARAM_REQ not in dhcp_options:
@@ -52,36 +50,30 @@ class DhcpPacketParser(PacketParserInterface):
         return self.config.FieldDelimiter.join([str(x) for x in dhcp_options])
 
     def extract_vendor_from_dhcp_options(self, dhcp_options: dict) -> Optional[str]:
-        vendor_option = None
         if dpkt.dhcp.DHCP_OPT_VENDOR_ID in dhcp_options:
             try:
-                vendor_option = dhcp_options.get(dpkt.dhcp.DHCP_OPT_VENDOR_ID, '').decode('utf-8')
+                return dhcp_options.get(dpkt.dhcp.DHCP_OPT_VENDOR_ID, '').decode('utf-8')
 
-            except AttributeError:
+            except AttributeError as ex:
                 # TODO: better error handling
                 logging.warning('Failed to extract information from DHCP packet. Invalid type of dhcp_vendor_option')
-
-        return vendor_option
+                raise ex
 
     def extract_dhcp_hostname_from_dhcp_options(self, dhcp_options: dict) -> Optional[str]:
-        dhcp_hostname = None
         if dpkt.dhcp.DHCP_OPT_HOSTNAME in dhcp_options:
             try:
-                dhcp_hostname = dhcp_options.get(dpkt.dhcp.DHCP_OPT_HOSTNAME, '').decode('utf-8')
+                return dhcp_options.get(dpkt.dhcp.DHCP_OPT_HOSTNAME, '').decode('utf-8')
 
-            except AttributeError:
+            except AttributeError as ex:
                 # TODO: better error handling
                 logging.warning('Failed to extract vendor information from DHCP packet. Invalid type of dhcp_hostname')
-
-        return dhcp_hostname
+                raise ex
 
     @staticmethod
     def load_dhcp_from_udp_packet(udp_packet):
-        dhcp = None
         try:
-            dhcp = dpkt.dhcp.DHCP(udp_packet.data)
+            return dpkt.dhcp.DHCP(udp_packet.data)
 
         except BaseException as ex:
             logging.warning('Unable to extract DHCP packet from UDP packet. Error: {}'.format(ex))
-
-        return dhcp
+            raise ex

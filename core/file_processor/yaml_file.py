@@ -31,7 +31,7 @@ class YamlFileProcessor(FileProcessorBase):
 
         except Exception as ex:
             raise FileError(
-                message='Unable to load specified yaml file from path: {}.Error: {}'.format(file_path, ex),
+                message='Unable to load specified yaml file from path: {}. Error: {}'.format(file_path, ex),
                 error_type=FileErrorTypes.FILE_PROCESSING_ERROR
             )
 
@@ -48,6 +48,6 @@ class YamlFileProcessor(FileProcessorBase):
 
         except Exception as ex:
             raise FileError(
-                message='Unable to write yaml file to specified path: {}.Error: {}'.format(file_path, ex),
+                message='Unable to write yaml file to specified path: {}. Error: {}'.format(file_path, ex),
                 error_type=FileErrorTypes.FILE_PROCESSING_ERROR
             )

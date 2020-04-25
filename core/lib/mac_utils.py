@@ -128,3 +128,4 @@ class MacAddressUtils:
                 return False
 
         return True
+    

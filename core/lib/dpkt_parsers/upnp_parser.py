@@ -1,4 +1,5 @@
 import logging
+from typing import Union
 
 import dpkt
 from dpkt.ip import IP
@@ -15,30 +16,26 @@ class UpnpPacketParser(PacketParserInterface):
         self.config = config
 
     @staticmethod
-    def extract_upnp_request_from_ip_packet(ip_packet: IP) -> UpnpRequest:
+    def load_upnp_request_from_ip_packet(ip_packet: IP) -> UpnpRequest:
         try:
             udp_packet = UDP(ip_packet.data)
-            return UpnpRequest(udp_packet.data)
+            return UpnpPacketParser.load_upnp_packet_from_udp_packet(udp_packet)
 
         except BaseException as ex:
             logging.warning('Can not extract UPnP request from IP packet. Error: {}'.format(ex))
             raise ex
 
     @staticmethod
-    def extract_upnp_request_from_udp_packet(udp_packet: UDP) -> UpnpRequest:
+    def load_upnp_packet_from_udp_packet(udp_packet: UDP) -> UpnpRequest:
         try:
-            return UpnpRequest(udp_packet.data)
+            http_packet = UpnpRequest(udp_packet.data)
+            if http_packet.method not in ['NOTIFY', 'M-SEARCH']:
+                http_packet = dpkt.http.Response(udp_packet.data)
+
+            return http_packet
 
         except BaseException as ex:
-            logging.error('Can not extract UPnP request from UDP packet. Error: {}'.format(ex))
-            raise ex
-
-    def extract_http_response_from_udp_packet(self, udp_packet: dpkt.udp.UDP) -> dpkt.http.Response:
-        try:
-            return dpkt.http.Response(udp_packet.data)
-
-        except BaseException as ex:
-            logging.warning('Can not extract HTTP Response from UPnP packet. Error: {}'.format(ex))
+            logging.warning('Can not extract UPnP request from IP packet. Error: {}'.format(ex))
             raise ex
 
     def extract_fingerprint_from_notify_message(self, http_packet: dpkt.http.Request) -> Munch:
@@ -67,7 +64,7 @@ class UpnpPacketParser(PacketParserInterface):
 
         return fingerprint
 
-    def extract_fingerprint_from_http_request(self, http_packet: dpkt.http.Request) -> dict:
+    def extract_fingerprint_from_request(self, http_packet: UpnpRequest) -> dict:
         fingerprint = dict()
         try:
             if http_packet.method == "NOTIFY":
@@ -85,35 +82,44 @@ class UpnpPacketParser(PacketParserInterface):
 
         return fingerprint
 
-    # pylint: disable=invalid-name
-    def extract_fingerprint_from_http_response_in_udp_packet(self, udp_packet: dpkt.udp.UDP) -> dict:
+    def extract_fingerprint_from_response(self, upnp_packet: dpkt.http.Response) -> dict:
         fingerprint = dict()
-        http_response_packet = self.extract_http_response_from_udp_packet(udp_packet)
-        if http_response_packet is None:
+        if upnp_packet is None:
             return fingerprint
 
-        fingerprint = self.extract_fingerprint_from_notify_message(http_response_packet)
+        fingerprint = self.extract_fingerprint_from_notify_message(upnp_packet)
         return fingerprint
 
-    def extract_data(self, udp_packet: UDP) -> Munch:
+    def extract_data(self, upnp_packet: Union[UpnpRequest, dpkt.http.Response]) -> Munch:
+        """
+        Extract data from UPnP response or response packet. The data is extracted from the packet based on HTTP request
+        method. The data consists of headers and packet data included in UPnP packet.
+        Parameters
+        ----------
+        upnp_packet: UPnP request or response packet.
+
+        Returns
+        -------
+        Dictionary (Munch) object containing fingerprint data extracted from UPnP request or response
+
+        Raises
+        -------
+        Attribute error: Raised while extracting fingerprint from UPnP request or response.
+        """
         data = Munch()
-
-        try:
-            http_packet = self.extract_upnp_request_from_udp_packet(udp_packet)
-            if http_packet is None:
-                return data
-
-            fingerprint = self.extract_fingerprint_from_http_request(http_packet)
+        fingerprint = dict()
+        if upnp_packet is None:
+            return data
+        
+        if isinstance(upnp_packet, UpnpRequest):
             data.upnp_packet_type = 1
+            fingerprint = self.extract_fingerprint_from_request(upnp_packet)
 
-            if not fingerprint:  # Fingerprint is empty dictionary
-                fingerprint = self.extract_fingerprint_from_http_response_in_udp_packet(udp_packet)
-                data.upnp_packet_type = 2
+        elif isinstance(upnp_packet, dpkt.http.Response):
+            data.upnp_packet_type = 2
+            fingerprint = self.extract_fingerprint_from_response(upnp_packet)
 
-            for key, value in fingerprint.items():
-                data[key] = value
-
-        except BaseException as ex:
-            raise ex
+        for key, value in fingerprint.items():
+            data[key] = value
 
         return data

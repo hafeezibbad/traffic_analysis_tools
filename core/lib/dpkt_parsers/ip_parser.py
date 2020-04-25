@@ -1,9 +1,11 @@
 import logging
-from typing import Tuple
+from typing import Tuple, Optional, Union
 
 import binascii
 import dpkt
+from dpkt.ethernet import Ethernet
 from dpkt.ip import IP
+from dpkt.ip6 import IP6
 from munch import Munch
 
 from core.configuration.data import ConfigurationData
@@ -18,6 +20,22 @@ class IpPacketParser(PacketParserInterface):
         self.ip_utils = IpAddrUtils()
         self.static_data = static_data or StaticData()
 
+    @staticmethod
+    def load_ip_packet_from_ethernet_frame(packet_data: bytes) -> Union[IP, IP6]:
+        if isinstance(packet_data, IP) or isinstance(packet_data, IP6):
+            return packet_data
+
+        # Packet data is bytes because it is a fragmented packet.
+        try:
+                return IP(packet_data)
+
+        except dpkt.dpkt.UnpackError:
+            return IP6(packet_data)  # When IPv6 packet is encapsulated in IPv4 packet
+
+        except BaseException as ex:
+            logging.error('Can not parse Ethernet frame as IPv4 or IPv6 packet. Error: {}'.format(ex))
+            raise ex
+
     def extract_data(self, packet: IP) -> Munch:
         data = Munch()
         try:
@@ -31,7 +49,7 @@ class IpPacketParser(PacketParserInterface):
             data.ip_opts = self.parse_ip_options(packet.opts) or ''
 
         except BaseException as ex:
-            logging.warning('Unable to extract data from `{}`.Error: `{}`'.format(type(packet), ex))
+            logging.warning('Unable to extract IP4 from `{}`.Error: `{}`'.format(type(packet), ex))
             raise ex
 
         return data

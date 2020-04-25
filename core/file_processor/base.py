@@ -90,7 +90,7 @@ class FileProcessorBase(FileProcessorABC):
             return True
 
         except OSError as e:
-            logging.error("Can not create a file of size: {} in folder: {}.Error: {}".format(file_size, directory, e))
+            logging.error("Can not create a file of size: {} in folder: {}. Error: {}".format(file_size, directory, e))
 
         return False
 

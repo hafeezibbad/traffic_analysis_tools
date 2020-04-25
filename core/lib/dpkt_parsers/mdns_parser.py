@@ -210,6 +210,9 @@ class MdnsPacketParser(PacketParserInterface):
 
     def extract_data(self, packet: Mdns) -> Munch:
         data = Munch()
+        if packet is None:
+            return data
+
         try:
             if self.is_mdns_packet_valid_for_processing(packet) is False:
                 return data

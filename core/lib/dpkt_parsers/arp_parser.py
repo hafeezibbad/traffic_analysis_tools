@@ -25,7 +25,7 @@ class ArpPacketParser(PacketParserInterface):
             data.arp_dst_ip = self.ip_utils.inet_to_str(packet.tpa)
 
         except BaseException as ex:
-            logging.warning('Unable to extract data from `{}`.Error: `{}`'.format(type(packet), ex))
+            logging.warning('Unable to extract ARP from `{}`.Error: `{}`'.format(type(packet), ex))
             raise ex
 
         return data

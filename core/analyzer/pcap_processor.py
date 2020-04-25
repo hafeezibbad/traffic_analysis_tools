@@ -1,6 +1,5 @@
 import logging
 import os
-import traceback
 from pathlib import Path
 from typing import Tuple
 
@@ -9,6 +8,7 @@ import dpkt
 from core.analyzer.base_processor import BaseProcessor
 from core.configuration.data import ConfigurationData
 from core.errors import FileError, FileErrorTypes
+from core.lib.common import print_json
 from core.lib.dpkt_utils import DpktUtils
 from core.models.packet_data import PacketData
 from core.models.pcap_file_info import PcapFileInfo
@@ -138,49 +138,61 @@ class PcapProcessor(BaseProcessor):
         packet_data.ref_time = ts - initial_timestamp
         packet_data.size = len(packet)
         try:
-            eth = dpkt.ethernet.Ethernet(packet)
+            # Handle Layer 2: Ethernet
+            try:
+                eth = dpkt.ethernet.Ethernet(packet)
+
+            except IndexError:
+                # This is a Malformed data, experienced in Apple deviecs. Since rest of packet is malformed,
+                # we only extract source, destination MAC address and IP protocol
+                data = self.dpkt_utils.parse_byte_data_as_ethernet_headers(packet)
+
+                packet_data.src_mac = data.src_mac
+                packet_data.dst_mac = data.dst_mac
+                packet_data.eth_type = data.eth_type
+                packet_data.eth_frame_payload_size = data.payload_size
+
+                return packet_data
+
             packet_data = self.dpkt_utils.extract_data_from_eth_frame(
                 eth_frame=eth,
                 packet_data=packet_data
             )
-
-            layer3_packet = eth.data
-            packet_data = self.dpkt_utils.extract_data_from_layer3_protocols(
-                protocol=eth.type,
-                layer3_packet=eth.data,
-                packet_data=packet_data
-            )
-
             # Skip further processing for packets which do not have layer 4 data
             if eth.type in [
                 dpkt.ethernet.ETH_TYPE_ARP,
-                6,                  # IEEE 802.1 Link Layer Control
-                34958,              # IEEE 802.1X Authentication
-                35085               # TDLS Discovery request
+                6,  # IEEE 802.1 Link Layer Control
+                34958,  # IEEE 802.1X Authentication
+                35085  # TDLS Discovery request
             ]:
-                packet_data.layer3_undecoded_data = eth.data
                 return packet_data
 
-            layer4_packet = layer3_packet.data
-            packet_data = self.dpkt_utils.extract_data_from_layer4_protocols(
-                protocol=layer3_packet.p,
-                layer4_packet=layer4_packet,
-                packet_data=packet_data
-            )
+            # Handle Layer 3: IP, IGMP, ARP, LLC
+            layer3_packet = self.dpkt_utils.load_layer3_packet(eth)
+            if layer3_packet is None:
+                return packet_data
 
+            packet_data = self.dpkt_utils.extract_data_from_layer3_packet(layer3_packet, packet_data=packet_data)
+
+            # Handler Layer 4: TCP, UDP, ICMP
+            layer4_packet = self.dpkt_utils.load_layer4_packet(layer3_packet)
+            if layer4_packet is None:
+                logging.warning('Unable to extract data from layer3 packet')
+                return packet_data
+
+            packet_data = self.dpkt_utils.extract_data_from_layer4_packet(layer4_packet, packet_data)
             if packet_data.tcp_syn_flag is True and packet_data.tcp_ack_flag is False:
-                packet_data = self.dpkt_utils.extract_tcp_syn_signature(layer3_packet, packet_data)
+                packet_data = self.dpkt_utils.extract_tcp_syn_signature(eth.data, packet_data)
 
-            packet_data = self.dpkt_utils.extract_data_from_layer7_protocols(
-                layer4_packet=layer4_packet,
-                packet_data=packet_data
-            )
-        except AttributeError:
-            if not hasattr(layer3_packet, 'data'):
-                # Save the data for packets which we were not able to parse as IP packets.
-                packet_data.layer3_undecoded_data = layer3_packet
-
+            # Handler Layer 7: DNS, UPnP, DHCP, mDNS, NTP
+            layer7_packet = self.dpkt_utils.load_layer7_packet(layer4_packet, packet_data)
+            if layer7_packet is None:
+                logging.debug('Unable to extract layer7 packet with src port `{}`, dst port `{}`'.format(
+                    packet_data.src_port, packet_data.dst_port
+                ))
+            packet_data = self.dpkt_utils.extract_data_from_layer7_packet(layer7_packet, packet_data)
+            
         except Exception as ex:
-            logging.error('Error in processing packet at ref_time: {}.Error: {}'.format(packet_data.ref_time, ex))
+            logging.error('Error in processing packet at ref_time: {}. Error: {}'.format(packet_data.ref_time, ex))
 
         return packet_data
