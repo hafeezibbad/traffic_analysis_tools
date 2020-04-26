@@ -28,5 +28,4 @@ class UdpPacketParserTests(BasePacketParserTests):
         self.assertEqual(mock_src_port, udp_data.src_port)
         self.assertEqual(mock_dst_port, udp_data.dst_port)
         self.assertTrue(udp_data.outgoing)
-        self.assertEqual(mock_dst_port, udp_data.layer7_proto)
-        self.assertEqual('dns', udp_data.layer7_proto_name)
+        self.assertEqual('dns', udp_data.layer7_proto)

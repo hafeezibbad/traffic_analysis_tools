@@ -8,3 +8,4 @@ TcpFlagDataFilePath: 'core/static/tcp_flags_data.json'
 TcpPortsFilePath: 'core/static/layer4_port_data.json'
 p0f_wd: 'core/bin'
 p0f_executable: './p0f'
+use_numeric_values: false

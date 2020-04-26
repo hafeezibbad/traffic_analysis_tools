@@ -38,7 +38,7 @@ class EthernetFrameParserTests(BasePacketParserTests):
         self.assertEqual(eth_data.src_mac, mock_src_mac)
         self.assertEqual(eth_data.dst_mac, mock_dst_mac)
         self.assertEqual(eth_data.eth_type, 'ipv4')
-        self.assertEqual(eth_data.eth_frame_payload_size, len(mock_data))
+        self.assertEqual(eth_data.eth_payload_size, len(mock_data))
 
     def test_get_eth_type_name_returns_protocol_abbrv(self):
         eth_frame = dpkt.ethernet.Ethernet()
@@ -64,4 +64,3 @@ class EthernetFrameParserTests(BasePacketParserTests):
 
         self.assertEqual(src_mac, mock_src_mac)
         self.assertEqual(dst_mac, mock_dst_mac)
-        

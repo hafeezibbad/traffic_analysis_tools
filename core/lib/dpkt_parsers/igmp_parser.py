@@ -31,5 +31,7 @@ class IgmpPacketParser(PacketParserInterface):
 
         data.igmp_type = igmp_packet.type
         data.igmp_addr = self.ip_addr_utils.inet_to_str(igmp_packet.group)
+        if self.config.use_numeric_values is True:
+            data.igmp_addr = self.ip_addr_utils.ip_to_int(data.igmp_addr)
 
         return data

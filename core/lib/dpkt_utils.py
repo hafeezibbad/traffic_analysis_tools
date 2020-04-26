@@ -1,6 +1,6 @@
 import binascii
 import logging
-from typing import Union, Type, Optional
+from typing import Union, Optional
 
 import dpkt
 from dpkt import Packet
@@ -21,6 +21,7 @@ from dpkt.udp import UDP
 from munch import Munch
 
 from core.configuration.data import ConfigurationData
+from core.lib.converters import hex_to_integer
 from core.lib.dpkt_parsers.arp_parser import ArpPacketParser
 from core.lib.dpkt_parsers.dhcp_parser import DhcpPacketParser
 from core.lib.dpkt_parsers.dns_parser import DnsPacketParser
@@ -35,7 +36,7 @@ from core.lib.dpkt_parsers.layer4_parser import UDPPacketParser
 from core.lib.dpkt_parsers.llc_parser import LlcPacketParser
 from core.lib.dpkt_parsers.mdns_parser import MdnsPacketParser
 from core.lib.dpkt_parsers.mdns_unpacker import Mdns
-from core.lib.dpkt_parsers.nat_pmp_parser import NatpmpPacketParser
+from core.lib.dpkt_parsers.natpmp_parser import NatpmpPacketParser
 from core.lib.dpkt_parsers.natpmp import Natpmp
 from core.lib.dpkt_parsers.ntp_parser import NtpPacketParser
 from core.lib.dpkt_parsers.syn_parser import SynPacketParser
@@ -276,12 +277,15 @@ class DpktUtils:
         data = Munch()
 
         decoded_data = binascii.hexlify(packet_data).decode('utf-8')
-        src_mac_int = int(decoded_data[:12], 16)
-        data.src_mac = self.mac_utils.int2mac(src_mac_int)
-        dst_mac_int = int(decoded_data[12:24], 16)
-        data.dst_mac = self.mac_utils.int2mac(dst_mac_int)
-        data.eth_type = decoded_data[24:28]
+        data.src_mac = hex_to_integer(decoded_data[:12])
+        data.dst_mac = hex_to_integer(decoded_data[12:24])
+        data.eth_type = hex_to_integer(decoded_data[24:28])
         data.payload_size = len(decoded_data[28:])/2
+
+        if self.config.use_numeric_values is False:
+            data.src_mac = self.mac_utils.int_to_mac(data.src_mac)
+            data.dst_mac = self.mac_utils.int_to_mac(data.dst_mac)
+            data.eth_type = decoded_data[24:28]
 
         return data
 

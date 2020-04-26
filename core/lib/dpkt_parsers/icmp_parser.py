@@ -39,11 +39,16 @@ class BaseIcmpPacketParser(PacketParserInterface):
 
         return ICMP_TYPES
 
-    def get_icmp_message(self, icmp_type_data: dict, icmp_type: int, icmp_code: int) -> str:
+    def get_icmp_message(self, icmp_type_data: dict, icmp_type: int, icmp_code: int) -> Union[str, int]:
         type_data = icmp_type_data.get(icmp_type, '')
         if isinstance(type_data, dict):
+            if self.config.use_numeric_values is True:
+                return icmp_code
             return type_data.get(icmp_code, '')
 
+        if self.config.use_numeric_values is True:
+            return icmp_type
+        
         return type_data
 
 

@@ -33,4 +33,10 @@ class Ip6PacketParser(PacketParserInterface):
         return data
 
     def extract_src_dest_ip(self, ip_packet: IP) -> Tuple:
-        return self.ip_utils.inet_to_str(ip_packet.src), self.ip_utils.inet_to_str(ip_packet.dst)
+        src_ip = self.ip_utils.inet_to_str(ip_packet.src)
+        dst_ip = self.ip_utils.inet_to_str(ip_packet.dst)
+
+        if self.config.use_numeric_values is True:
+            return self.ip_utils.ip_to_int(src_ip), self.ip_utils.ip_to_int(dst_ip)
+
+        return src_ip, dst_ip

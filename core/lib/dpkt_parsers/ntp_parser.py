@@ -1,5 +1,5 @@
 import logging
-from typing import Optional
+from typing import Optional, Union
 
 import dpkt
 from dpkt.ip import IP
@@ -54,7 +54,7 @@ class NtpPacketParser(PacketParserInterface):
 
         return data
 
-    def resolve_ntp_reference(self, packet: NTP) -> str:
+    def resolve_ntp_reference(self, packet: NTP) -> Union[int, str]:
         reference_id = self.ip_utils.inet_to_str(packet.id)
         if reference_id is None:
             # Could not parse NTP REFID, probably it is a string
@@ -63,5 +63,8 @@ class NtpPacketParser(PacketParserInterface):
         elif reference_id == '0.0.0.0':
             # REFID is NULL but dpkt considers it as b'\x00\x00\x00\x00'
             return ''
+
+        if self.config.use_numeric_values is True:
+            return self.ip_utils.ip_to_int(reference_id)
 
         return reference_id

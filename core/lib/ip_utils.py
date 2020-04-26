@@ -36,7 +36,7 @@ class IpAddrUtils:
         if self.is_valid_ip(ip):
             return ip
 
-    def ip2int(self, ip_address: str) -> Optional[int]:
+    def ip_to_int(self, ip_address: str) -> Optional[int]:
         """
         Converts IP address string to integer representation. For example, '192.168.100.1' --> 3232261121
         :param ip_address: IP address in string form
@@ -47,7 +47,7 @@ class IpAddrUtils:
 
         logging.warning('Unable to convert ip: {} to integer representation')
 
-    def int2ip(self, ip_integer) -> Optional[str]:
+    def int_to_ip(self, ip_integer) -> Optional[str]:
         """
         Converts integer form of IP address to string form i.e.
         3232261121--> '192.168.100.1'

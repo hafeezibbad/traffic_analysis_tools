@@ -1,5 +1,6 @@
 import logging
 import os
+import traceback
 from pathlib import Path
 from typing import Tuple
 
@@ -150,7 +151,7 @@ class PcapProcessor(BaseProcessor):
                 packet_data.src_mac = data.src_mac
                 packet_data.dst_mac = data.dst_mac
                 packet_data.eth_type = data.eth_type
-                packet_data.eth_frame_payload_size = data.payload_size
+                packet_data.eth_payload_size = data.payload_size
 
                 return packet_data
 
@@ -191,8 +192,9 @@ class PcapProcessor(BaseProcessor):
                     packet_data.src_port, packet_data.dst_port
                 ))
             packet_data = self.dpkt_utils.extract_data_from_layer7_packet(layer7_packet, packet_data)
-            
+
         except Exception as ex:
             logging.error('Error in processing packet at ref_time: {}. Error: {}'.format(packet_data.ref_time, ex))
+            print(traceback.format_exc())
 
         return packet_data

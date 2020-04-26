@@ -28,5 +28,17 @@ def timestamp_to_formatted_date(seconds: float, str_format: str = "%Y-%m-%d %H:%
     return datetime.datetime.utcfromtimestamp(seconds).strftime(str_format)
 
 
+def hex_to_integer(hex_value: str) -> int:
+    """Converts hex value (e.g. 888e) to integer value ()"""
+    if not hex_value:
+        return -1
+
+    return int(hex_value, 16)
 
 
+def bool_to_integer(boolean_flag: bool) -> int:
+    """Convert a boolean flag to integer (0, or 1) if the value is not boolean, returns 0"""
+    if boolean_flag is True:
+        return 1
+
+    return 0

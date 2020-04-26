@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Union
 
 from core.models.common import Model
 
@@ -7,47 +7,46 @@ class PacketData(Model):
     timestamp: float = 0
     ref_time: float = 0
     size: float = 0  # Bytes
-    outgoing: bool = False
+    outgoing: Optional[Union[int, bool]]
     # Layer 2: Data link layer
     src_mac: Optional[str]
     dst_mac: Optional[str]
     eth_type: Optional[str]
     eth_payload_size: Optional[int]  # Bytes
     # Layer 3: Network layer
-    src_ip: Optional[str]
-    dst_ip: Optional[str]
+    src_ip: Optional[Union[int, str]]
+    dst_ip: Optional[Union[int, str]]
     ip_tos: Optional[int]
     ip_ttl: Optional[int]
     ip_opts: Optional[int]
     ip_proto: Optional[int]
     ip_payload_size: Optional[int]
     ip6_nxt_hdr: Optional[str]
-    ip_do_not_fragment: bool = True
-    ip_more_fragment: bool = False
+    ip_do_not_fragment: Optional[Union[bool, int]]
+    ip_more_fragment: Optional[Union[bool, int]]
     # Layer 3: IEEE-8-1211.Auth
     ieee80211_version: Optional[int]
     ieee80211_payload_size: Optional[int]
     # Layer 4: ICMP packets
     icmp_type: Optional[int]
     icmp_code: Optional[int]
-    icmp_message: Optional[str]
+    icmp_message: Optional[Union[str, int]]
     # Layer 4: IGMP Packets
     igmp_type: Optional[int]   # 3: Change to Include Mode (Leave group), 4: Change to exclude mode (Join Group)
-    igmp_addr: Optional[str]    # IGMP Multicast address
+    igmp_addr: Optional[Union[int, str]]    # IGMP Multicast address
     # Layer 4: Transport layer
     src_port: Optional[int]
     dst_port: Optional[int]
     layer4_payload_size: Optional[int]
-    data_from_fragment: Optional[str]
     # Layer 4: TCP flags
-    tcp_fin_flag: bool = False
-    tcp_syn_flag: bool = False
-    tcp_rst_flag: bool = False
-    tcp_psh_flag: bool = False
-    tcp_ack_flag: bool = False
-    tcp_urg_flag: bool = False
-    tcp_ece_flag: bool = False
-    tcp_cwr_flag: bool = False
+    tcp_fin_flag: Optional[Union[bool, int]]
+    tcp_syn_flag: Optional[Union[bool, int]]
+    tcp_rst_flag: Optional[Union[bool, int]]
+    tcp_psh_flag: Optional[Union[bool, int]]
+    tcp_ack_flag: Optional[Union[bool, int]]
+    tcp_urg_flag: Optional[Union[bool, int]]
+    tcp_ece_flag: Optional[Union[bool, int]]
+    tcp_cwr_flag: Optional[Union[bool, int]]
     # TCP Syn packet data
     syn_signature: Optional[str]
     client_os: Optional[str]
@@ -58,13 +57,11 @@ class PacketData(Model):
     natpmp_result: Optional[int]
     natpmp_sssoe: Optional[int]
     natpmp_lifetime: Optional[int]
-    natpmp_external_ip: Optional[str]
+    natpmp_external_ip: Optional[Union[str, int]]
     natpmp_internal_port: Optional[int]
     natpmp_external_port: Optional[int]
     # Layer 7: Application layer
     layer7_proto: Optional[int]
-    layer7_proto_name: Optional[str]
-    dhcp_opts: Optional[str]
     payload_size: Optional[int]
     # Layer 7: DNS queries
     dns_type: Optional[int]
@@ -73,28 +70,29 @@ class PacketData(Model):
     dns_query_domain: Optional[str]
     dns_query_type: Optional[int]
     dns_query_cls: Optional[int]
-    dns_query_multiple_domains: bool = False
+    dns_query_multiple_domains: Optional[Union[bool, int]]
     # Layer 7: DNS answers
-    dns_ans_type: Optional[str]
+    dns_ans_type: Optional[int]
     dns_ans_cname: Optional[str]
     dns_ans_cname_ttl: Optional[int]
     dns_ans_name: Optional[str]
-    dns_ans_ip: Optional[str]
-    dns_ans_ttl: Optional[str]
+    dns_ans_ip: Optional[Union[str, int]]
+    dns_ans_ttl: Optional[int]
     # Layer 7: ARP data
     arp_request_src: Optional[int]   # '-1': client, '1': server
-    arp_src_mac: Optional[str]
-    arp_src_ip: Optional[str]
-    arp_dst_mac: Optional[str]
-    arp_dst_ip: Optional[str]
+    arp_src_mac: Optional[Union[int, str]]
+    arp_src_ip: Optional[Union[int, str]]
+    arp_dst_mac: Optional[Union[int, str]]
+    arp_dst_ip: Optional[Union[int, str]]
     # Layer 7: NTP
     ntp_mode: Optional[int]   # -1= client, 1= Server
     ntp_interval: Optional[int]   # Polling interval choice 5 (means 32 seconds polling interval)
-    ntp_reference_id: Optional[str]
+    ntp_reference_id: Optional[Union[int, str]]
     ntp_stratum: Optional[int]   # 1: primary reference, 2: secondary reference, Layer 7: DHCP
     dhcp_fingerprint: Optional[str]
     dhcp_vendor: Optional[str]
     dhcp_hostname: Optional[str]
+    dhcp_opts: Optional[str]
     # Layer 7: mDNS
     mdns_packet_type: Optional[int]   # 1: Query, 2: Response
     mdns_hostname: Optional[str]
@@ -166,7 +164,6 @@ class PacketData(Model):
             self.src_port,
             self.dst_port,
             self.layer4_payload_size,
-            self.data_from_fragment,
             # Layer 4: TCP flags
             self.tcp_fin_flag,
             self.tcp_syn_flag,
@@ -191,8 +188,6 @@ class PacketData(Model):
             self.natpmp_external_port,
             # Layer 7: Application layer
             self.layer7_proto,
-            self.layer7_proto_name,
-            self.dhcp_opts,
             self.payload_size,
             # Layer 7: DNS queries
             self.dns_type,
@@ -224,6 +219,7 @@ class PacketData(Model):
             self.dhcp_fingerprint,
             self.dhcp_vendor,
             self.dhcp_hostname,
+            self.dhcp_opts,
             # Layer 7: mDNS
             self.mdns_packet_type,
             self.mdns_hostname,
@@ -297,7 +293,6 @@ class PacketData(Model):
             "src_port",
             "dst_port",
             "layer4_payload_size",
-            "data_from_fragment",
             # Layer 4: TCP flags
             "tcp_fin_flag",
             "tcp_syn_flag",
@@ -322,8 +317,6 @@ class PacketData(Model):
             "natpmp_external_port",
             # Layer 7: Application layer
             "layer7_proto",
-            "layer7_proto_name",
-            "dhcp_opts",
             "payload_size",
             # Layer 7: DNS queries
             "dns_type",
@@ -355,6 +348,7 @@ class PacketData(Model):
             "dhcp_fingerprint",
             "dhcp_vendor",
             "dhcp_hostname",
+            "dhcp_opts",
             # Layer 7: mDNS
             "mdns_packet_type",
             "mdns_hostname",
