@@ -62,13 +62,10 @@ class Natpmp:
 
         self.version, self.opcode, self.reserved, self.internal_port, self.external_port, self.lifetime = \
             struct.unpack(PORT_MAPPING_REQUEST_FORMAT, data)
-        print('=' * 80)
-        print(self.version, self.opcode, self.reserved, self.internal_port, self.external_port, self.lifetime)
-        print('=' * 80)
 
     def __unpack_port_map_response(self, data: bytes):
         if len(data) > 16:
             data = data[:16]
 
-        self.version, self.opcode, self.result, self.sssoe, self.private_port, self.pub_port, self.lifetime =\
+        self.version, self.opcode, self.result, self.sssoe, self.internal_port, self.external_port, self.lifetime =\
             struct.unpack(PORT_MAPPING_RESPONSE_FORMAT, data)

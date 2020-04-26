@@ -27,13 +27,20 @@ class PortMappingRequest(NatpmpRequest):
     Create a NAT-PMP TCP port mapping request. The additional fields for this request include private_port
     (H: 2-byte unsigned short), public_port (H: 2-byte unsigned short), and lifetime (I: 4-byte unsigned integer).
     """
-    def __init__(self, protocol: int, private_port: int, public_port: int, lifetime: int = 3600, version: int = 0):
+    def __init__(
+            self,
+            protocol: int,
+            private_port: int,
+            public_port: int,
+            lifetime: int = 3600,
+            version: int = 0
+    ) -> None:
         super(PortMappingRequest, self).__init__(version, protocol)
         self.private_port = private_port
         self.public_port = public_port
         self.lifetime = lifetime
 
-    def to_bytes(self):
+    def to_bytes(self) -> bytes:
         return struct.pack(
             PORT_MAPPING_REQUEST_FORMAT,
             self.version,

@@ -195,6 +195,5 @@ class PcapProcessor(BaseProcessor):
 
         except Exception as ex:
             logging.error('Error in processing packet at ref_time: {}. Error: {}'.format(packet_data.ref_time, ex))
-            print(traceback.format_exc())
 
         return packet_data

@@ -61,7 +61,6 @@ class FileUtilsTest(unittest.TestCase):
 
     def test_has_valid_extension_accepts_list_set_and_tuple_for_extension_argument(self):
         for extension in [['py'], {'py'}, ('py',)]:
-            print(extension)
             self.assertTrue(has_valid_extension(
                 file_path=os.path.join(FIXTURES_DIRECTORY_PATH, 'common.py'),
                 valid_extensions=extension)

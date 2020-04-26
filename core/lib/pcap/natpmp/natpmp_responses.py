@@ -27,7 +27,7 @@ class NatpmpResponse:
 
 class ExternalAddressResponse(NatpmpResponse):
     """
-    Creates a response from local gateway for external address request to local gateway. In addition to the fields
+    Decodes response from local gateway for external address request to local gateway. In addition to the fields
     specified in request containing IP address. The member variable IP contains string format for IP address and
     integer_ip is of I: 4-byte unsigned integer format.
     """
@@ -53,7 +53,7 @@ class ExternalAddressResponse(NatpmpResponse):
 
 class PortMappingResponse(NatpmpResponse):
     """
-    Create response for PortMappingRequest to local gateway. The response contains private_port (H: 2-byte unsigned
+    Decodes response for PortMappingRequest to local gateway. The response contains private_port (H: 2-byte unsigned
     short), public_port (H: 2-byte unsigned short), lifetime (I: 4-byte unsigned integer) in addition to NAT-PMP
     headers. Please note that the port mapping assigned is NOT NECESSARILY the port request.
     """
