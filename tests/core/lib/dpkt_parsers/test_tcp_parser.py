@@ -44,6 +44,5 @@ class TcpPacketParserTests(BasePacketParserTests):
         self.assertEqual(mock_src_port, tcp_data.src_port)
         self.assertEqual(mock_dst_port, tcp_data.dst_port)
         self.assertTrue(tcp_data.outgoing)
-        self.assertEqual(mock_dst_port, tcp_data.layer7_proto)
-        self.assertEqual('dns', tcp_data.layer7_proto_name)
+        self.assertEqual('dns', tcp_data.layer7_proto)
         self.assertTrue(tcp_data.tcp_ack_flag)

@@ -82,7 +82,7 @@ class DnsPacketParser(PacketParserInterface):
         # http://en.wikipedia.org/wiki/List_of_DNS_record_types
         dns_ans_ip_list = []
         dns_ans_name_list = []
-        dns_ans_ttl = [0]
+        dns_ans_ttl = []
 
         try:
             for answer in dns_packet.an:
@@ -102,7 +102,11 @@ class DnsPacketParser(PacketParserInterface):
             data.dns_ans_name = self.config.FieldDelimiter.join([name for name in dns_ans_name_list])
             # We are using only max value because in experience ttl is same even if there is separate ttl for each IP
             # address in DNS response
-            data.dns_ans_ttl = max(dns_ans_ttl)
+            if dns_ans_ttl:
+                data.dns_ans_ttl = max(dns_ans_ttl)
+            else:
+                data.dns_ans_ttl = None
+
             if self.config.use_numeric_values is True:
                 dns_ans_ip_list = map(self.ip_utils.ip_to_int, dns_ans_ip_list)
             data.dns_ans_ip = self.config.FieldDelimiter.join([str(ip) for ip in dns_ans_ip_list])

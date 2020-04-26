@@ -3,6 +3,8 @@ import unittest
 from unittest.mock import MagicMock
 
 import dpkt
+from dpkt.dns import DNS
+from dpkt.ntp import NTP
 
 from core.lib.dpkt_utils import DpktUtils
 from core.lib.mac_utils import MacAddressUtils
@@ -42,16 +44,12 @@ class DpktUtilsTest(unittest.TestCase):
         ip_packet.data = b'abcdef0123456789'
         ip_packet.all_extension_headers = []
 
-        packet_data = self.dpkt_utils.extract_data_from_layer3_protocols(
-            protocol=dpkt.ethernet.ETH_TYPE_IP6,
-            layer3_packet=ip_packet,
-            packet_data=PacketData()
-        )
+        packet_data = self.dpkt_utils.extract_data_from_layer3_packet(ip_packet, PacketData())
 
         self.assertEqual(mock_src_ip6, packet_data.src_ip)
         self.assertEqual(mock_dst_ip6, packet_data.dst_ip)
-        self.assertEqual(2048, packet_data.ip_proto)
-        self.assertEqual(len(b'abcdef0123456789'), packet_data.ip_payload_size)
+        self.assertEqual(ip_packet.p, packet_data.ip_proto)
+        self.assertEqual(len(ip_packet.data), packet_data.ip_payload_size)
 
     def test_extract_data_from_layer3_packet_works_as_expected_for_ip_packets(self):
         mock_src_ip = '192.168.100.1'
@@ -65,17 +63,16 @@ class DpktUtilsTest(unittest.TestCase):
         ip_packet.ttl = 60
         ip_packet.tos = 2
 
-        packet_data = self.dpkt_utils.extract_data_from_layer3_protocols(
-            protocol=dpkt.ethernet.ETH_TYPE_IP,
+        packet_data = self.dpkt_utils.extract_data_from_layer3_packet(
             layer3_packet=ip_packet,
             packet_data=PacketData()
         )
 
         self.assertEqual(mock_src_ip, packet_data.src_ip)
         self.assertEqual(mock_dst_ip, packet_data.dst_ip)
-        self.assertEqual(2048, packet_data.ip_proto)
-        self.assertEqual(len(b'abcdef0123456789'), packet_data.ip_payload_size)
-        self.assertEqual(60, packet_data.ip_ttl)
+        self.assertEqual(str(ip_packet.p), packet_data.ip_proto)
+        self.assertEqual(len(ip_packet.data), packet_data.ip_payload_size)
+        self.assertEqual(ip_packet.ttl, packet_data.ip_ttl)
         self.assertIsInstance(packet_data.ip_more_fragment, bool)
 
     def test_extract_data_from_layer3_packet_works_as_expected_for_arp_packets(self):
@@ -91,15 +88,14 @@ class DpktUtilsTest(unittest.TestCase):
         arp_packet.tpa = socket.inet_aton(dst_ip)
         arp_packet.op = 2
 
-        packet_data = self.dpkt_utils.extract_data_from_layer3_protocols(
-            protocol=dpkt.ethernet.ETH_TYPE_ARP,
+        packet_data = self.dpkt_utils.extract_data_from_layer3_packet(
             layer3_packet=arp_packet,
             packet_data=PacketData()
         )
 
         self.assertEqual(src_mac, packet_data.arp_src_mac)
         self.assertEqual(dst_mac, packet_data.arp_dst_mac)
-        self.assertEqual(2, packet_data.arp_request_src)
+        self.assertEqual(arp_packet.op, packet_data.arp_request_src)
         self.assertEqual(src_ip, packet_data.arp_src_ip)
         self.assertEqual(dst_ip, packet_data.arp_dst_ip)
 
@@ -109,8 +105,7 @@ class DpktUtilsTest(unittest.TestCase):
         tcp_packet.dport = 80
         tcp_packet.flags = 0x100
         tcp_packet.data = 'dummy_data'
-        packet_data = self.dpkt_utils.extract_data_from_layer4_protocols(
-            protocol=dpkt.ip.IP_PROTO_TCP,
+        packet_data = self.dpkt_utils.extract_data_from_layer4_packet(
             layer4_packet=tcp_packet,
             packet_data=PacketData()
         )
@@ -119,8 +114,7 @@ class DpktUtilsTest(unittest.TestCase):
         self.assertEqual(80, packet_data.dst_port)
         self.assertEqual(50000, packet_data.src_port)
         self.assertNotEqual(0, packet_data.layer4_payload_size)
-        self.assertEqual(80, packet_data.layer7_proto)
-        self.assertEqual('http', packet_data.layer7_proto_name)
+        self.assertEqual('http', packet_data.layer7_proto)  # HTTP uses port 80
 
     def test_extract_data_from_layer4_packet_works_as_expected_for_udp_packet(self):
         udp_packet = dpkt.udp.UDP()
@@ -128,60 +122,46 @@ class DpktUtilsTest(unittest.TestCase):
         udp_packet.dport = 800
         udp_packet.data = b'dummy_data'
 
-        packet_data = self.dpkt_utils.extract_data_from_layer4_protocols(
-            protocol=dpkt.ip.IP_PROTO_UDP,
+        packet_data = self.dpkt_utils.extract_data_from_layer4_packet(
             layer4_packet=udp_packet,
             packet_data=PacketData()
         )
 
         self.assertTrue(packet_data.outgoing)
-        self.assertEqual(800, packet_data.dst_port)
-        self.assertEqual(50000, packet_data.src_port)
+        self.assertEqual(udp_packet.dport, packet_data.dst_port)
+        self.assertEqual(udp_packet.sport, packet_data.src_port)
         self.assertNotEqual(0, packet_data.layer4_payload_size)
-        self.assertEqual(800, packet_data.layer7_proto)
-        self.assertEqual('mdbe', packet_data.layer7_proto_name)
+        self.assertEqual('mdbe', packet_data.layer7_proto)  # mdbe uses port 800
 
-    @unittest.mock.patch('core.lib.dpkt_parsers.dns_parser.DnsPacketParser.load_dns_packet_from_udp_packet')
-    def test_extract_data_from_layer7_packet_works_for_dns_packet(self, dns_mock):
-        udp_dns_packet = dpkt.udp.UDP()
-        udp_dns_packet.dport = 53
-
+    def test_extract_data_from_layer7_packet_works_for_dns_packet(self):
         mock_ans_1 = dpkt.dns.DNS.RR()
         mock_ans_1.type = dpkt.dns.DNS_CNAME
         mock_ans_1.ttl = 60
         mock_ans_1.name = 'mock_cname_ans'
-        dns_packet = MagicMock(
-            an=[mock_ans_1],
-            qr=dpkt.dns.DNS_R
-        )
-        dns_mock.return_value = dns_packet
-        packet_data = PacketData(dst_port=53)
-        packet_data = self.dpkt_utils.extract_data_from_layer7_protocols(udp_dns_packet, packet_data)
+        mock_dns_packet = DNS()
+        mock_dns_packet.an = [mock_ans_1]
+        mock_dns_packet.qr = dpkt.dns.DNS_R
+
+        packet_data = self.dpkt_utils.extract_data_from_layer7_packet(mock_dns_packet, PacketData())
 
         self.assertEqual(mock_ans_1.name, packet_data.dns_ans_cname)
         self.assertEqual(mock_ans_1.ttl, packet_data.dns_ans_cname_ttl)
-        self.assertEqual('', packet_data.dns_ans_name)
-        self.assertEqual('', packet_data.dns_ans_ip)
-        self.assertEqual('', packet_data.dns_ans_ttl)
+        self.assertIsNone(packet_data.dns_ans_name)
+        self.assertIsNone(packet_data.dns_ans_ip)
+        self.assertIsNone(packet_data.dns_ans_ttl)
 
-    @unittest.mock.patch('core.lib.dpkt_parsers.ntp_parser.NtpPacketParser.load_ntp_packet_from_udp_packet')
-    def test_extract_data_from_layer7_packet_works_for_ntp_packet(self, ntp_mock):
-        udp_ntp_packet = dpkt.udp.UDP()
-        udp_ntp_packet.dport = 123
-
-        ntp_packet = MagicMock(
-            id=socket.inet_aton('1.2.3.4'),
-            mode=1,
-            stratum=2,
-            interval=5
-        )
-
-        ntp_mock.return_value = ntp_packet
+    def test_extract_data_from_layer7_packet_works_for_ntp_packet(self):
+        ntp_packet = NTP()
+        mock_ntp_reference = '1.2.3.4'
+        ntp_packet.id = socket.inet_aton(mock_ntp_reference)
+        ntp_packet.mode = 1
+        ntp_packet.stratum = 2
+        ntp_packet.interval = 5
 
         packet_data = PacketData(dst_port=123)
-        packet_data = self.dpkt_utils.extract_data_from_layer7_protocols(udp_ntp_packet, packet_data)
+        packet_data = self.dpkt_utils.extract_data_from_layer7_packet(ntp_packet, packet_data)
 
-        self.assertEqual('1.2.3.4', packet_data.ntp_reference_id)
-        self.assertEqual(1, packet_data.ntp_mode)
-        self.assertEqual(2, packet_data.ntp_stratum)
-        self.assertEqual(5, packet_data.ntp_interval)
+        self.assertEqual(mock_ntp_reference, packet_data.ntp_reference_id)
+        self.assertEqual(ntp_packet.mode, packet_data.ntp_mode)
+        self.assertEqual(ntp_packet.stratum, packet_data.ntp_stratum)
+        self.assertEqual(ntp_packet.interval, packet_data.ntp_interval)

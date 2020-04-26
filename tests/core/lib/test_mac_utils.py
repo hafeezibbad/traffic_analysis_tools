@@ -15,12 +15,12 @@ class MacUtilsTests(unittest.TestCase):
 
     def test_int2mac_returns_valid_mac(self):
         for mac_addr in MAC_ADDRESSES:
-            self.assertIsInstance(self.mac_utils.mac2int(mac_addr), int)
+            self.assertIsInstance(self.mac_utils.mac_to_int(mac_addr), int)
 
     def test_mac_to_int_to_mac_works_as_expected(self):
         for mac_addr in MAC_ADDRESSES:
-            integer_mac = self.mac_utils.mac2int(mac_addr)
-            self.assertEqual(mac_addr, self.mac_utils.int2mac(integer_mac))
+            integer_mac = self.mac_utils.mac_to_int(mac_addr)
+            self.assertEqual(mac_addr, self.mac_utils.int_to_mac(integer_mac))
 
     def test_convert_hexadecimal_mac_to_readable_mac_works_as_expected(self):
         for mac_addr in MAC_ADDRESSES:

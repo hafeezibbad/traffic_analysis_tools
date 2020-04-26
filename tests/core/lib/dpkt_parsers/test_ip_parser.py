@@ -26,17 +26,17 @@ class IpPacketParserTests(BasePacketParserTests):
         ip_packet.opts = b''
         ip_packet.flags = 0x400
 
-        ip6_data = self.ip_packet_parser.extract_data(ip_packet)
-        self.assertIsInstance(ip6_data, Munch)
+        ip_data = self.ip_packet_parser.extract_data(ip_packet)
+        self.assertIsInstance(ip_data, Munch)
 
-        self.assertEqual(mock_src_ip, ip6_data.src_ip)
-        self.assertEqual(mock_dst_ip, ip6_data.dst_ip)
-        self.assertEqual(2048, ip6_data.ip_proto)
-        self.assertEqual(len(b'1234'), ip6_data.ip_payload_size)
-        self.assertEqual(30, ip6_data.ip_ttl)
-        self.assertFalse(ip6_data.ip_do_not_fragment)
-        self.assertIsInstance(ip6_data.ip_more_fragment, bool)
-        self.assertEqual('', ip6_data.ip_opts)
+        self.assertEqual(mock_src_ip, ip_data.src_ip)
+        self.assertEqual(mock_dst_ip, ip_data.dst_ip)
+        self.assertEqual('2048', ip_data.ip_proto)
+        self.assertEqual(len(b'1234'), ip_data.ip_payload_size)
+        self.assertEqual(30, ip_data.ip_ttl)
+        self.assertFalse(ip_data.ip_do_not_fragment)
+        self.assertIsInstance(ip_data.ip_more_fragment, bool)
+        self.assertEqual('', ip_data.ip_opts)
 
     def test_extract_src_dest_ip_returns_src_dest_ip(self):
         mock_src_ip = '192.168.1.1'

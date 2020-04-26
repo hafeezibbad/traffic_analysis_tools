@@ -15,6 +15,7 @@ class Layer4BaseParserTests(BasePacketParserTests):
         mock_data = b'12345'
         mock_src_port = 11123
         mock_dst_port = 53
+        mock_protocol = 'dns'
         mock_flags = 0x010
 
         layer4_packet = dpkt.tcp.TCP()
@@ -32,8 +33,7 @@ class Layer4BaseParserTests(BasePacketParserTests):
         self.assertEqual(mock_src_port, data.src_port)
         self.assertEqual(mock_dst_port, data.dst_port)
         self.assertTrue(data.outgoing)
-        self.assertEqual(mock_dst_port, data.layer7_proto)
-        self.assertEqual('dns', data.layer7_proto_name)
+        self.assertEqual(mock_protocol, data.layer7_proto)
         self.assertEqual(len(mock_data), data.layer4_payload_size)
 
     def test_extract_data_raises_not_implemented_error(self):
@@ -67,25 +67,27 @@ class Layer4BaseParserTests(BasePacketParserTests):
         self.assertEqual((mock_src_port, mock_dst_port), self.layer4_packet_parser.extract_src_dest_port(layer4_packet))
 
     def test_get_layer7_proto_number_returns_none_if_packet_is_none(self):
-        self.assertIsNone(self.layer4_packet_parser.get_layer7_proto_number(None))
+        self.assertIsNone(self.layer4_packet_parser.get_layer7_protocol('tcp', None))
 
     def test_get_layer7_proto_number_returns_dst_port_if_packet_is_outgoing(self):
+        mock_protocol = 'https'
         mock_src_port = 50000
         mock_dst_port = 443      # Packet is outgoing
         layer4_packet = dpkt.tcp.TCP()
         layer4_packet.sport = mock_src_port
         layer4_packet.dport = mock_dst_port
 
-        self.assertEqual(mock_dst_port, self.layer4_packet_parser.get_layer7_proto_number(layer4_packet))
+        self.assertEqual(mock_protocol, self.layer4_packet_parser.get_layer7_protocol('tcp', layer4_packet))
 
     def test_get_layer7_proto_number_returns_src_port_if_packet_is_incoming(self):
+        mock_protocol = 'https'
         mock_src_port = 443      # Packet is incoming
         mock_dst_port = 50000
         layer4_packet = dpkt.tcp.TCP()
         layer4_packet.sport = mock_src_port
         layer4_packet.dport = mock_dst_port
 
-        self.assertEqual(mock_src_port, self.layer4_packet_parser.get_layer7_proto_number(layer4_packet))
+        self.assertEqual(mock_protocol, self.layer4_packet_parser.get_layer7_protocol('tcp', layer4_packet))
 
     def test_get_protocol_info_from_port_works_as_expected_for_tcp_protocol(self):
         self.assertStrEqual(

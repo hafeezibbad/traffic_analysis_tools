@@ -63,7 +63,7 @@ class DnsPacketParserTests(BasePacketParserTests):
         self.assertEqual(1800, dns_data.dns_ans_cname_ttl)
         self.assertEqual('mock_aname;mock_aname2', dns_data.dns_ans_name)
         self.assertEqual('1.1.1.1;2.2.2.2', dns_data.dns_ans_ip)
-        self.assertEqual('3600;3600', dns_data.dns_ans_ttl)
+        self.assertEqual(dns_a_ans.ttl, dns_data.dns_ans_ttl)
 
     def test_extract_data_from_dns_query_works_as_expected_for_multiple_qds(self):
         dns_q1 = dpkt.dns.DNS.Q()
@@ -111,7 +111,7 @@ class DnsPacketParserTests(BasePacketParserTests):
         self.assertEqual(30, dns_data.dns_ans_cname_ttl)
         self.assertEqual('', dns_data.dns_ans_name)
         self.assertEqual('', dns_data.dns_ans_ip)
-        self.assertEqual('', dns_data.dns_ans_ttl)
+        self.assertEqual(None, dns_data.dns_ans_ttl)
 
     def test_extract_data_from_dns_A_and_AAAA_anss(self):
         mock_ans_A = dpkt.dns.DNS.RR()
@@ -135,4 +135,4 @@ class DnsPacketParserTests(BasePacketParserTests):
 
         self.assertEqual('mock_A_name;mock_AAAA_name', dns_data.dns_ans_name)
         self.assertEqual('1.2.3.4;786b:a7d6:fc04:1d14:dfcd:5005:655e:f092', dns_data.dns_ans_ip)
-        self.assertEqual('30;60', dns_data.dns_ans_ttl)
+        self.assertEqual(mock_ans_AAAA.ttl, dns_data.dns_ans_ttl)
