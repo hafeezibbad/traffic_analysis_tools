@@ -165,3 +165,35 @@ class DpktUtilsTest(unittest.TestCase):
         self.assertEqual(ntp_packet.mode, packet_data.ntp_mode)
         self.assertEqual(ntp_packet.stratum, packet_data.ntp_stratum)
         self.assertEqual(ntp_packet.interval, packet_data.ntp_interval)
+
+    def test_extract_data_from_ntp_packet_works_as_expected(self):
+        ntp_packet = NTP()
+        mock_ntp_reference = '1.2.3.4'
+        ntp_packet.id = socket.inet_aton(mock_ntp_reference)
+        ntp_packet.mode = 1
+        ntp_packet.stratum = 2
+        ntp_packet.interval = 5
+
+        data = self.dpkt_utils.extract_data_from_ntp_packet(ntp_packet)
+
+        self.assertEqual(mock_ntp_reference, data.ntp_reference_id)
+        self.assertEqual(ntp_packet.mode, data.ntp_mode)
+        self.assertEqual(ntp_packet.stratum, data.ntp_stratum)
+        self.assertEqual(ntp_packet.interval, data.ntp_interval)
+
+    def test_extract_data_from_dns_packet_works_as_expected(self):
+        mock_ans_1 = dpkt.dns.DNS.RR()
+        mock_ans_1.type = dpkt.dns.DNS_CNAME
+        mock_ans_1.ttl = 60
+        mock_ans_1.name = 'mock_cname_ans'
+        mock_dns_packet = DNS()
+        mock_dns_packet.an = [mock_ans_1]
+        mock_dns_packet.qr = dpkt.dns.DNS_R
+
+        data = self.dpkt_utils.extract_data_from_dns_packet(mock_dns_packet)
+
+        self.assertEqual(mock_ans_1.name, data.dns_ans_cname)
+        self.assertEqual(mock_ans_1.ttl, data.dns_ans_cname_ttl)
+        self.assertEqual('', data.dns_ans_name)
+        self.assertEqual('', data.dns_ans_ip)
+        self.assertIsNone(data.dns_ans_ttl)
