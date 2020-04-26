@@ -22,28 +22,28 @@ from munch import Munch
 
 from core.configuration.data import ConfigurationData
 from core.lib.converters import hex_to_integer
-from core.lib.dpkt_parsers.arp_parser import ArpPacketParser
-from core.lib.dpkt_parsers.dhcp_parser import DhcpPacketParser
-from core.lib.dpkt_parsers.dns_parser import DnsPacketParser
-from core.lib.dpkt_parsers.icmp_parser import Icmp6PacketParser, IcmpPacketParser
-from core.lib.dpkt_parsers.ieee80211_parser import IEEE80211PacketParser
-from core.lib.dpkt_parsers.ethernet_parser import EthernetFrameParser
-from core.lib.dpkt_parsers.igmp_parser import IgmpPacketParser
-from core.lib.dpkt_parsers.ip6_parser import Ip6PacketParser
-from core.lib.dpkt_parsers.ip_parser import IpPacketParser
-from core.lib.dpkt_parsers.layer4_parser import TcpPacketParser
-from core.lib.dpkt_parsers.layer4_parser import UDPPacketParser
-from core.lib.dpkt_parsers.llc_parser import LlcPacketParser
-from core.lib.dpkt_parsers.mdns_parser import MdnsPacketParser
-from core.lib.dpkt_parsers.mdns_unpacker import Mdns
-from core.lib.dpkt_parsers.natpmp_parser import NatpmpPacketParser
-from core.lib.dpkt_parsers.natpmp import Natpmp
-from core.lib.dpkt_parsers.ntp_parser import NtpPacketParser
-from core.lib.dpkt_parsers.syn_parser import SynPacketParser
-from core.lib.dpkt_parsers.upnp_parser import UpnpPacketParser
-from core.lib.dpkt_parsers.upnp_request import UpnpRequest
+from core.lib.parser.arp_parser import ArpPacketParser
+from core.lib.parser.dhcp_parser import DhcpPacketParser
+from core.lib.parser.dns_parser import DnsPacketParser
+from core.lib.parser.icmp_parser import Icmp6PacketParser, IcmpPacketParser
+from core.lib.parser.ieee80211_parser import IEEE80211PacketParser
+from core.lib.parser.ethernet_parser import EthernetFrameParser
+from core.lib.parser.igmp_parser import IgmpPacketParser
+from core.lib.parser.ip6_parser import Ip6PacketParser
+from core.lib.parser.ip_parser import IpPacketParser
+from core.lib.parser.layer4_parser import TcpPacketParser
+from core.lib.parser.layer4_parser import UDPPacketParser
+from core.lib.parser.llc_parser import LlcPacketParser
+from core.lib.parser.mdns_parser import MdnsPacketParser
+from core.lib.parser.natpmp_parser import NatpmpPacketParser
+from core.lib.parser.ntp_parser import NtpPacketParser
+from core.lib.parser.syn_parser import SynPacketParser
+from core.lib.parser.upnp_parser import UpnpPacketParser
 from core.lib.ip_utils import IpAddrUtils
 from core.lib.mac_utils import MacAddressUtils
+from core.lib.pcap.mdns.mdns_unpacker import Mdns
+from core.lib.pcap.natpmp.natpmp import Natpmp
+from core.lib.pcap.upnp.upnp_request import UpnpRequest
 from core.models.packet_data import PacketData
 from core.static.CONSTANTS import IEEE80211_PROTOCOL_NUMBER, UPNP_PORTS, MDNS_PORTS, DHCP_PORTS
 from core.static.utils import StaticData
