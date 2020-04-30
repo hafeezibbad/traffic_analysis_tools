@@ -1,7 +1,7 @@
 import logging
 import random
 import re
-from typing import Optional
+from typing import Optional, Union
 
 import binascii
 
@@ -12,33 +12,35 @@ from core.static.CONSTANTS import MAC_REGEX
 
 
 class MacAddressUtils:
-    def int_to_mac(self, mac_integer: int) -> Optional[str]:
+    def int_to_mac(self, mac_integer: Union[int, str]) -> Optional[str]:
         """
-        Converts integer form of mac address to string form i.e.
-        ('aa:bb:cc:dd:ee:ff')
+        Converts integer form of mac address to string form, that is, 'aa:bb:cc:dd:ee:ff'
         :param mac_integer: Integer representation of MAC address.
         :return: String representation of MAC address.
         """
         try:
+            mac_integer = int(mac_integer)
             mac = str(EUI(mac_integer)).lower().replace('-', ':')
             if self.is_valid_mac(mac) is True:
                 return mac
 
         except Exception as ex:
-            logging.warning('Unable to convert mac (integer): {0} to string.Error: {1}'.format(mac_integer, ex))
+            logging.error('Unable to convert mac (integer): {0} to string. Error: {1}'.format(mac_integer, ex))
 
         return None
 
     def hexadecimal_mac_to_readable_mac(self, mac_address: str) -> Optional[str]:
         """
         Converts MAC address from hex string to readable/printable string
-        :param mac_address: Hex string for MAC (e.g. \x01\x02\x03\x04\x05\x06)
+        :param mac_address: Hex string for MAC, for example, \x01\x02\x03\x04\x05\x06)
          :type: string
-        :return mac: MAC address in printable format e.g. 00:01:02:03:04:05.
+        :return mac: MAC address in printable format, for example, 00:01:02:03:04:05.
          :type: string
         """
-        mac = ':'.join([binascii.hexlify(mac_address)[i:i + 2]
-                        for i in range(0, len(binascii.hexlify(mac_address)), 2)])
+        mac = ':'.join([
+            binascii.hexlify(mac_address).decode('utf-8')[i:i + 2]
+            for i in range(0, len(binascii.hexlify(mac_address)), 2)
+        ])
 
         if self.is_valid_mac(mac) is True:
             return mac

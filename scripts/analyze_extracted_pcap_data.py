@@ -1,9 +1,3 @@
-import os
-import sys
-
-
-sys.path.append(os.getcwd())    # Add project root directory to path
-
 import matplotlib.pyplot as plt
 from munch import Munch
 from pandas import DataFrame

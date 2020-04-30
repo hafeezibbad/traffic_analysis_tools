@@ -3,7 +3,7 @@ import random
 import re
 import socket
 import struct
-from typing import Optional
+from typing import Optional, Union
 from urllib.parse import urlparse
 
 from netaddr import IPAddress
@@ -47,16 +47,20 @@ class IpAddrUtils:
 
         logging.warning('Unable to convert ip: {} to integer representation')
 
-    def int_to_ip(self, ip_integer) -> Optional[str]:
+    def int_to_ip(self, ip_integer: Union[int, str]) -> Optional[str]:
         """
-        Converts integer form of IP address to string form i.e.
-        3232261121--> '192.168.100.1'
+        Converts integer form of IP address to string form, for example, int_to_ip(3232261121) -> '192.168.100.1'
         :param ip_integer: Integer representation of IP address.
         :return: String representation of IP address.
         """
-        ip = str(IPAddress(ip_integer))
-        if self.is_valid_ip(ip) is True:
-            return ip
+        try:
+            ip_integer = int(ip_integer)
+            ip = str(IPAddress(ip_integer))
+            if self.is_valid_ip(ip) is True:
+                return ip
+
+        except Exception as ex:
+            logging.error('Unable to convert IP (integer): {0} to string. Error: {1}'.format(ip_integer, ex))
 
     def get_ip_for_url(self, url: str = None) -> Optional[str]:
         """
