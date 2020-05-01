@@ -24,7 +24,7 @@ class NtpPacketParser(PacketParserInterface):
             return NtpPacketParser.load_ntp_packet_from_udp_packet(udp_packet)
 
         except BaseException as ex:
-            logging.warning('Can not extract NTP packet from UDP packet. Error: {}'.format(ex))
+            logging.warning('Can not extract NTP packet from UDP packet. Error: `%s`', ex)
             raise ex
 
     @staticmethod
@@ -36,7 +36,7 @@ class NtpPacketParser(PacketParserInterface):
             logging.warning('Not enough data to extract NTP packet from UDP packet')
 
         except BaseException as ex:
-            logging.warning('Can not extract NTP packet from UDP packet. Error: {}'.format(ex))
+            logging.warning('Can not extract NTP packet from UDP packet. Error: `%s`', ex)
             raise ex
 
     def extract_data(self, packet: NTP) -> Munch:
@@ -48,7 +48,7 @@ class NtpPacketParser(PacketParserInterface):
             data.ntp_reference_id = self.resolve_ntp_reference(packet)
 
         except BaseException as ex:
-            logging.warning('Unable to extract NTP from `{}`. Error: `{}`'.format(type(packet), ex))
+            logging.warning('Unable to extract NTP from `%s`. Error: `%s`', type(packet), ex)
             raise ex
 
         return data
@@ -59,7 +59,7 @@ class NtpPacketParser(PacketParserInterface):
             # Could not parse NTP REFID, probably it is a string
             return packet.id
 
-        elif reference_id == '0.0.0.0':
+        if reference_id == '0.0.0.0':
             # REFID is NULL but dpkt considers it as b'\x00\x00\x00\x00'
             return ''
 

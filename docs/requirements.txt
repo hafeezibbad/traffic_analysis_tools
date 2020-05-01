@@ -38,3 +38,4 @@ sphinxcontrib-seqdiag==2.0.0
 sphinxcontrib-serializinghtml==1.1.4
 urllib3==1.25.9
 webcolors==1.11.1
+sphinx-autodoc-typehints==1.10.3

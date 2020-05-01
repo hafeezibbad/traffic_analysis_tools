@@ -1,16 +1,14 @@
+import logging
+import time
 import os
 
-import logging
 from pathlib import Path
-import time
-
-
+from typing import Any, List, Union, Dict, Callable, Optional
 from munch import DefaultMunch
 import pandas as pd
 from pandas import DataFrame
-from typing import Any, List, Union, Dict, Callable, Optional
 
-from scripts.errors import GenericError
+from core.errors.generic_errors import GenericError
 
 
 def extract_data_as_separate_csv(
@@ -64,7 +62,7 @@ def extract_data_as_separate_csv(
     output_folder = Path(result_folder)
     if output_folder.exists() is True and output_folder.is_dir() is False:
         raise GenericError('Specified output folder `{}` is not a directory'.format(result_folder))
-    elif output_folder.exists() is False:
+    if output_folder.exists() is False:
         os.makedirs(output_folder, exist_ok=True)
 
     data = load_csv_to_dataframe(file_path, fill_empty_values=True, verify_columns_exist=filter_columns)
@@ -76,7 +74,7 @@ def extract_data_as_separate_csv(
         unique_values.extend(list(data[col].unique()))
 
     unique_values = set(unique_values)
-    logging.debug('`{}` unique values'.format(len(unique_values)))
+    logging.debug('`%s` unique values', len(unique_values))
 
     for val in unique_values:
         st = time.time()
@@ -98,10 +96,11 @@ def extract_data_as_separate_csv(
             row_count=filtered_data.shape[0],
             time_taken=time.time() - st
         )
-        logging.debug('Successfully filtered data for value = `{val}` to `{file_path}` in {t} seconds'.format(
-            val=str_val,
-            file_path=summary_data[str_val]['file'],
-            t=summary_data[str_val]['time_taken'])
+        logging.debug(
+            'Successfully filtered data for value = `%s` to `%s` in `%s` seconds',
+            str_val,
+            summary_data[str_val]['file'],
+            summary_data[str_val]['time_taken']
         )
 
     return summary_data
@@ -143,7 +142,7 @@ def write_dataframe_to_csv_file(
         return None
     if Path(file_path).exists() and overwrite is False:
         raise GenericError('A file already exists at specified path: `{}`, and overwrite is disabled'.format(file_path))
-    elif Path(file_path).is_dir() is True:
+    if Path(file_path).is_dir() is True:
         raise GenericError('Specified file_path: `{}` is a directory'.format(file_path))
 
     try:
@@ -152,6 +151,8 @@ def write_dataframe_to_csv_file(
         raise GenericError(
             'Could not write dataframe to csv file at specified path: `{}`. Error: `{}`'.format(file_path, ex)
         )
+
+    return None
 
 
 def load_csv_to_dataframe(
@@ -241,7 +242,7 @@ def get_filtered_data_from_data_frame(
     GenericError
         Error if filter_columns are not available in data frame.
     """
-    logging.debug('Rows read from CSV file'.format(data.shape[0]))
+    logging.debug('`%s` Rows read from CSV file', data.shape[0])
     if not isinstance(filter_columns, list):
         raise GenericError(
             'Invalid data provided as filter_columns. expected: <List>, provided: `{}`'.format(type(filter_columns))

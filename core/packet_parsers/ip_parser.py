@@ -22,7 +22,7 @@ class IpPacketParser(PacketParserInterface):
 
     @staticmethod
     def load_ip_packet_from_ethernet_frame(packet_data: bytes) -> Union[IP, IP6]:
-        if isinstance(packet_data, IP) or isinstance(packet_data, IP6):
+        if isinstance(packet_data, (IP, IP6)):
             return packet_data
 
         # Packet data is bytes because it is a fragmented packet.
@@ -33,7 +33,7 @@ class IpPacketParser(PacketParserInterface):
             return IP6(packet_data)  # When IPv6 packet is encapsulated in IPv4 packet
 
         except BaseException as ex:
-            logging.error('Can not parse Ethernet frame as IPv4 or IPv6 packet. Error: {}'.format(ex))
+            logging.error('Can not parse Ethernet frame as IPv4 or IPv6 packet. Error: `%s`', ex)
             raise ex
 
     def extract_data(self, packet: IP) -> Munch:
@@ -53,11 +53,12 @@ class IpPacketParser(PacketParserInterface):
                 data.ip_more_fragment = 1 if data.ip_more_fragment is True else 0
 
         except BaseException as ex:
-            logging.warning('Unable to extract IP4 from `{}`. Error: `{}`'.format(type(packet), ex))
+            logging.warning('Unable to extract IP4 from `%s`. Error: `%s`', type(packet), ex)
             raise ex
 
         return data
 
+    # pylint: disable=duplicate-code
     def extract_src_dest_ip(self, ip_packet: IP) -> Tuple:
         src_ip = self.ip_utils.inet_to_str(ip_packet.src)
         dst_ip = self.ip_utils.inet_to_str(ip_packet.dst)

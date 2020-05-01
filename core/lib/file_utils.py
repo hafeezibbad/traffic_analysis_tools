@@ -1,22 +1,37 @@
-"""File related functions and features."""
 import logging
 import os
 import zipfile
 from itertools import count
-from typing import Optional, Tuple, Union
+from pathlib import Path
+from typing import Optional, Tuple, Union, List, Iterable, Set
+
+from core.file_processor.errors import FileError, FileErrorType
 
 
-def search_file(directory: str, filename: str) -> Optional[str]:
+def search_file(directory: str = None, filename: str = None, recursive: bool = True) -> Optional[str]:
+    """Search for the file in given directory to look for given file.
+
+    Parameters
+    ----------
+    directory: str
+        Directory for searching the required file
+    filename: str
+        Name of file (including extension) being searched. Filename is case-sensitive
+    recursive: bool
+        Set this flag to recursively look for given file in specified directory path
+
+    Returns
+    -------
+    file_path: str
+        Absolute path to file in given directory, if file is found, otherwise `None`
+
     """
-    Search for the file in given directory to look for given file
-    :param directory: Directory where we look for the file
-    :param filename: Name of file we are looking for.
-    :return file_path: full path if file exists, otherwise None
-    """
-    if not directory or not filename:
+    print('1' * 80)
+    if check_valid_path(directory, is_directory=True) is False or not filename:
         return None
 
-    files = recursive_listdir(directory=directory) or []
+    files = list_files_in_directory(directory=directory, recursive=recursive)
+    print('searching files in {}: {}'.format(directory, files))
     for f in files:
         if os.path.basename(f) == filename:      # Linux filesystem is case sensitive
             return os.path.abspath(f)
@@ -24,90 +39,155 @@ def search_file(directory: str, filename: str) -> Optional[str]:
     return None               # No file with given name found in the directory
 
 
-def get_unique_filename(directory: str = None, filename: str = '') -> Optional[str]:
+def get_unique_filename(directory: str = None, filename: str = '', max_tries: int = 1000) -> Optional[str]:
+    """Get unique filename in a directory by incrementing file name for storing the file, for example, 'filename001.ext'
+
+    Parameters
+    ----------
+    directory: str
+        Path to directory where filename should be unique
+    filename: str
+        Original file name
+    max_tries: int
+        Upper limit of number of attempts to find the unique filename
+
+    Returns
+    -------
+    filename: str
+        Unique filename in the given directory path.
+        None is returned if directory or filename is invalid, or None
     """
-    Increment file name for storing the file.
-    :param directory: Folder for storing the filename
-    :param filename: Original file name
-    :return filename: Incremented filename e.g. 'filename001.ext'
-    """
-    if not directory or os.path.exists(directory) is False:
-        logging.error('Invalid or non-existing directory: {} provided for file creation'.format(directory))
+    if check_valid_path(directory, is_directory=True) is False:
+        logging.error('Invalid or non-existing directory: `%s` provided for file creation', directory)
         return None
 
     if not filename:
-        logging.error('Invalid filename: {} provided for file creation'.format(filename))
+        logging.error('Invalid filename: `%s` provided for file creation', filename)
         return None
 
     _fname = ''.join(filename.split('.')[:-1]) + '-%03i.' + filename.split('.')[-1]
     _fname_gen = (os.path.join(directory, _fname) % i for i in count(1))
     unique_name = next(_fname_gen)
 
-    while os.path.exists(os.path.abspath(unique_name)):
+    for _ in range(max_tries):
+        if not os.path.exists(os.path.abspath(unique_name)):
+            break
         unique_name = next(_fname_gen)
 
     return unique_name
 
 
-def has_valid_extension(file_path: str, valid_extensions: Union[list, set, Tuple] = None) -> bool:
+def has_valid_extension(file_path: str = None, valid_extensions: Union[list, set, Tuple] = None) -> bool:
+    """ Check if given file has valid extension.
+
+    Parameters
+    -----------
+    file_path: str
+        name of file whose extension needs to be checked.
+    valid_extensions: List[str], Set[str], Tuple[str]
+        List, set, tuple of valid extensions, for example, ['csv', 'pcap']
+
+    Returns
+    -------
+    success: bool
+        True if no valid_extensions are specified or file has valid extension,otherwise False
     """
-    Check if given file has valid extension.
-    :param filename: name of file whose extension needs to be checked.
-    :param valid_extensions: set of valid extensions.
-    :return result: boolean True if file has valid extension.
-    """
-    if not valid_extensions or not isinstance(valid_extensions, (list, set, tuple)):
+    if not valid_extensions:
+        return True
+
+    if file_path is None or not isinstance(valid_extensions, (list, set, tuple)):
         return False
 
     filename = os.path.basename(file_path)
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in valid_extensions
 
 
-def remove_files_from_directory(directory: str = None, extension: str = '', recursive: bool = False) -> Optional[int]:
-    """
-    Removes all files with given extension from the specified folder (optional: recursively)
-    :param directory: folder path
-    :param extension: (comma separated string) file extension e.g. "csv,pcap_files" (default=all files)
-    :param recursive: remove files recursively from subfolders. (default=False)
-    :return: Count of files deleted, None if there was an error
-    """
-    if not directory or not os.path.exists(directory):
-        logging.error('path:{0} does not exist'.format(directory))
-        return None
+def remove_files_from_directory(
+        directory: str = None,
+        file_extensions: Iterable[str] = None,
+        recursive: bool = False
+) -> List[str]:
+    """Removes all files with given extension from the specified folder (optional: recursively)
 
-    count = 0
+    Parameters
+    ----------
+    directory: str
+        Path to directory from where files should be removed
+    file_extensions: Iterable[str]
+        List, Set, tuple of file extensions which should be removed, for example, ["csv", "pcap"] (default=all files)
+        Comma separated string, for example, "csv,pcap"
+    recursive: bool
+        Flag to specify whether to remove  files recursively from subfolders. (default=False)
 
-    if extension is not None:
-        ext = extension.split(',')
+    Returns
+    -------
+    file_paths: List[str]
+        List of paths to files which were deleted
+
+    Raises
+    ------
+    FileError: Exception
+    """
+    if check_valid_path(directory, is_directory=True) is False:
+        raise FileError(
+            message='Directory path specified for storing file: `{}` does not exist'.format(directory),
+            error_type=FileErrorType.PATH_DOES_NOT_EXIST
+        )
+
+    deleted_files = []
+
+    if isinstance(file_extensions, str):
+        file_extensions = file_extensions.split(',')
+
     for f in os.listdir(directory):
         _fp = os.path.join(directory, f)
 
         if os.path.isdir(_fp) and recursive:
-            count += remove_files_from_directory(_fp, extension, recursive)
+            deleted_files.extend(remove_files_from_directory(_fp, file_extensions, recursive))
 
         elif os.path.isfile(_fp):
-            if ext and os.path.basename(_fp).split('.')[-1] in ext:
-                os.remove(_fp)
-                count += 1
+            if file_extensions is None or os.path.basename(_fp).split('.')[-1] not in file_extensions:
+                continue
 
-            elif ext is None:
-                os.remove(_fp)
-                count += 1
+            os.remove(_fp)
+            deleted_files.append(_fp)
 
-    return count
+    return deleted_files
 
 
-def search_file_in_directory(directory: str, filename: str) -> Optional[str]:
-    """
-    Search for the file in given directory to look for given file
-    :param directory: Directory where we look for the file
-    :param filename: Name of file we are looking for.
-    :return file_path: full path if file exists, otherwise None
+def search_file_in_directory(directory: str = None, filename: str = None, recursive: bool = True) -> Optional[str]:
+    """Search for a given file in specified directory.
+
+    Parameters
+    ----------
+    directory: str
+        Path to directory for searching the files
+    filename: str
+        Name of file being searched
+    recursive: bool
+        Flag to specify if directory should be search recursively? Default= True
+
+    Returns
+    --------
+    file_path: str
+        Absolute path to file if found
+        None if file is not found, or directory/filename is not specified
+
+    Raises
+    ------
+    FileError: Exception
+        If the path to directory does not exist, or specified path is not a directory
     """
     if not directory or not filename:
         return None
+    if check_valid_path(directory, is_directory=True) is False:
+        raise FileError(
+            message='No directory found at specified path: `{}`'.format(directory),
+            error_type=FileErrorType.INVALID_PATH
+        )
 
-    files = recursive_listdir(directory=directory) or []
+    files = list_files_in_directory(directory, recursive=recursive)
+
     for f in files:
         if os.path.basename(f) == filename:  # Linux filesystem is case sensitive
             return os.path.abspath(f)
@@ -115,40 +195,63 @@ def search_file_in_directory(directory: str, filename: str) -> Optional[str]:
     return None  # No file with given name found in the directory
 
 
-def recursive_listdir(directory: str = None, extension: str = None) -> Optional[list]:
+def list_files_in_directory(
+        directory: str = None,
+        extensions: List[str] = None,
+        recursive: bool = True
+) -> Optional[list]:
+    """Recursive version for listdir which also gets files from subdirectories.
+
+    Parameters
+    ----------
+    directory: str
+        Path to directory for searching the files
+    extensions:  List[st]
+        (if specified) Only lists the files with given extensions.
+    recursive: bool
+        Flag to specify if directory should be search recursively? Default= True
+
+    Raises
+    ------
+    FileError: Exception
+        If the path to directory does not exist, or specified path is not a directory
     """
-    Recursive version for listdir which also gets files from subdirectories
-    :param directory: Root path to list all files
-    :param extension: (if specified) Only lists the files with given extension.
-    :return: list of all files in given directory and any subdirectories. None if folder path is invalid
-    """
-    if not directory or not os.path.exists(directory):
-        logging.error('folder path: {0} is invalid'.format(directory))
-        return None
+    if check_valid_path(directory, is_directory=True) is False:
+        raise FileError(
+            message='No directory found at specified path: `{}`'.format(directory),
+            error_type=FileErrorType.INVALID_PATH
+        )
 
     files = []
     for f in os.listdir(directory):
-        if os.path.isdir(os.path.join(directory, f)):
-            files.extend(recursive_listdir(directory=os.path.join(directory, f), extension=extension))
+        if recursive is True and os.path.isdir(os.path.join(directory, f)):
+            files.extend(list_files_in_directory(os.path.join(directory, f), extensions, recursive))
 
-        elif extension is not None and f.split('.')[-1] == extension:
+        # If extensions are specified, only add files which have given extension
+        elif extensions and f.split('.')[-1] in extensions:
             files.append(os.path.abspath(os.path.join(directory, f)))
 
-        elif extension is None:
+        # No extensions specified, add all files
+        elif not extensions:
             files.append(os.path.abspath(os.path.join(directory, f)))
 
     return files
 
 
-def get_filename_and_ext(file_path: str) -> Optional[Tuple]:
-    """
-    Returns the file name and extension for the specified file.
-    :param file_path: Path of the whose name is required.
-        :type : <string>
-    :return file_name: name of the specified file.
-     :type : <string>
-    :return extension: file extension of the specified file.
-     :type : <string>
+def get_filename_and_ext(file_path: str = None) -> Tuple[Optional[str], Optional[str]]:
+    """Returns the file name and extension for the specified file.
+
+    Parameters
+    -----------
+    file_path: str
+        Path of the whose name is required.
+
+    Returns
+    --------
+    file_name: str
+        name of the specified file.
+    extension: str
+        file extension of the specified file.
     """
     if not file_path:
         return None, None
@@ -159,21 +262,41 @@ def get_filename_and_ext(file_path: str) -> Optional[Tuple]:
     return f_name, ext if ext.lower() != f_name.lower() else None
 
 
-def extract_all_zips(zip_file_path: str = None, remove_zips: str = False) -> int:
+def extract_all_zips(
+        directory: str = None,
+        recursive: bool = True,
+        delete_original: str = False,
+        strict: bool = False
+) -> List[str]:
+    """Looks for any zip files in a folder and extract those zipped files.
+
+    Parameters
+    ----------
+    directory: str
+        Path where to look for zip files.
+    recursive: bool
+        Set this flag to recursively look for zip files in the directory. Default = True
+    delete_original: bool
+        Set this flag to delete original zip files after successful extraction. Default = False
+    strict: bool
+        Set this flag to raise exception if there is an exception in extracting one of the zip files. Default = False
+
+    Returns
+    --------
+    count: int
+        number of zipped files successfully extracted
+
+    Raises
+    ------
+    FileError: Exception
+        If specified directory path does not exist or is not a directory.
     """
-    This routine looks for any .zip files in a folder including its subdirectories. It then extracts all the files
-    from those zipped files.
-    :param zip_file_path: Path where to look for zip files.
-    :param remove_zips: If true, the original zip files are removed after extracting the compressed files.
-    :return count: number of zipped files processed.
-    """
-    if zip_file_path is None or os.path.exists(zip_file_path) is False:
-        return -1
+    if check_valid_path(directory, is_directory=True) is False:
+        return []
 
     extracted = []
-    count = 0
     while True:
-        zipped_files = recursive_listdir(zip_file_path, extension='zip')
+        zipped_files = list_files_in_directory(directory, extensions=['zip'], recursive=recursive)
         if len(zipped_files) == 0:
             break
 
@@ -184,11 +307,49 @@ def extract_all_zips(zip_file_path: str = None, remove_zips: str = False) -> int
                     zip_ref.extractall(zf)
                     zip_ref.close()
                     extracted.append(zf)
-                    if remove_zips:
+                    if delete_original:
                         os.remove(zf)   # Delete the original zipped file
-                    count += 1
 
-            except Exception as e:
-                logging.error('Unable to extract file:{0}. Error:{1}'.format(zf, e))
+            except Exception as ex:
+                if strict is True:
+                    raise ex
+                logging.error('Unable to extract file: `%s`. Error: `%s`', zf, ex)
 
-    return count
+    return extracted
+
+
+def check_valid_path(
+        path: str = None,
+        is_directory: bool = False,
+        valid_extensions: Union[List[str], Tuple[str], Set[str]] = None
+) -> bool:
+    """Check that given path is valid, that is, it exists.
+
+    Parameters
+    ----------
+    path: str
+        Path which needs to be checked
+    is_directory: bool
+        Check if given path is a directory or not. Default: False
+    valid_extensions: List[str], Set[str], Tuple[str]
+        List, set, tuple of valid extensions, for example, ['csv', 'pcap']
+
+    Returns
+    -------
+    valid: bool
+        True if path is valid based on specified criteria, false otherwise
+    """
+    if not path:
+        return False
+
+    path = Path(path)
+    if path.exists() is False:
+        return False
+
+    if is_directory and path.is_dir() is False:
+        return False
+
+    if has_valid_extension(path, valid_extensions=valid_extensions) is False:
+        return False
+
+    return True

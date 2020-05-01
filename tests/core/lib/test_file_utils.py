@@ -40,33 +40,33 @@ class FileUtilsTest(unittest.TestCase):
         self.assertIsNotNone(unique_filename)
         self.assertEqual(os.path.join(FIXTURES_DIRECTORY_PATH, 'filename-001.ext'), unique_filename)
 
-    def test_has_valid_extension_return_false_if_no_extension_specified(self):
-        self.assertFalse(has_valid_extension(
+    def test_has_valid_extension_return_true_if_no_extension_specified(self):
+        self.assertTrue(has_valid_extension(
             file_path=os.path.join(FIXTURES_DIRECTORY_PATH, 'common.py'),
-            valid_extensions=None)
-        )
+            valid_extensions=None
+        ))
 
-    def test_has_valid_extension_return_false_if_empty_extension_specified(self):
-        self.assertFalse(has_valid_extension(
+    def test_has_valid_extension_return_true_if_empty_extension_specified(self):
+        self.assertTrue(has_valid_extension(
             file_path=os.path.join(FIXTURES_DIRECTORY_PATH, 'common.py'),
-            valid_extensions=[])
-        )
+            valid_extensions=[]
+        ))
 
     def test_has_valid_extension_return_false_if_specified_extension_is_not_list(self):
         for extension in ['extensions', 1234, dict(extension='py')]:
             self.assertFalse(has_valid_extension(
                 file_path=os.path.join(FIXTURES_DIRECTORY_PATH, 'common.py'),
-                valid_extensions=extension)
-            )
+                valid_extensions=extension
+            ))
 
     def test_has_valid_extension_accepts_list_set_and_tuple_for_extension_argument(self):
         for extension in [['py'], {'py'}, ('py',)]:
             self.assertTrue(has_valid_extension(
                 file_path=os.path.join(FIXTURES_DIRECTORY_PATH, 'common.py'),
-                valid_extensions=extension)
-            )
+                valid_extensions=extension
+            ))
 
-    def test_get_filename_and_ext_returns_none_if_file_path_is_None(self):
+    def test_get_filename_and_ext_returns_none_if_file_path_is_none(self):
         filename, ext = get_filename_and_ext(file_path=None)
         self.assertIsNone(filename)
         self.assertIsNone(ext)

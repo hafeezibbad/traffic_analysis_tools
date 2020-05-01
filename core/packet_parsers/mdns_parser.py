@@ -22,7 +22,7 @@ class MdnsPacketParser(PacketParserInterface):
             return MdnsPacketParser.load_mdns_packet_from_udp_packet(udp_packet)
 
         except BaseException as ex:
-            logging.warning('Can not extract mDNS packet from IP packet. Error: {}'.format(ex))
+            logging.warning('Can not extract mDNS packet from IP packet. Error: `%s`', ex)
             raise ex
 
     @staticmethod
@@ -31,7 +31,7 @@ class MdnsPacketParser(PacketParserInterface):
             return Mdns(udp_packet.data)
 
         except BaseException as ex:
-            logging.warning('Can not extract mDNS packet from IP packet. Error: {}'.format(ex))
+            logging.warning('Can not extract mDNS packet from IP packet. Error: `%s`', ex)
             raise ex
 
     def is_mdns_packet_valid_for_processing(self, mdns_packet: Mdns) -> bool:
@@ -46,7 +46,7 @@ class MdnsPacketParser(PacketParserInterface):
             return False
 
         if mdns_packet.has_error() is True:
-            logging.warning('mDNS packet has an error code. Error: {}'.format(mdns_packet.flags))
+            logging.warning('mDNS packet has an error code. Error: `%s`', mdns_packet.flags)
 
             return False
 
@@ -57,11 +57,11 @@ class MdnsPacketParser(PacketParserInterface):
             return None
 
         if "_tcp.local" in ptr_record:
-            logging.debug('mdns_hostname ignore _tcp.local {}'.format(ptr_record))
+            logging.debug('mdns_hostname ignore _tcp.local `%s`', ptr_record)
             return None
 
         if "_udp.local" in ptr_record:
-            logging.debug("mdns_hostname ignoring _udp.local {}".format(ptr_record))
+            logging.debug("mdns_hostname ignoring _udp.local `%s`", ptr_record)
             return None
 
         dns_hostname = ptr_record
@@ -144,7 +144,7 @@ class MdnsPacketParser(PacketParserInterface):
             mdns_services = self.find_dns_services_from_dns_packet(dns_packet=mdns_packet)
 
         else:
-            logging.debug("mDNS unknown question: %s\n" % mdns_packet.questions[0]["QNAME"])
+            logging.debug("mDNS unknown question: %s\n", mdns_packet.questions[0]["QNAME"])
 
         return mdns_hostname, mdns_services
 
@@ -222,12 +222,12 @@ class MdnsPacketParser(PacketParserInterface):
                 data.mdns_hostname, data.mdns_services = self.find_hostname_and_services_from_dns_packet(packet)
 
             elif packet.question_count != 1:
-                logging.debug("Expecting 1 mDNS question, got {}".format(packet.question_count))
+                logging.debug("Expecting 1 mDNS question, got `%s`", packet.question_count)
                 # This is a seriously fucked up poor son of a bitch packet, but we do not care. We just go on.
                 data.mdns_hostname, data.mdns_services = self.find_hostname_and_services_from_complex_dns_packet(packet)
 
         except BaseException as ex:
-            logging.warning('Unable to extract data from DNS packet `{}`.Error: `{}`'.format(packet, ex))
+            logging.warning('Unable to extract data from DNS packet `%s`. Error: `%s`', packet, ex)
             raise ex
 
         return data

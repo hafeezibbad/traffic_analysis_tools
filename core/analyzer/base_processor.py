@@ -3,17 +3,20 @@ from abc import ABC
 
 class BaseProcessorABC(ABC):
     @staticmethod
-    def process():
+    def process(input_file: str = None, output_file: str = None):
         pass
 
 
 class BaseProcessor(BaseProcessorABC):
     """Base class for all processors."""
     def process(self, input_file: str = None, output_file: str = None):
-        """
+        """Process input file to generate output file
 
-        :param input_file: File containing the data which needs to be processed
-        :param output_file: File where processed data needs to be written
-        :return:
+        Parameters
+        ----------
+        input_file: str
+            File containing the data which needs to be processed
+        output_file: str
+            File where processed data needs to be written
         """
         raise NotImplementedError

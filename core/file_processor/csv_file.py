@@ -1,4 +1,4 @@
-from core.file_process.base import FileProcessorABC
+from core.file_processor.base import FileProcessorABC
 
 
 class CsvFileProcessor(FileProcessorABC):
@@ -6,6 +6,6 @@ class CsvFileProcessor(FileProcessorABC):
         # TODO: Implement
         pass
 
-    def write(self, content: list, output_file_path: str) -> bool:
+    def write(self, data: list, output_file_path: str) -> bool:
         # TODO: Implement
         pass

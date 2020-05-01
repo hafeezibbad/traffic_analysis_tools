@@ -6,11 +6,9 @@ from tempfile import NamedTemporaryFile
 import dpkt
 from dpkt.ip import IP
 from munch import Munch
-from numpy.distutils.misc_util import Configuration
 
 from core.configuration.data import ConfigurationData
 from core.packet_parsers.base import PacketParserInterface
-from core.models.packet_data import PacketData
 
 
 class SynPacketParser(PacketParserInterface):
@@ -48,7 +46,7 @@ class SynPacketParser(PacketParserInterface):
                 )
 
         except ValueError as ex:
-            logging.warning('Unable to extract signature from SYN packet using `p0f`. Error: {}'.format(ex))
+            logging.warning('Unable to extract signature from SYN packet using `p0f`. Error: `%s`', ex)
 
         return result
 
@@ -69,12 +67,12 @@ class SynPacketParser(PacketParserInterface):
 
         return client_os
 
-    def extract_data(self, ip_packet: IP) -> Munch:
+    def extract_data(self, packet: IP) -> Munch:
         data = Munch()
         result = self.extract_signature_from_syn_using_p0f(
             p0f_executable=self.config.p0f_executable,
             p0f_wd=self.config.p0f_wd,
-            ip_packet=ip_packet
+            ip_packet=packet
         )
 
         try:
@@ -85,6 +83,6 @@ class SynPacketParser(PacketParserInterface):
             data.client_os = self.extract_os_from_p0f_output(p0f_output=result.stdout)
 
         except BaseException as ex:
-            logging.warning('Failed to extract signature from TCP-SYN packet. Error: {}'.format(ex))
+            logging.warning('Failed to extract signature from TCP-SYN packet. Error: `%s`', ex)
 
         return data

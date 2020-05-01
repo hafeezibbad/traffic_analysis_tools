@@ -1,3 +1,4 @@
+# pylint: disable=invalid-name
 import binascii
 import logging
 from typing import Union, Optional
@@ -45,7 +46,7 @@ from core.pcap.mdns.mdns_unpacker import Mdns
 from core.pcap.natpmp.natpmp import Natpmp
 from core.pcap.upnp.upnp_request import UpnpRequest
 from core.models.packet_data import PacketData
-from core.static.CONSTANTS import IEEE80211_PROTOCOL_NUMBER, UPNP_PORTS, MDNS_PORTS, DHCP_PORTS
+from core.static.constants import IEEE80211_PROTOCOL_NUMBER, UPNP_PORTS, MDNS_PORTS, DHCP_PORTS
 from core.static.utils import StaticData
 
 
@@ -69,26 +70,25 @@ class DpktUtils:
         Take an ethernet frame and parse its data as layer3 packet. Currently supported protocols are IPv4, IPv6, ARP,
         LLC, IEEE80211
         """
-        if eth_frame.type == dpkt.ethernet.ETH_TYPE_IP: # IPv4 Packet
+        if eth_frame.type == dpkt.ethernet.ETH_TYPE_IP:  # IPv4 Packet
             return IpPacketParser.load_ip_packet_from_ethernet_frame(eth_frame.data)
 
-        elif eth_frame.type == dpkt.ethernet.ETH_TYPE_IP6:  # IPv6 Packet
+        if eth_frame.type == dpkt.ethernet.ETH_TYPE_IP6:  # IPv6 Packet
             return eth_frame.data
 
-        elif eth_frame.type == dpkt.ethernet.ETH_TYPE_ARP:  # ARP packet
+        if eth_frame.type == dpkt.ethernet.ETH_TYPE_ARP:  # ARP packet
             return eth_frame.data
 
-        elif isinstance(eth_frame.data, dpkt.llc.LLC):  # IEEE 802.3 Logical Link Control
+        if isinstance(eth_frame.data, dpkt.llc.LLC):  # IEEE 802.3 Logical Link Control
             return eth_frame.data
 
-        elif eth_frame.type == IEEE80211_PROTOCOL_NUMBER:  # IEEE 802.1X Authentication
+        if eth_frame.type == IEEE80211_PROTOCOL_NUMBER:  # IEEE 802.1X Authentication
             return eth_frame.data
 
-        else:
-            # TODO: Handle other layer 3 packets, e.g. TDLS discovery requests
-            _protocol = self.ether_type_data.get(str(hex(eth_frame.type)[2:]))
-            if _protocol is None:
-                logging.warning('Unable to get protocol from ether_type (int): {}'.format(_protocol))
+        # TODO: Handle other layer 3 packets, e.g. TDLS discovery requests
+        _protocol = self.ether_type_data.get(str(hex(eth_frame.type)[2:]))
+        if _protocol is None:
+            logging.warning('Unable to get protocol from ether_type (int): `%s`', _protocol)
 
         return None
 
@@ -97,16 +97,16 @@ class DpktUtils:
         if isinstance(layer3_packet, IP):  # IPv4 Packet
             data = self.extract_data_from_ip4_packet(ip_packet=layer3_packet)
 
-        elif isinstance(layer3_packet, IP6):  # IPv6 Packet
+        if isinstance(layer3_packet, IP6):  # IPv6 Packet
             data = self.extract_data_from_ip6_packet(ip6_packet=layer3_packet)
 
-        elif isinstance(layer3_packet, ARP):  # ARP packet
+        if isinstance(layer3_packet, ARP):  # ARP packet
             data = self.extract_data_from_arp_packet(arp_packet=layer3_packet)
 
-        elif isinstance(layer3_packet, LLC):  # IEEE 802.3 Logical Link Control
+        if isinstance(layer3_packet, LLC):  # IEEE 802.3 Logical Link Control
             data = self.extract_data_from_llc_packet(llc_packet=layer3_packet)
 
-        elif isinstance(layer3_packet, IEEE80211):  # IEEE 802.1X Authentication
+        if isinstance(layer3_packet, IEEE80211):  # IEEE 802.1X Authentication
             data = self.extract_data_from_80211_packet(layer3_packet)
 
         return self.load_protocol_data_to_packet_data(data, packet_data)
@@ -135,27 +135,29 @@ class DpktUtils:
         if layer3_packet is None:
             return None
 
+        packet_data = None
         if layer3_packet.p == dpkt.ip.IP_PROTO_TCP:  # TCP packet
-            return layer3_packet.data
+            packet_data = layer3_packet.data
 
         elif layer3_packet.p == dpkt.ip.IP_PROTO_UDP:  # UDP packet
-            return layer3_packet.data
+            packet_data = layer3_packet.data
 
         elif layer3_packet.p == dpkt.ip.IP_PROTO_ICMP:  # ICMP packet
-            return layer3_packet.data
+            packet_data = layer3_packet.data
 
         elif layer3_packet.p == dpkt.ip.IP_PROTO_ICMP6:  # ICMPv6 packet
-            return layer3_packet.data
+            packet_data = layer3_packet.data
 
         elif layer3_packet.p == dpkt.ip.IP_PROTO_IGMP:  # IGMP packet
-            return layer3_packet.data
+            packet_data = layer3_packet.data
 
         else:
-            logging.warning('Unidentified Protocol. Proto Num: {}, Type: {}'.format(
-                layer3_packet.p, type(layer3_packet.data)
-            ))
-
-        return None
+            logging.warning(
+                'Unidentified Protocol. Proto Num: `%s`, Type: `%s`',
+                layer3_packet.p,
+                type(layer3_packet.data)
+            )
+        return packet_data
 
     def extract_data_from_layer4_packet(self, layer4_packet: Packet, packet_data: PacketData) -> PacketData:
         data = None
@@ -204,26 +206,30 @@ class DpktUtils:
         return packet_data
 
     def load_layer7_packet(self, layer4_packet: Packet, packet_data: PacketData) -> Optional[Union[Natpmp, Packet]]:
-        if isinstance(layer4_packet, UDP):
-            if packet_data.src_port == 5351 or packet_data.dst_port == 5351:  # This is a NAT-PMP packet.
-                return Natpmp(buf=layer4_packet.data)
+        if not isinstance(layer4_packet, UDP):
+            return None
 
-            elif packet_data.src_port == 53 or packet_data.dst_port == 53:  # DNS packet
-                return DnsPacketParser.load_dns_packet_from_udp_packet(layer4_packet)
+        layer7_packet = None
 
-            elif packet_data.src_port == 123 or packet_data.dst_port == 123:  # NTP packet
-                return NtpPacketParser.load_ntp_packet_from_udp_packet(layer4_packet)
+        if packet_data.src_port == 5351 or packet_data.dst_port == 5351:  # This is a NAT-PMP packet.
+            layer7_packet = Natpmp(buf=layer4_packet.data)
 
-            elif packet_data.src_port in UPNP_PORTS or packet_data.dst_port in UPNP_PORTS:  # UPnP packet
-                return UpnpPacketParser.load_upnp_packet_from_udp_packet(layer4_packet)
+        elif packet_data.src_port == 53 or packet_data.dst_port == 53:  # DNS packet
+            layer7_packet = DnsPacketParser.load_dns_packet_from_udp_packet(layer4_packet)
 
-            elif packet_data.src_port in MDNS_PORTS or packet_data.dst_port in MDNS_PORTS:  # mDNS packet
-                return MdnsPacketParser.load_mdns_packet_from_udp_packet(layer4_packet)
+        elif packet_data.src_port == 123 or packet_data.dst_port == 123:  # NTP packet
+            layer7_packet = NtpPacketParser.load_ntp_packet_from_udp_packet(layer4_packet)
 
-            elif packet_data.src_port in DHCP_PORTS or packet_data.dst_port in DHCP_PORTS:  # DHCP packet
-                return DhcpPacketParser.load_dhcp_from_udp_packet(layer4_packet)
+        elif packet_data.src_port in UPNP_PORTS or packet_data.dst_port in UPNP_PORTS:  # UPnP packet
+            layer7_packet = UpnpPacketParser.load_upnp_packet_from_udp_packet(layer4_packet)
 
-        return None
+        elif packet_data.src_port in MDNS_PORTS or packet_data.dst_port in MDNS_PORTS:  # mDNS packet
+            layer7_packet = MdnsPacketParser.load_mdns_packet_from_udp_packet(layer4_packet)
+
+        elif packet_data.src_port in DHCP_PORTS or packet_data.dst_port in DHCP_PORTS:  # DHCP packet
+            layer7_packet = DhcpPacketParser.load_dhcp_from_udp_packet(layer4_packet)
+
+        return layer7_packet
 
     def extract_data_from_layer7_packet(self, layer7_packet: Packet, packet_data: PacketData) -> PacketData:
         """Currently supported Layer 7 protocols are DHCP, UPNP, MDNS, DNS, NTP"""
@@ -241,7 +247,7 @@ class DpktUtils:
         elif isinstance(layer7_packet, NTP):  # NTP packet
             data = self.extract_data_from_ntp_packet(layer7_packet)
 
-        elif isinstance(layer7_packet, UpnpRequest) or isinstance(layer7_packet, dpkt.http.Response):  # UPnP packet
+        elif isinstance(layer7_packet, (UpnpRequest, dpkt.http.Response)):  # UPnP packet
             data = self.extract_data_from_upnp_packet(layer7_packet)
 
         elif isinstance(layer7_packet, DHCP):  # DNS packet
@@ -295,7 +301,7 @@ class DpktUtils:
             packet_data: PacketData
     ) -> PacketData:
         if protocol_data is None or not isinstance(protocol_data, dict):
-            logging.debug('Unable to load protocol data from `{}` object. <dict> expected'.format(type(protocol_data)))
+            logging.debug('Unable to load protocol data from `%s` object. <dict> expected', type(protocol_data))
             return packet_data
 
         for key, value in protocol_data.items():
@@ -304,7 +310,9 @@ class DpktUtils:
                     setattr(packet_data, key, value)
                 else:
                     logging.warning(
-                        'Trying to set invalid or callable property `{}` in `{}` object'.format(key, type(packet_data))
+                        'Trying to set invalid or callable property `%s` in `%s` object',
+                        key,
+                        type(packet_data)
                     )
 
         return packet_data

@@ -27,18 +27,20 @@ class DhcpPacketParser(PacketParserInterface):
             data.dhcp_hostname = self.extract_dhcp_hostname_from_dhcp_options(dhcp_options) or ''
 
         except BaseException as ex:
-            logging.warning('Unable to extract DHCP from `{}`. Error: `{}`'.format(type(packet), ex))
+            logging.warning('Unable to extract DHCP from `%s`. Error: `%s`', type(packet), ex)
             raise ex
 
         return data
 
     def extract_dhcp_options_from_dhcp_packet(self, dhcp_packet: DHCP) -> Optional[dict]:
         try:
-           return dict(dhcp_packet.opts)
+            return dict(dhcp_packet.opts)
 
         except ValueError as ex:
-            logging.warning('Failed to extract dhcp_options from DHCP packet. Invalid type: `{}` of '
-                            '`dhcp_packet.opts`'.format(type(dhcp_packet.opts)))
+            logging.warning(
+                'Failed to extract dhcp_options from DHCP packet. Invalid type: `%s` of `dhcp_packet.opts`',
+                type(dhcp_packet.opts)
+            )
             raise ex
 
     def extract_fingerprint_from_dhcp_options(self, dhcp_options: dict) -> Optional[str]:
@@ -59,6 +61,8 @@ class DhcpPacketParser(PacketParserInterface):
                 logging.warning('Failed to extract information from DHCP packet. Invalid type of dhcp_vendor_option')
                 raise ex
 
+        return None
+
     def extract_dhcp_hostname_from_dhcp_options(self, dhcp_options: dict) -> Optional[str]:
         if dpkt.dhcp.DHCP_OPT_HOSTNAME in dhcp_options:
             try:
@@ -69,11 +73,13 @@ class DhcpPacketParser(PacketParserInterface):
                 logging.warning('Failed to extract vendor information from DHCP packet. Invalid type of dhcp_hostname')
                 raise ex
 
+        return None
+
     @staticmethod
     def load_dhcp_from_udp_packet(udp_packet):
         try:
             return dpkt.dhcp.DHCP(udp_packet.data)
 
         except BaseException as ex:
-            logging.warning('Unable to extract DHCP packet from UDP packet. Error: {}'.format(ex))
+            logging.warning('Unable to extract DHCP packet from UDP packet. Error: `%s`', ex)
             raise ex

@@ -1,13 +1,10 @@
-import json
 import os
-
-import yaml
 
 from core.file_processor.errors import FileError
 from core.file_processor.json_file import JsonFileProcessor
 from core.file_processor.yaml_file import YamlFileProcessor
 from core.lib.file_utils import get_filename_and_ext
-from .errors import ConfigurationError, ConfigurationErrors
+from core.configuration.errors import ConfigurationError, ConfigurationErrors
 
 
 class ConfigurationParser:

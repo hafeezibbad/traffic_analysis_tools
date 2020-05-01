@@ -18,10 +18,12 @@
 #
 import os
 import sys
-doc_source_directory = os.path.dirname(os.path.abspath(__file__))
-docs_root_directory = os.path.dirname(doc_source_directory)
+current_directory = os.path.dirname(os.path.abspath(__file__))
+docs_root_directory = os.path.dirname(current_directory)
+docs_source_directory = os.path.join(docs_root_directory, 'source')
 project_root_directory = os.path.dirname(docs_root_directory)
-sys.path.insert(0, project_root_directory)
+# sys.path.insert(0, project_root_directory)
+sys.path.insert(0, os.path.abspath('..'))
 sys.path.insert(0, os.path.abspath('.'))
 
 import sphinx_rtd_theme
@@ -45,8 +47,20 @@ extensions = [
     'sphinx.ext.mathjax',
     'sphinx.ext.ifconfig',
     'sphinx.ext.viewcode',
-    'sphinx.ext.githubpages'
+    'sphinx.ext.githubpages',
+    'sphinxcontrib.httpdomain',
+    'sphinxcontrib.inlinesyntaxhighlight',
+    'sphinxcontrib.blockdiag',
+    'sphinxcontrib.seqdiag',
+    'sphinxcontrib.actdiag',
+    'sphinxcontrib.nwdiag',
+    'sphinx.ext.extlinks'
 ]
+
+extlinks = {
+    'github': ('https://github.com/%s', ''),
+    'project_file': ('https://github.com/hafeezibbad/traffic_analysis_tools/tree/master/%s', '')
+}
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -84,7 +98,18 @@ language = None
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This patterns also effect to html_static_path and html_extra_path
-exclude_patterns = []
+exclude_patterns = [
+    '_build',
+    '**tests**',
+    '**spi**',
+    '**fixtures**',
+    '**configs**',
+    '**pytest**',
+    '**tests**',
+    '**notebooks**',
+    '**venv**',
+    '**scripts**'
+]
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = 'sphinx'
@@ -190,20 +215,6 @@ def skip(app, what, name, obj, skip, options):
 def setup(app):
     app.connect("autodoc-skip-member", skip)
 
-
-# List of patterns, relative to source directory, that match files and
-# directories to ignore when looking for source files.
-exclude_patterns = [
-    '_build',
-    '**tests**',
-    '**spi**',
-    '**fixtures**',
-    '**configs**',
-    '**pytest**',
-    '**tests**',
-    '**notebooks**',
-    '**venv**'
-]
 
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {'https://docs.python.org/': None}

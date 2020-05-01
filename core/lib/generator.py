@@ -1,7 +1,8 @@
 import math
-import numpy
 import random
 import string
+
+import numpy
 
 
 def id_generator(length: int = 8) -> str:

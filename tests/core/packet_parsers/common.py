@@ -14,15 +14,14 @@ class BasePacketParserTests(unittest.TestCase):
         self.config = CONFIGURATION_OBJ
         self.static_data = StaticData()
 
-    def assertStrEqual(self, first: str, second: str, ignore_case: bool = False):
-        if isinstance(first, str) is False:
-            raise AssertionError('Invalid argument <>: expected <str>, provided <{}>'.format(first, type(first)))
+    def assertStrEqual(self, first: str, second: str, ignore_case: bool = False):   # pylint: disable=invalid-name
+        if not isinstance(first, str):
+            raise AssertionError('Invalid argument `{}`: expected <str>, provided <{}>'.format(first, type(first)))
 
-        if isinstance(second, str) is False:
-            raise AssertionError('Invalid argument <>: expected <str>, provided <{}>'.format(second, type(second)))
+        if not isinstance(second, str):
+            raise AssertionError('Invalid argument `{}`: expected <str>, provided <{}>'.format(second, type(second)))
 
         if ignore_case is True:
             assert first.lower() == second.lower()
 
         assert first == second
-

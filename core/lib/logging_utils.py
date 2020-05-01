@@ -12,14 +12,25 @@ def setup_logging(
         max_file_size: int = 10000000,
         backup_count: int = 5
 ) -> Logger:
-    """
-    This function sets up logging for class
-    :param name: name of the module calling logging setup function
-    :param log_directory: directory to store logs
-    :param file_name: filename for storing log information
-    :param max_file_size: maximum size for logging file.
-    :param backup_count: Number of backup log files
-    :return logger: Logger object for the module
+    """Setup logging for class.
+
+    Parameters
+    ----------
+    name: str
+        name of the module calling logging setup function
+    log_directory: str
+        path to directory where logs should be stored
+    file_name: str
+        filename for storing log information
+    max_file_size: int
+        maximum size for logging file.
+    backup_count: int
+        Number of backup log files
+
+    Returns
+    -------
+    logger: Logger
+        Logger object for the module
     """
 
     logger = logging.getLogger(name)
@@ -52,10 +63,17 @@ def setup_logging(
 
 
 def setup_simple_logging(name: str) -> Logger:
-    """
-    Setups up simple command line logging
-    :param name: Name of module
-    :return: Logger object
+    """Setup up simple command line logging.
+
+    Parameters
+    ----------
+    name: str
+        Name of module
+
+    Returns
+    -------
+    logger: Logger
+        Logging object
     """
 
     logger = logging.getLogger(name)

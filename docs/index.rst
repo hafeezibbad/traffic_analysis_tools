@@ -3,14 +3,26 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to traffic-analysis-tooling's documentation!
+Welcome to Traffic Analysis Tooling's documentation!
 ====================================================
 
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
 
+Internal
+========
+.. toctree::
+   :maxdepth: 2
 
+   source/faq/developer_guide
+
+Code Documentation
+==================
+.. toctree::
+   :maxdepth: 2
+
+   source/modules/modules
 
 Indices and tables
 ==================

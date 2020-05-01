@@ -1,5 +1,5 @@
 import datetime
-from core.static.CONSTANTS import DATE_TIME_FORMAT
+from core.static.constants import DATE_TIME_FORMAT
 
 
 def get_date_identifier(timestamp: float) -> str:

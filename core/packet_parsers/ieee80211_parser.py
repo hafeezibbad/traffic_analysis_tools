@@ -19,7 +19,7 @@ class IEEE80211PacketParser(PacketParserInterface):
             data.ieee80211_payload_size = len(packet.data)
 
         except BaseException as ex:
-            logging.warning('Unable to extract IEEE80211 from `{}`. Error: `{}`'.format(type(packet), ex))
+            logging.warning('Unable to extract IEEE80211 from `%s`. Error: `%s`', type(packet), ex)
             raise ex
 
         return data

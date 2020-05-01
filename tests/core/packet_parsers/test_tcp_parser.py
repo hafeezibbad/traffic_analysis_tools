@@ -1,8 +1,6 @@
 import dpkt
-from munch import Munch
 
 from core.packet_parsers.layer4_parser import TcpPacketParser
-from core.models.packet_data import PacketData
 from tests.core.packet_parsers.common import BasePacketParserTests
 
 

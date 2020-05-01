@@ -1,7 +1,8 @@
 """
 Constants or regular expressions used in application.
 """
-
+# pylint: disable=anomalous-backslash-in-string
+# pylint: disable=invalid-name
 import os
 
 STATICS_DIR_PATH = os.path.dirname(os.path.abspath(__file__))
@@ -43,7 +44,7 @@ IPv6_REGEX = r'(' \
              '([0-9a-fA-F]{1,4}:){1,4}:'\
              '((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}'\
              '(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])'\
-             ')'
+             ')'    # noqa=W605
 URI_REGEX = "^(?:([A-Za-z][A-Za-z0-9+\\-.]*):(?://((?:(?:(?:%[0-9A-Fa-f]{2}|" \
             "[!$&'()*+,;=A-Za-z0-9\\-._~])|:)*@)?(?:\\[(?:(?:(?:[0-9A-Fa-f]" \
             "{1,4}:){6}(?:[0-9A-Fa-f]{1,4}:[0-9A-Fa-f]{1,4}|(?:(?:[0-9]|[1-9]" \

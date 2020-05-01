@@ -1,24 +1,34 @@
 import logging
 import os
-import traceback
 from pathlib import Path
-from typing import Tuple
+from typing import Tuple, TextIO, Any
 
 import dpkt
 
 from core.analyzer.base_processor import BaseProcessor
 from core.configuration.data import ConfigurationData
-from core.errors import FileError, FileErrorTypes
-from core.lib.common import print_json
+from core.errors.generic_errors import GenericError
+from core.file_processor.base import FileProcessorBase
+from core.file_processor.errors import FileError, FileErrorType
 from core.lib.dpkt_utils import DpktUtils
+from core.lib.file_utils import check_valid_path
 from core.models.packet_data import PacketData
 from core.models.pcap_file_info import PcapFileInfo
 from core.static.utils import StaticData
 
 
 class PcapProcessor(BaseProcessor):
+    def __init__(self, config: ConfigurationData, static_data: StaticData = None) -> None:
+        """PCAP processor class contains functionality for processing and analyzing PCAP files.
 
-    def __init__(self, config: ConfigurationData, static_data: StaticData = None):
+        Parameters
+        ----------
+        config: ConfigurationData
+            Application configuration data
+        static_data: StaticData
+            Static data which is used in analyzing PCAP files. This data contains protocol numbers, port numbers to
+            description mappings.
+        """
         self.pcap_file_info = PcapFileInfo()
         self.config = config
         self.static_data = static_data
@@ -26,46 +36,46 @@ class PcapProcessor(BaseProcessor):
             self.static_data = StaticData()
         self.dpkt_utils = DpktUtils(config=config, static_data=static_data)
 
-    def open_file(self, file_path: str = None, mode='r'):
-        if not file_path:
-            raise FileError(
-                'No file path specified: {}'.format(file_path),
-                error_type=FileErrorTypes.INVALID_FILE_PATH
-            )
-
-        try:
-            return open(file_path, mode)
-
-        except Exception as ex:
-            raise FileError(
-                message='Unable to access specified file: {}. Error: {}'.format(file_path, ex),
-                error_type=FileErrorTypes.UNSPECIFIED_ERROR
-            )
-
+    # pylint: disable=arguments-differ
     def process(
             self,
             input_file: str = None,
             output_file: str = None,
             pcap_filter: str = ''
-    ) -> Tuple[PcapFileInfo, bool]:
+    ) -> PcapFileInfo:
+        """Process a .pcap file by reading each packet, extract basic statistics from the packet, writes
+        these statistics to an output csv file.
+
+        Parameters
+        -----------
+        input_file: str
+            Path to input pcap_files file which needs to be processed
+        output_file: str
+            Path to output file where results should be written
+        pcap_filter: str, optional
+            Set up a pypcap's BRF expression to filter packets read from PCAP file. For example, to only process DNS
+            packets use pcap_filter='udp dst port 53'.
+
+        Returns
+        --------
+        pcap_file_info: PcapFileInfo
+            JSON object containing summary information about data extracted from PCAP file
+
+        Raises
+        -------
+        FileError: Exception
+            If there is some issue with reading or processing input pcap file, or writing data to output csv file.
         """
-        Takes a .pcap_files file as input, reads each packet, extracts basic statistics from the packet and writes them to
-        an output file.
-        :param input_file: Path to pcap_files file which needs to be processed
-        :param output_file: Path to output file where results should be written
-        :param pcap_filter: Set up a pypcap's BRF expression to filter packets read from PCAP file. For example,
-        to only process DNS packets use pcap_filter='udp dst port 53'.
-        :return:
-        :raises: FileError
-        """
-        print('input_file:', input_file)
+        logging.debug('input_file: %s', input_file)
+
         pcap_file, captures = self.load_pcap_file_for_reading(input_file, pcap_filter)
         pcap_file_info = PcapFileInfo()
         if pcap_file is None:
-            return pcap_file_info, False
+            return pcap_file_info
+
         result_file = self.open_output_file_and_write_headers(output_file)
+
         initial_ts = 0
-        # Process packets in PCAP file
         count = 0
         total_data = 0
         for ts, buff in captures:
@@ -82,10 +92,9 @@ class PcapProcessor(BaseProcessor):
                 result_file.write(packet_data.to_csv_string(delimiter=self.config.ResultFileDelimiter) + '\n')
 
             except Exception as ex:
-                logging.warning('Unable to process packet at ts:{} Error: {}'.format(ts, ex))
-                raise ex
+                raise GenericError(message='Unable to process packet at ts:{} Error: {}'.format(ts, ex)) from ex
 
-        logging.info('{} packets processed from {}'.format(count, input_file))
+        logging.info('%s packets processed from %s', count, input_file)
         pcap_file.close()
         result_file.close()
 
@@ -95,31 +104,70 @@ class PcapProcessor(BaseProcessor):
         pcap_file_info.packet_count = count
         pcap_file_info.total_data = total_data
 
-        return pcap_file_info, True
+        return pcap_file_info
 
-    def open_output_file_and_write_headers(self, output_file_path):
+    def open_output_file_and_write_headers(self, output_file_path: str) -> TextIO:
+        """Create file for writing data extracted from packet, and write headers.
+
+        Parameters
+        ----------
+        output_file_path: str
+            Path to output file to writen data
+
+        Returns
+        --------
+        output_file: TextIO
+            File object for writing output data
+        """
         if not os.path.exists(os.path.dirname(output_file_path)):
             Path(os.path.dirname(output_file_path)).mkdir(parents=True, exist_ok=True)
 
-        output_file = self.open_file(output_file_path, mode='w')         # Overwrites old file
-        # Write headers
+        output_file = FileProcessorBase.open_file(output_file_path, mode='w')  # Overwrites old file
         output_file.write(PacketData.packet_data_file_headers(delimiter=self.config.ResultFileDelimiter) + '\n')
 
         return output_file
 
-    def load_pcap_file_for_reading(self, file_path: str, pcap_filter: str = '') -> Tuple:
+    def load_pcap_file_for_reading(self, file_path: str, pcap_filter: str = '') -> Tuple[TextIO, Any]:
+        """Open pcap file for reading from specified file path.
+
+        Parameters
+        ----------
+        file_path : str
+            Path to pcap file
+        pcap_filter : str, optional
+            Set up a pypcap's BRF expression to filter packets read from PCAP file. For example, to only process DNS
+            packets use pcap_filter='udp dst port 53'.
+
+        Returns
+        -------
+        file_object: TextIO
+            File object with open pcap file for reading
+        captures: Any
+            dpkt pcap reader object
+
+        Raises
+        ------
+        FileError: Exception
+            Raised if input pcap file can not be read.
+        """
+        if check_valid_path(file_path, valid_extensions=['pcap']) is False:
+            raise FileError(
+                message='Invalid file path ({}) specified for pcap file'.format(file_path),
+                error_type=FileErrorType.INVALID_FILE_PATH
+            )
         try:
-            pcap_file = self.open_file(file_path, mode='rb')
+            pcap_file = FileProcessorBase.open_file(file_path, mode='rb')
             captures = dpkt.pcap.Reader(pcap_file)
-            if filter:
+            if pcap_filter:
                 captures.setfilter(pcap_filter)           # pypcap's BRF expression
 
             return pcap_file, captures
 
         except Exception as ex:
-            logging.warning('Unable to load pcap_files file to dpkt. Error: {}'.format(ex))
-
-        return None, None
+            raise FileError(
+                message='Unable to load pcap_files file to dpkt. Error: {}'.format(ex),
+                error_type=FileErrorType.UNSPECIFIED_ERROR
+            ) from ex
 
     def get_timestamp_of_first_packet_in_pcap_file(self, file_path: str, pcap_filter: str = '') -> float:
         first_ts = -1
@@ -161,10 +209,10 @@ class PcapProcessor(BaseProcessor):
             )
             # Skip further processing for packets which do not have layer 4 data
             if eth.type in [
-                dpkt.ethernet.ETH_TYPE_ARP,
-                6,  # IEEE 802.1 Link Layer Control
-                34958,  # IEEE 802.1X Authentication
-                35085  # TDLS Discovery request
+                    dpkt.ethernet.ETH_TYPE_ARP,
+                    6,  # IEEE 802.1 Link Layer Control
+                    34958,  # IEEE 802.1X Authentication
+                    35085  # TDLS Discovery request
             ]:
                 return packet_data
 
@@ -188,12 +236,14 @@ class PcapProcessor(BaseProcessor):
             # Handler Layer 7: DNS, UPnP, DHCP, mDNS, NTP
             layer7_packet = self.dpkt_utils.load_layer7_packet(layer4_packet, packet_data)
             if layer7_packet is None:
-                logging.debug('Unable to extract layer7 packet with src port `{}`, dst port `{}`'.format(
-                    packet_data.src_port, packet_data.dst_port
-                ))
+                logging.debug(
+                    'Unable to extract layer7 packet with src port `%s`, dst port `%s`',
+                    packet_data.src_port,
+                    packet_data.dst_port
+                )
             packet_data = self.dpkt_utils.extract_data_from_layer7_packet(layer7_packet, packet_data)
 
         except Exception as ex:
-            logging.error('Error in processing packet at ref_time: {}. Error: {}'.format(packet_data.ref_time, ex))
+            logging.error('Error in processing packet at ref_time: `%s`. Error: `%s`', packet_data.ref_time, ex)
 
         return packet_data
