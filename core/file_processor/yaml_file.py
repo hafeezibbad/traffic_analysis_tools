@@ -47,14 +47,14 @@ class YamlFileProcessor(FileProcessorBase):
                 error_type=FileErrorType.FILE_PROCESSING_ERROR
             )
 
-    def write(self, data: Union[Munch, Dict[str, Any]], file_path: str):
+    def write(self, data: Union[Munch, Dict[str, Any]], output_file_path: str):
         """Write a yaml file and return data as an object.
 
          Parameter
          ----------
          data: Dict[str, Any]
             Data to be written to YAML file.
-         file_path: str
+         output_file_path: str
             Path to YAML file for writing the data
 
         Raises
@@ -63,11 +63,11 @@ class YamlFileProcessor(FileProcessorBase):
             If data can not be written to YAML file.
         """
         try:
-            with open(file_path, 'w') as output:
+            with open(output_file_path, 'w') as output:
                 yaml.dump(data, output, default_flow_style=False)
 
         except Exception as ex:
             raise FileError(
-                message='Unable to write yaml file to specified path: {}. Error: {}'.format(file_path, ex),
+                message='Unable to write yaml file to specified path: {}. Error: {}'.format(output_file_path, ex),
                 error_type=FileErrorType.FILE_PROCESSING_ERROR
             )

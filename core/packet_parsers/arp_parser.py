@@ -31,7 +31,7 @@ class ArpPacketParser(PacketParserInterface):
                 data.arc_dst_ip = self.ip_utils.ip_to_int(data.arp_src_ip)
 
         except BaseException as ex:
-            logging.warning('Unable to extract ARP from `{}`.Error: `{}`'.format(type(packet), ex))
+            logging.warning('Unable to extract ARP from `%s`. Error: `%s`', type(packet), ex)
             raise ex
 
         return data

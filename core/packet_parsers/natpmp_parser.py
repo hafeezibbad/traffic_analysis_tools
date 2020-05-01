@@ -11,22 +11,22 @@ class NatpmpPacketParser(PacketParserInterface):
         self.config = config
         self.ip_addr_utils = IpAddrUtils()
 
-    def extract_data(self, natpmp_packet: Natpmp) -> Munch:
+    def extract_data(self, packet: Natpmp) -> Munch:
         data = Munch()
 
-        data.natpmp_version = natpmp_packet.version
-        data.natpmp_opcode = natpmp_packet.opcode
-        data.natpmp_reserved = natpmp_packet.reserved
-        data.natpmp_result = natpmp_packet.result
-        data.natpmp_sssoe = natpmp_packet.sssoe
-        data.natpmp_lifetime = natpmp_packet.lifetime
-        data.natpmp_internal_port = natpmp_packet.internal_port
-        data.natpmp_external_port = natpmp_packet.external_port
-        if natpmp_packet.external_ip != -1:
+        data.natpmp_version = packet.version
+        data.natpmp_opcode = packet.opcode
+        data.natpmp_reserved = packet.reserved
+        data.natpmp_result = packet.result
+        data.natpmp_sssoe = packet.sssoe
+        data.natpmp_lifetime = packet.lifetime
+        data.natpmp_internal_port = packet.internal_port
+        data.natpmp_external_port = packet.external_port
+        if packet.external_ip != -1:
             # There is an NatPMP External Address Response packet so extract external IP address
             if self.config.use_numeric_values is False:
-                data.natpmp_external_ip = natpmp_packet.external_ip
+                data.natpmp_external_ip = packet.external_ip
             else:
-                data.natpmp_external_ip = self.ip_addr_utils.int_to_ip(natpmp_packet.external_ip)
+                data.natpmp_external_ip = self.ip_addr_utils.int_to_ip(packet.external_ip)
 
         return data

@@ -3,12 +3,12 @@
 ICMP6_CODE_DESTINATION_UNREACHABLE = {
     0: "no router to destination",
     1: "communication with destination administratively prohibited",
-    2: "beyond scope of source address",  # [RFC4443]
+    2: "beyond scope of source address",                # [RFC4443]
     3: "address unreachable",
     4: "port unreachable",
-    5: "source address failed ingree/egress policy",  # [RFC4443]
-    6: "reject router to destination",  # [RFC4443]
-    7: "Error in Source Routing Header",  # [RFC6550][RFC6554]
+    5: "source address failed ingree/egress policy",    # [RFC4443]
+    6: "reject router to destination",                  # [RFC4443]
+    7: "Error in Source Routing Header",                # [RFC6550][RFC6554]
 }
 
 ICMP6_CODE_PACKET_TOO_BIG = {
@@ -39,9 +39,10 @@ ICMP6_CODE_ROUTER_RENUMBERING = {
 }
 
 ICMP6_CODE_ICMP_NODE_INFORMATION_QUERY = {
-    0: "The Data field contains an IPv6 address which is the Subject of this Query.",        # [RFC4620]
-    1: "The Data field contains a name which is the Subject of this Query, or is empty, as in the case of a NOOP.",    #[RFC4620]
-    2: "The Data field contains an IPv4 address which is the Subject of this Query."    # [RFC4620]
+    0: "The Data field contains an IPv6 address which is the Subject of this Query.",               # [RFC4620]
+    1: "The Data field contains a name which is the Subject of this Query, or is empty, "
+       "as in the case of a NOOP.",                                                                 # [RFC4620]
+    2: "The Data field contains an IPv4 address which is the Subject of this Query."                # [RFC4620]
 }
 
 ICMP6_CODE_ICMP_NODE_INFORMATION_RESPONSE = {
@@ -124,55 +125,55 @@ ICMP6_CODE_MOBILE_NODE_IDENTIFIER_OPTION = {
 
 ICMP6_TYPES = {
     0: "Reserved",  #
-    1: ICMP6_CODE_DESTINATION_UNREACHABLE,  # [RFC4443]
-    2: ICMP6_CODE_PACKET_TOO_BIG,  # [RFC4443]
-    3: ICMP6_CODE_TIME_EXCEEDED,  # [RFC4443]
-    4: ICMP6_CODE_PARAMETER_PROBLEM,  # [RFC4443]
+    1: ICMP6_CODE_DESTINATION_UNREACHABLE,                  # [RFC4443]
+    2: ICMP6_CODE_PACKET_TOO_BIG,                           # [RFC4443]
+    3: ICMP6_CODE_TIME_EXCEEDED,                            # [RFC4443]
+    4: ICMP6_CODE_PARAMETER_PROBLEM,                        # [RFC4443]
     15: ICMP6_CODE_TRUST_ANCHOR_OPTION,
     16: ICMP6_CODE_CERTIFICATE_OPTION,
     29: ICMP6_CODE_HANDOVER_ASSIST_INFO_TYPE,
     30: ICMP6_CODE_MOBILE_NODE_IDENTIFIER_OPTION,
     # 5 - 99: "Unassigned",
-    100: "Private experimentation",  # [RFC4443]
-    101: "Private experimentation",  # [RFC4443]
+    100: "Private experimentation",                         # [RFC4443]
+    101: "Private experimentation",                         # [RFC4443]
     # 102 - 126: "Unassigned",
-    127: "Reserved for expansion of ICMPv6 error messages",  # [RFC4443]
-    128: ICMP6_CODE_ECHO_REQUEST,  # [RFC4443]
-    129: "Echo Reply",  # [RFC4443]
-    130: "Multicast Listener Query",  # [RFC2710]
-    131: "Multicast Listener Report",  # [RFC2710]
-    132: "Multicast Listener Done",  # [RFC2710]
-    133: "Router Solicitation",  # [RFC4861]
-    134: "Router Advertisement",  # [RFC4861]
-    135: "Neighbor Solicitation",  # [RFC4861]
-    136: "Neighbor Advertisement",  # [RFC4861]
-    137: "Redirect Message",  # [RFC4861]
-    138: ICMP6_CODE_ROUTER_RENUMBERING,  # [RFC2894]
-    139: ICMP6_CODE_ICMP_NODE_INFORMATION_QUERY,  # [RFC4620]
-    140: "ICMP Node Information Response",  # [RFC4620]
-    141: "Inverse Neighbor Discovery Solicitation Message",  # [RFC3122]
-    142: "Inverse Neighbor Discovery Advertisement Message",  # [RFC3122]
-    143: "Version 2 Multicast Listener Report",  # [RFC3810]
-    144: "Home Agent Address Discovery Request Message",  # [RFC6275]
-    145: "Home Agent Address Discovery Reply Message",  # [RFC6275]
-    146: "Mobile Prefix Solicitation",  # [RFC6275]
-    147: "Mobile Prefix Advertisement",  # [RFC6275]
-    148: "Certification Path Solicitation Message",  # [RFC3971]
-    149: "Certification Path Advertisement Message",  # [RFC3971]
-    150: "ICMP messages utilized by experimental mobility protocols such as Seamoby", #[RFC4065]
-    151: "Multicast Router Advertisement",  # [RFC4286]
-    152: "Multicast Router Solicitation",  # [RFC4286]
-    153: "Multicast Router Termination",  # [RFC4286]
-    154: ICMP_CODE_FMIPv6_MESSAGE_TYPES,  # [RFC5568]
-    155: "RPL Control Message",  # [RFC6550]
-    156: "ILNPv6 Locator Update Message",  # [RFC6743]
-    157: ICMP6_CODE_DUPLICATION_ADDR_REQUEST_CODE_SUFFIX,  # [RFC6775]
+    127: "Reserved for expansion of ICMPv6 error messages",     # [RFC4443]
+    128: ICMP6_CODE_ECHO_REQUEST,                               # [RFC4443]
+    129: "Echo Reply",                                          # [RFC4443]
+    130: "Multicast Listener Query",                            # [RFC2710]
+    131: "Multicast Listener Report",                           # [RFC2710]
+    132: "Multicast Listener Done",                             # [RFC2710]
+    133: "Router Solicitation",                                 # [RFC4861]
+    134: "Router Advertisement",                                # [RFC4861]
+    135: "Neighbor Solicitation",                               # [RFC4861]
+    136: "Neighbor Advertisement",                              # [RFC4861]
+    137: "Redirect Message",                                    # [RFC4861]
+    138: ICMP6_CODE_ROUTER_RENUMBERING,                         # [RFC2894]
+    139: ICMP6_CODE_ICMP_NODE_INFORMATION_QUERY,                # [RFC4620]
+    140: "ICMP Node Information Response",                      # [RFC4620]
+    141: "Inverse Neighbor Discovery Solicitation Message",     # [RFC3122]
+    142: "Inverse Neighbor Discovery Advertisement Message",    # [RFC3122]
+    143: "Version 2 Multicast Listener Report",                 # [RFC3810]
+    144: "Home Agent Address Discovery Request Message",        # [RFC6275]
+    145: "Home Agent Address Discovery Reply Message",          # [RFC6275]
+    146: "Mobile Prefix Solicitation",                          # [RFC6275]
+    147: "Mobile Prefix Advertisement",                         # [RFC6275]
+    148: "Certification Path Solicitation Message",             # [RFC3971]
+    149: "Certification Path Advertisement Message",            # [RFC3971]
+    150: "ICMP messages utilized by experimental mobility protocols such as Seamoby",   # [RFC4065]
+    151: "Multicast Router Advertisement",                      # [RFC4286]
+    152: "Multicast Router Solicitation",                       # [RFC4286]
+    153: "Multicast Router Termination",                        # [RFC4286]
+    154: ICMP_CODE_FMIPv6_MESSAGE_TYPES,                        # [RFC5568]
+    155: "RPL Control Message",                                 # [RFC6550]
+    156: "ILNPv6 Locator Update Message",                       # [RFC6743]
+    157: ICMP6_CODE_DUPLICATION_ADDR_REQUEST_CODE_SUFFIX,       # [RFC6775]
     158: ICMP6_CODE_DUPLICATION_ADDR_CONFIRMATION_CODE_SUFFIX,  # [RFC6775]
-    159: "MPL Control Message",  # [RFC7731]
-    160: ICMP6_CODE_EXTENDED_ECHO_REQUEST,  # [RFC8335]
-    161: ICMP6_CODE_EXTENDED_ECHO_REPLY,  # [RFC8335]
+    159: "MPL Control Message",                                 # [RFC7731]
+    160: ICMP6_CODE_EXTENDED_ECHO_REQUEST,                      # [RFC8335]
+    161: ICMP6_CODE_EXTENDED_ECHO_REPLY,                        # [RFC8335]
     # 162 - 199: "Unassigned",
-    200: "Private experimentation",  # [RFC4443]
-    201: "Private experimentation",  # [RFC4443]
-    255: "Reserved for expansion of ICMPv6 informational messages"          # [RFC4443]
+    200: "Private experimentation",                             # [RFC4443]
+    201: "Private experimentation",                             # [RFC4443]
+    255: "Reserved for expansion of ICMPv6 informational messages"                      # [RFC4443]
 }

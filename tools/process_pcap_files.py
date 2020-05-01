@@ -1,9 +1,9 @@
+#!/usr/bin/python
 """
 This scripts takes the path to directory and searches for PCAP files in that directory recursively. After that,
 it processes all pcap files to extract the data in form of a csv file. These CSV files are saved at path specific in
 results directory.
 """
-#!/usr/bin/python
 import gc
 import os
 import sys
@@ -11,13 +11,14 @@ import time
 
 sys.path.append(os.getcwd())
 
-from core.lib.logging_utils import setup_logging
-from core.analyzer.pcap_processor import PcapProcessor
-from core.configuration.manager import ConfigurationManager
-from core.lib.common import print_json, write_json_to_file
-from core.lib.file_utils import recursive_listdir, get_filename_and_ext
-from core.static.utils import StaticData
-from scripts.common import RESULTS_DIR_PATH, CONFIG_DIR_PATH, PCAP_DIR_PATH, LOG_FILE_DIR_PATH
+# pylint: disable=wrong-import-position
+from core.lib.logging_utils import setup_logging  # noqa
+from core.analyzer.pcap_processor import PcapProcessor  # noqa
+from core.configuration.manager import ConfigurationManager  # noqa
+from core.lib.common import print_json, write_json_to_file  # noqa
+from core.lib.file_utils import list_files_in_directory, get_filename_and_ext  # noqa
+from core.static.utils import StaticData  # noqa
+from tools.common import RESULTS_DIR_PATH, CONFIG_DIR_PATH, PCAP_DIR_PATH, LOG_FILE_DIR_PATH  # noqa
 
 logger = setup_logging(
     name=__name__,
@@ -29,7 +30,7 @@ config_manager = ConfigurationManager()
 config = config_manager.load_data_from_configuration_file(file_path=os.path.join(CONFIG_DIR_PATH, 'config.yml'))
 stdout_file = os.path.join(RESULTS_DIR_PATH, 'prog_stdout.json')
 # Get list of PCAP files
-pcap_files = recursive_listdir(directory=PCAP_DIR_PATH, extension='pcap')
+pcap_files = list_files_in_directory(directory=PCAP_DIR_PATH, extensions='pcap', recursive=True)
 static_data = StaticData()
 pcap_processor = PcapProcessor(config=config, static_data=static_data)
 

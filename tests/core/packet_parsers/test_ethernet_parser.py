@@ -1,18 +1,8 @@
-import logging
-from typing import Tuple
-
-import binascii
 import dpkt
-from dpkt.ethernet import Ethernet
-from dpkt.ip import IP
 from munch import Munch
 
-from core.configuration.data import ConfigurationData
-from core.packet_parsers.base import PacketParserInterface
 from core.packet_parsers.ethernet_parser import EthernetFrameParser
-from core.lib.ip_utils import IpAddrUtils
 from core.lib.mac_utils import MacAddressUtils
-from core.static.utils import StaticData
 from tests.core.packet_parsers.common import BasePacketParserTests
 
 

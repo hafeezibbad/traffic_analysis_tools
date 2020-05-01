@@ -1,11 +1,13 @@
+from pathlib import Path
+
 import matplotlib.pyplot as plt
 from munch import Munch
+import pandas as pd
 from pandas import DataFrame
-from pathlib import Path
 
 from core.lib.converters import timestamp_to_formatted_date
 from core.lib.matplotlib_utils import bar_plot
-from core.lib.numpy_utils import NpEncoder
+from tools.common import print_as_json
 
 # Specify the path to directory which contains all data.
 DATA_DIR_PATH = Path.home() / 'personal/phd/projects/traffic_analysis_tools/fixtures/results'
@@ -15,12 +17,6 @@ DATA_FILE_PATH = DATA_DIR_PATH / DATA_FILE_NAME
 if DATA_FILE_PATH.exists() is False:
     print('The path specified for file containing data extracted from PCAP does not exist, please recheck')
 
-
-def print_as_json(data, indent=2, sort_keys=False) -> None:
-    print(json.dumps(data, indent=indent, sort_keys=sort_keys, cls=NpEncoder))
-
-
-import pandas as pd
 # Load data file
 pcap_data = pd.read_csv(str(DATA_FILE_PATH))
 
@@ -42,7 +38,6 @@ summary_data.total_data = pcap_data['size'].sum()
 summary_data.data_rate = summary_data.total_data/summary_data.duration
 summary_data.average_packet_size = pcap_data['size'].mean()
 
-import json
 
 print('Start time of trace: {}'.format(timestamp_to_formatted_date(summary_data.start_time)))
 print('End time of trace: {}'.format(timestamp_to_formatted_date(summary_data.stop_time)))
@@ -59,12 +54,12 @@ summary_data.unique_dst_ip = pcap_data['dst_ip'].unique()
 summary_data.unique_ip = set().union(summary_data.unique_src_ip, summary_data.unique_dst_ip)
 
 
-def get_protocol_specific_data(df: DataFrame, summary_data: Munch) -> Munch:
+def get_protocol_specific_data(df: DataFrame, summary: Munch) -> Munch:
     proto_data = Munch()
 
     proto_data.count = df.shape[0]
     proto_data.total_data = df['size'].sum()
-    proto_data.packet_rate = df.shape[0] / summary_data.duration
+    proto_data.packet_rate = df.shape[0] / summary.duration
     proto_data.avg_packet_size = proto_data.total_data / (proto_data.count or 1)
 
     return proto_data
@@ -72,15 +67,15 @@ def get_protocol_specific_data(df: DataFrame, summary_data: Munch) -> Munch:
 
 # Stats for outgoing packets
 summary_data.outgoing_packets_data = get_protocol_specific_data(
-    df=pcap_data[pcap_data['outgoing'] == True],
-    summary_data=summary_data
+    df=pcap_data[pcap_data['outgoing'] is True],
+    summary=summary_data
 )
 print_as_json(summary_data.outgoing_packets_data)
 
 # Stats for incoming packets
 summary_data.incoming_packet_data = get_protocol_specific_data(
     df=pcap_data[pcap_data['outgoing'].isnull()],
-    summary_data=summary_data
+    summary=summary_data
 )
 print_as_json(summary_data.incoming_packet_data)
 
@@ -90,7 +85,7 @@ layer3_proto_data = dict()
 for proto in summary_data.unique_layer3_proto:
     layer3_proto_data[proto] = get_protocol_specific_data(
         df=pcap_data[pcap_data['eth_type'] == proto],
-        summary_data=summary_data
+        summary=summary_data
     )
 summary_data.layer3_proto_data = layer3_proto_data
 print_as_json(summary_data.layer3_proto_data)
@@ -102,7 +97,7 @@ layer4_proto_data = dict()
 for proto in summary_data.unique_layer4_proto:
     layer4_proto_data[proto] = get_protocol_specific_data(
         df=pcap_data[pcap_data['ip_proto'] == proto],
-        summary_data=summary_data
+        summary=summary_data
     )
 summary_data.layer4_proto_data = layer4_proto_data
 print_as_json(summary_data.layer4_proto_data)
@@ -114,7 +109,7 @@ layer7_proto_data = dict()
 for proto in summary_data.unique_layer7_proto:
     layer7_proto_data[proto] = get_protocol_specific_data(
         df=pcap_data[pcap_data['layer7_proto_name'] == proto],
-        summary_data=summary_data
+        summary=summary_data
     )
 summary_data.layer7_proto_data = layer7_proto_data
 print_as_json(summary_data.layer7_proto_data)
@@ -148,5 +143,3 @@ ax.set_title('Data transferred per IP address')
 plt.xticks(rotation=70)
 plt.locator_params(axis='x', nbins=len(ips))
 plt.show()
-
-

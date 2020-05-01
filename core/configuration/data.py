@@ -1,4 +1,4 @@
-from pydantic import Extra
+from pydantic import Extra  # pylint: disable=no-name-in-module
 
 from core.models.common import Model
 

@@ -1,14 +1,14 @@
 #!/usr/bin/python
-
 import os
 import sys
 import time
 
 sys.path.append(os.getcwd())
 
-from core.analyzer.pcap_processor import PcapProcessor
-from core.configuration.manager import ConfigurationManager
-from scripts.common import RESULTS_DIR_PATH, CONFIG_DIR_PATH, PCAP_DIR_PATH, PROJECT_DIR_PATH
+# pylint: disable=wrong-import-position
+from core.analyzer.pcap_processor import PcapProcessor  # noqa
+from core.configuration.manager import ConfigurationManager  # noqa
+from tools.common import RESULTS_DIR_PATH, CONFIG_DIR_PATH, PCAP_DIR_PATH, PROJECT_DIR_PATH  # noqa
 
 config_manager = ConfigurationManager()
 config = config_manager.load_data_from_configuration_file(file_path=os.path.join(CONFIG_DIR_PATH, 'config.yml'))
@@ -18,7 +18,7 @@ pcap_processor = PcapProcessor(config=config)
 
 # Read and process the file
 start_time = time.time()
-trace_info, status = pcap_processor.process(
+trace_info = pcap_processor.process(
     # input_file=os.path.join(PCAP_DIR_PATH, '16-11-22.pcap'),
     # output_file=os.path.join(RESULTS_DIR_PATH, '16-11-22.csv'
     input_file=os.path.join(PCAP_DIR_PATH, 'test_data.pcap'),

@@ -3,18 +3,17 @@ import argparse
 from pathlib import Path
 
 
-def convert_csv_to_tex(args):
-    file_path = Path(args.input_file)
+def convert_csv_to_tex(arguments):
+    file_path = Path(arguments.input_file)
     if not file_path.exists():
         raise ValueError('Invalid/non-existing path `{}` provided for input CSV file')
 
     table_data = ""
 
+    table_data = table_data + r"\end{tabular}\n"
+    table_data = table_data + r"\end{}"
 
-    table_data = table_data + "\end{tabular}\n"
-    table_data = table_data + "\end"
-
-
+    return table_data
 
 
 def get_args():
@@ -39,4 +38,3 @@ def get_args():
 
 if __name__ == '__main__':
     args = get_args()
-

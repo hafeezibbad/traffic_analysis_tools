@@ -1,7 +1,7 @@
 import logging
 from abc import ABC
 import os
-from typing import Optional, Generic, TextIO, List
+from typing import Optional, Any, TextIO, List
 
 from core.file_processor.errors import FileError, FileErrorType
 from core.lib.file_utils import remove_files_from_directory, has_valid_extension
@@ -14,7 +14,7 @@ class FileProcessorABC(ABC):
         pass
 
     @staticmethod
-    def write(content: Generic, output_file_path: str) -> bool:
+    def write(data: Any, output_file_path: str) -> bool:
         pass
 
     @staticmethod
@@ -26,7 +26,7 @@ class FileProcessorABC(ABC):
         pass
 
     @staticmethod
-    def create_empty_files(directory: str = None, file_size: int = 0) -> bool:
+    def create_empty_files(directory: str = None, file_sizes: List[int] = 0, strict: bool = False) -> bool:
         pass
 
     @staticmethod
@@ -44,11 +44,11 @@ class FileProcessorBase(FileProcessorABC):
     def read(self, file_path: str) -> bool:
         raise NotImplementedError
 
-    def write(self, content: Generic, output_file_path: str) -> bool:
+    def write(self, data: Any, output_file_path: str) -> bool:
         raise NotImplementedError
 
     @staticmethod
-    def open_file(self, file_path: str = None, mode: str = 'r') -> TextIO:
+    def open_file(file_path: str = None, mode: str = 'r') -> TextIO:
         """Open file in given mode for read/write.
 
         Parameters
@@ -169,7 +169,7 @@ class FileProcessorBase(FileProcessorABC):
 
         """
         try:
-            if type(file_size) is str and str.isalnum(file_size):
+            if isinstance(file_size, str) and str.isalnum(file_size):
                 file_size = int(file_size)
 
         except ValueError:
@@ -243,9 +243,7 @@ class FileProcessorBase(FileProcessorABC):
             except Exception as ex:
                 if strict is True:
                     raise ex
-                logging.warning(
-                    'Unable to create file of size: `{}` at path: `{}`. Error: `{}`'.format(fs, directory, ex)
-                )
+                logging.warning('Unable to create file of size: `%s` at path: `%s`. Error: `%s`', fs, directory, ex)
 
         return files_created
 

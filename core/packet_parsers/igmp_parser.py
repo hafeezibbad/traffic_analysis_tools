@@ -21,16 +21,16 @@ class IgmpPacketParser(PacketParserInterface):
             return IGMP(ip_packet.data)
 
         except BaseException as ex:
-            logging.warning('Can not extract IGMP packet data from IP Packet. Error: `{}`'.format(ex))
+            logging.warning('Can not extract IGMP packet data from IP Packet. Error: `%s`', ex)
             raise ex
 
-    def extract_data(self, igmp_packet: IGMP) -> Munch:
+    def extract_data(self, packet: IGMP) -> Munch:
         data = Munch()
-        if igmp_packet is None:
+        if packet is None:
             return data
 
-        data.igmp_type = igmp_packet.type
-        data.igmp_addr = self.ip_addr_utils.inet_to_str(igmp_packet.group)
+        data.igmp_type = packet.type
+        data.igmp_addr = self.ip_addr_utils.inet_to_str(packet.group)
         if self.config.use_numeric_values is True:
             data.igmp_addr = self.ip_addr_utils.ip_to_int(data.igmp_addr)
 

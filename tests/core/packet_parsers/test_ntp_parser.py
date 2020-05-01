@@ -31,7 +31,7 @@ class NtpPacketParserTests(BasePacketParserTests):
         self.assertEqual(mock_stratum, ntp_data.ntp_stratum)
         self.assertEqual(mock_reference_addr, ntp_data.ntp_reference_id)
 
-    def test_resolve_ntp_reference_returns_none_if_id_is_Null(self):
+    def test_resolve_ntp_reference_returns_none_if_id_is_null(self):
         ntp_packet = dpkt.ntp.NTP()
         ntp_packet.id = b'\x00\x00\x00\x00'
 

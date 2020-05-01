@@ -27,7 +27,7 @@ class Ip6PacketParser(PacketParserInterface):
                 )
 
         except BaseException as ex:
-            logging.warning('Unable to extract IP6 from `{}`.Error: `{}`'.format(type(packet), ex))
+            logging.warning('Unable to extract IP6 from `%s`. Error: `%s`', type(packet), ex)
             raise ex
 
         return data

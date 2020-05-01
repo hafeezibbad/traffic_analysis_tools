@@ -1,6 +1,6 @@
 import logging
-from typing import Union
 
+from typing import Union
 import dpkt
 from dpkt.ip import IP
 from dpkt.udp import UDP
@@ -22,7 +22,7 @@ class UpnpPacketParser(PacketParserInterface):
             return UpnpPacketParser.load_upnp_packet_from_udp_packet(udp_packet)
 
         except BaseException as ex:
-            logging.warning('Can not extract UPnP request from IP packet. Error: {}'.format(ex))
+            logging.warning('Can not extract UPnP request from IP packet. Error: `%s`', ex)
             raise ex
 
     @staticmethod
@@ -35,7 +35,7 @@ class UpnpPacketParser(PacketParserInterface):
             return http_packet
 
         except BaseException as ex:
-            logging.warning('Can not extract UPnP request from IP packet. Error: {}'.format(ex))
+            logging.warning('Can not extract UPnP request from IP packet. Error: `%s`', ex)
             raise ex
 
     def extract_fingerprint_from_notify_message(self, http_packet: dpkt.http.Request) -> Munch:
@@ -90,13 +90,13 @@ class UpnpPacketParser(PacketParserInterface):
         fingerprint = self.extract_fingerprint_from_notify_message(upnp_packet)
         return fingerprint
 
-    def extract_data(self, upnp_packet: Union[UpnpRequest, dpkt.http.Response]) -> Munch:
-        """
-        Extract data from UPnP response or response packet. The data is extracted from the packet based on HTTP request
-        method. The data consists of headers and packet data included in UPnP packet.
+    def extract_data(self, packet: Union[UpnpRequest, dpkt.http.Response]) -> Munch:
+        """Extract data from UPnP response or response packet. The data is extracted from the packet based on
+        HTTP request  method. The data consists of headers and packet data included in UPnP packet.
+
         Parameters
         ----------
-        upnp_packet: UPnP request or response packet.
+        packet: UPnP request or response packet.
 
         Returns
         -------
@@ -108,16 +108,16 @@ class UpnpPacketParser(PacketParserInterface):
         """
         data = Munch()
         fingerprint = dict()
-        if upnp_packet is None:
+        if packet is None:
             return data
 
-        if isinstance(upnp_packet, UpnpRequest):
+        if isinstance(packet, UpnpRequest):
             data.upnp_packet_type = 1
-            fingerprint = self.extract_fingerprint_from_request(upnp_packet)
+            fingerprint = self.extract_fingerprint_from_request(packet)
 
-        elif isinstance(upnp_packet, dpkt.http.Response):
+        elif isinstance(packet, dpkt.http.Response):
             data.upnp_packet_type = 2
-            fingerprint = self.extract_fingerprint_from_response(upnp_packet)
+            fingerprint = self.extract_fingerprint_from_response(packet)
 
         for key, value in fingerprint.items():
             data[key] = value

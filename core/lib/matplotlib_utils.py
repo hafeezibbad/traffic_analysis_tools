@@ -57,10 +57,10 @@ def bar_plot(ax, data, colors=None, total_width=0.8, single_width=1, legend=True
 
         # Draw a bar for every value of that type
         for x, y in enumerate(values):
-            bar = ax.bar(x + x_offset, y, width=bar_width * single_width, color=colors[i % len(colors)])
+            bar_value = ax.bar(x + x_offset, y, width=bar_width * single_width, color=colors[i % len(colors)])
 
         # Add a handle to the last drawn bar, which we'll need for the legend
-        bars.append(bar[0])
+        bars.append(bar_value[0])
 
     # Draw legend if we need
     if legend:

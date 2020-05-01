@@ -4,10 +4,10 @@ from typing import Optional
 
 from munch import Munch, DefaultMunch
 
-from core.errors import FileError
+from core.file_processor.errors import FileError
 from core.file_processor.json_file import JsonFileProcessor
 from core.lib.manuf_file import load_manuf_file
-from core.static.CONSTANTS import IP_PROTOCOLS_DATA_FILE_PATH, LAYER4_PORTS_DATA_FILE_PATH, TCP_FLAGS_DATA_FILE_PATH, \
+from core.static.constants import IP_PROTOCOLS_DATA_FILE_PATH, LAYER4_PORTS_DATA_FILE_PATH, TCP_FLAGS_DATA_FILE_PATH, \
     MANUF_DATA_FILE_PATH, ETHER_TYPES_DATA_FILE_PATH, IP_OPTIONS_DATA_FILE_PATH
 
 
@@ -54,7 +54,7 @@ class StaticData:
             return JsonFileProcessor().read(file_path)
 
         except FileError:
-            logging.error('Loading data from path: {} failed'.format(file_path))
+            logging.error('Loading data from path: `%s` failed', file_path)
 
         return None
 
@@ -67,6 +67,6 @@ class StaticData:
                     ip_protocol_table[num] = name[8:]
 
         except Exception as ex:
-            logging.error('Unable to protocol number to name mapping. Error: {}'.format(ex))
+            logging.error('Unable to protocol number to name mapping. Error: `%s`', ex)
 
         return ip_protocol_table

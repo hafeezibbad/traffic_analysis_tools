@@ -8,6 +8,7 @@ from core.packet_parsers.dns_parser import DnsPacketParser
 from tests.core.packet_parsers.common import BasePacketParserTests
 
 
+# pylint: disable=invalid-name
 class DnsPacketParserTests(BasePacketParserTests):
     def __init__(self, *args, **kwargs):
         super(DnsPacketParserTests, self).__init__(*args, **kwargs)

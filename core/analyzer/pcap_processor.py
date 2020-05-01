@@ -1,10 +1,9 @@
 import logging
 import os
 from pathlib import Path
-from typing import Tuple, TextIO
+from typing import Tuple, TextIO, Any
 
 import dpkt
-from pydantic.types import Any
 
 from core.analyzer.base_processor import BaseProcessor
 from core.configuration.data import ConfigurationData
@@ -37,6 +36,7 @@ class PcapProcessor(BaseProcessor):
             self.static_data = StaticData()
         self.dpkt_utils = DpktUtils(config=config, static_data=static_data)
 
+    # pylint: disable=arguments-differ
     def process(
             self,
             input_file: str = None,
@@ -66,7 +66,7 @@ class PcapProcessor(BaseProcessor):
         FileError: Exception
             If there is some issue with reading or processing input pcap file, or writing data to output csv file.
         """
-        logging.debug('input_file:', input_file)
+        logging.debug('input_file: %s', input_file)
 
         pcap_file, captures = self.load_pcap_file_for_reading(input_file, pcap_filter)
         pcap_file_info = PcapFileInfo()
@@ -94,7 +94,7 @@ class PcapProcessor(BaseProcessor):
             except Exception as ex:
                 raise GenericError(message='Unable to process packet at ts:{} Error: {}'.format(ts, ex)) from ex
 
-        logging.info('{} packets processed from {}'.format(count, input_file))
+        logging.info('%s packets processed from %s', count, input_file)
         pcap_file.close()
         result_file.close()
 
@@ -150,7 +150,7 @@ class PcapProcessor(BaseProcessor):
         FileError: Exception
             Raised if input pcap file can not be read.
         """
-        if check_valid_path(file_path, valid_extensions=['pcap']):
+        if check_valid_path(file_path, valid_extensions=['pcap']) is False:
             raise FileError(
                 message='Invalid file path ({}) specified for pcap file'.format(file_path),
                 error_type=FileErrorType.INVALID_FILE_PATH
@@ -158,7 +158,7 @@ class PcapProcessor(BaseProcessor):
         try:
             pcap_file = FileProcessorBase.open_file(file_path, mode='rb')
             captures = dpkt.pcap.Reader(pcap_file)
-            if filter:
+            if pcap_filter:
                 captures.setfilter(pcap_filter)           # pypcap's BRF expression
 
             return pcap_file, captures
@@ -209,10 +209,10 @@ class PcapProcessor(BaseProcessor):
             )
             # Skip further processing for packets which do not have layer 4 data
             if eth.type in [
-                dpkt.ethernet.ETH_TYPE_ARP,
-                6,  # IEEE 802.1 Link Layer Control
-                34958,  # IEEE 802.1X Authentication
-                35085  # TDLS Discovery request
+                    dpkt.ethernet.ETH_TYPE_ARP,
+                    6,  # IEEE 802.1 Link Layer Control
+                    34958,  # IEEE 802.1X Authentication
+                    35085  # TDLS Discovery request
             ]:
                 return packet_data
 
@@ -236,12 +236,14 @@ class PcapProcessor(BaseProcessor):
             # Handler Layer 7: DNS, UPnP, DHCP, mDNS, NTP
             layer7_packet = self.dpkt_utils.load_layer7_packet(layer4_packet, packet_data)
             if layer7_packet is None:
-                logging.debug('Unable to extract layer7 packet with src port `{}`, dst port `{}`'.format(
-                    packet_data.src_port, packet_data.dst_port
-                ))
+                logging.debug(
+                    'Unable to extract layer7 packet with src port `%s`, dst port `%s`',
+                    packet_data.src_port,
+                    packet_data.dst_port
+                )
             packet_data = self.dpkt_utils.extract_data_from_layer7_packet(layer7_packet, packet_data)
 
         except Exception as ex:
-            logging.error('Error in processing packet at ref_time: {}. Error: {}'.format(packet_data.ref_time, ex))
+            logging.error('Error in processing packet at ref_time: `%s`. Error: `%s`', packet_data.ref_time, ex)
 
         return packet_data

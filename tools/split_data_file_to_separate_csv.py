@@ -1,14 +1,13 @@
+from pathlib import Path  # noqa
 import os
 import sys
 
-
 sys.path.append(os.getcwd())
 
-from pathlib import Path
-
-from core.lib.mac_utils import MacAddressUtils
-from core.lib.common import print_json
-from core.pandas_utils.split_csv_data import extract_data_as_separate_csv
+# pylint: disable=wrong-import-position
+from core.lib.mac_utils import MacAddressUtils  # noqa
+from core.lib.common import print_json  # noqa
+from core.pandas_utils.split_csv_data import extract_data_as_separate_csv  # noqa
 
 
 if __name__ == '__main__':

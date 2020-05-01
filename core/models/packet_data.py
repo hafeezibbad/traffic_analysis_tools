@@ -130,112 +130,112 @@ class PacketData(Model):
         """The sequence should be similar to packet_data_file_headers"""
         values = []
         for attr in [
-            self.timestamp,
-            self.ref_time,
-            self.size,
-            self.outgoing,
-            # Layer 2: Data link layer
-            self.src_mac,
-            self.dst_mac,
-            self.eth_type,
-            self.eth_payload_size,
-            # Layer 3: Network layer
-            self.src_ip,
-            self.dst_ip,
-            self.ip_tos,
-            self.ip_ttl,
-            self.ip_opts,
-            self.ip_proto,
-            self.ip_payload_size,
-            self.ip6_nxt_hdr,
-            self.ip_do_not_fragment,
-            self.ip_more_fragment,
-            # Layer 3: IEEE-8-1211.Auth
-            self.ieee80211_version,
-            self.ieee80211_payload_size,
-            # Layer 4: ICMP packets
-            self.icmp_type,
-            self.icmp_code,
-            self.icmp_message,
-            # Layer 4: IGMP Packets
-            self.igmp_type,
-            self.igmp_addr,
-            # Layer 4: Transport layer
-            self.src_port,
-            self.dst_port,
-            self.layer4_payload_size,
-            # Layer 4: TCP flags
-            self.tcp_fin_flag,
-            self.tcp_syn_flag,
-            self.tcp_rst_flag,
-            self.tcp_psh_flag,
-            self.tcp_ack_flag,
-            self.tcp_urg_flag,
-            self.tcp_ece_flag,
-            self.tcp_cwr_flag,
-            # TCP Syn packet data
-            self.syn_signature,
-            self.client_os,
-            # Layer 4: NAT-PMP data
-            self.natpmp_version,
-            self.natpmp_opcode,
-            self.natpmp_reserved,
-            self.natpmp_result,
-            self.natpmp_sssoe,
-            self.natpmp_lifetime,
-            self.natpmp_external_ip,
-            self.natpmp_internal_port,
-            self.natpmp_external_port,
-            # Layer 7: Application layer
-            self.layer7_proto,
-            self.payload_size,
-            # Layer 7: DNS queries
-            self.dns_type,
-            self.dns_rcode,
-            self.dns_op,
-            self.dns_query_domain,
-            self.dns_query_type,
-            self.dns_query_cls,
-            self.dns_query_multiple_domains,
-            # Layer 7: DNS answers
-            self.dns_ans_type,
-            self.dns_ans_cname,
-            self.dns_ans_cname_ttl,
-            self.dns_ans_name,
-            self.dns_ans_ip,
-            self.dns_ans_ttl,
-            # Layer 7: ARP data
-            self.arp_request_src,
-            self.arp_src_mac,
-            self.arp_src_ip,
-            self.arp_dst_mac,
-            self.arp_dst_ip,
-            # Layer 7: NTP
-            self.ntp_mode,
-            self.ntp_interval,
-            self.ntp_reference_id,
-            self.ntp_stratum,
-            # Layer 7: DHCP
-            self.dhcp_fingerprint,
-            self.dhcp_vendor,
-            self.dhcp_hostname,
-            self.dhcp_opts,
-            # Layer 7: mDNS
-            self.mdns_packet_type,
-            self.mdns_hostname,
-            self.mdns_services,
-            # Layer 7: UPnP message, SSDP Protocol
-            self.upnp_packet_type,
-            self.upnp_location,
-            self.upnp_server,
-            self.upnp_cache,
-            self.upnp_uns,
-            self.upnp_nt,
-            self.upnp_nts,
-            self.upnp_host,
-            self.upnp_st,
-            self.upnp_man,
-            self.upnp_mx
+                self.timestamp,
+                self.ref_time,
+                self.size,
+                self.outgoing,
+                # Layer 2: Data link layer
+                self.src_mac,
+                self.dst_mac,
+                self.eth_type,
+                self.eth_payload_size,
+                # Layer 3: Network layer
+                self.src_ip,
+                self.dst_ip,
+                self.ip_tos,
+                self.ip_ttl,
+                self.ip_opts,
+                self.ip_proto,
+                self.ip_payload_size,
+                self.ip6_nxt_hdr,
+                self.ip_do_not_fragment,
+                self.ip_more_fragment,
+                # Layer 3: IEEE-8-1211.Auth
+                self.ieee80211_version,
+                self.ieee80211_payload_size,
+                # Layer 4: ICMP packets
+                self.icmp_type,
+                self.icmp_code,
+                self.icmp_message,
+                # Layer 4: IGMP Packets
+                self.igmp_type,
+                self.igmp_addr,
+                # Layer 4: Transport layer
+                self.src_port,
+                self.dst_port,
+                self.layer4_payload_size,
+                # Layer 4: TCP flags
+                self.tcp_fin_flag,
+                self.tcp_syn_flag,
+                self.tcp_rst_flag,
+                self.tcp_psh_flag,
+                self.tcp_ack_flag,
+                self.tcp_urg_flag,
+                self.tcp_ece_flag,
+                self.tcp_cwr_flag,
+                # TCP Syn packet data
+                self.syn_signature,
+                self.client_os,
+                # Layer 4: NAT-PMP data
+                self.natpmp_version,
+                self.natpmp_opcode,
+                self.natpmp_reserved,
+                self.natpmp_result,
+                self.natpmp_sssoe,
+                self.natpmp_lifetime,
+                self.natpmp_external_ip,
+                self.natpmp_internal_port,
+                self.natpmp_external_port,
+                # Layer 7: Application layer
+                self.layer7_proto,
+                self.payload_size,
+                # Layer 7: DNS queries
+                self.dns_type,
+                self.dns_rcode,
+                self.dns_op,
+                self.dns_query_domain,
+                self.dns_query_type,
+                self.dns_query_cls,
+                self.dns_query_multiple_domains,
+                # Layer 7: DNS answers
+                self.dns_ans_type,
+                self.dns_ans_cname,
+                self.dns_ans_cname_ttl,
+                self.dns_ans_name,
+                self.dns_ans_ip,
+                self.dns_ans_ttl,
+                # Layer 7: ARP data
+                self.arp_request_src,
+                self.arp_src_mac,
+                self.arp_src_ip,
+                self.arp_dst_mac,
+                self.arp_dst_ip,
+                # Layer 7: NTP
+                self.ntp_mode,
+                self.ntp_interval,
+                self.ntp_reference_id,
+                self.ntp_stratum,
+                # Layer 7: DHCP
+                self.dhcp_fingerprint,
+                self.dhcp_vendor,
+                self.dhcp_hostname,
+                self.dhcp_opts,
+                # Layer 7: mDNS
+                self.mdns_packet_type,
+                self.mdns_hostname,
+                self.mdns_services,
+                # Layer 7: UPnP message, SSDP Protocol
+                self.upnp_packet_type,
+                self.upnp_location,
+                self.upnp_server,
+                self.upnp_cache,
+                self.upnp_uns,
+                self.upnp_nt,
+                self.upnp_nts,
+                self.upnp_host,
+                self.upnp_st,
+                self.upnp_man,
+                self.upnp_mx
         ]:
             if attr is not None and attr is not False:
                 values.append(str(attr))
@@ -245,15 +245,13 @@ class PacketData(Model):
         return delimiter.join(values)
 
     def to_numeric(self):
-        """
+        """ Convert all string fields in packet data to string format
         This function converts all string fields, for example MAC addresses, IP Addresses, ethernet type,
         layer5 protocols etc. to integer values, instead of their string values. This will be used in feature
         analysis. Categorical features are not handled in this function so values, dns_ans_ip, dns_ans_ttl,
         upnp_location, upnp server values will be nullified.
         """
         # TODO: implement
-
-
 
     @staticmethod
     def packet_data_file_headers(delimiter: str = ','):

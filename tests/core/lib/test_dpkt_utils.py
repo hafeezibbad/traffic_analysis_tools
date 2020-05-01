@@ -1,6 +1,5 @@
 import socket
 import unittest
-from unittest.mock import MagicMock
 
 import dpkt
 from dpkt.dns import DNS
@@ -9,7 +8,6 @@ from dpkt.ntp import NTP
 from core.lib.dpkt_utils import DpktUtils
 from core.lib.mac_utils import MacAddressUtils
 from core.models.packet_data import PacketData
-from core.static.utils import StaticData
 from tests.core.lib.common import CONFIGURATION_OBJ
 
 

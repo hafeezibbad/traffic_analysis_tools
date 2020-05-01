@@ -3,7 +3,7 @@ IP_TCP_PROTOCOL = {
     "keyword": "TCP",
     "references": [],
     "rfc": [
-      "RFC793"
+        "RFC793"
     ],
     "protocol": "Transmission Control",
     "decimal": "6"
@@ -36,12 +36,12 @@ LAYER4_9898_PROTOCOL_INFO = [
 ]
 
 PORT_INFO_WO_ABBRV = {
-   "abbrv": "",
-   "description": "Network File System (protocol) over IPv6 Service",
-   "port": "973",
-   "status": "Unofficial",
-   "tcp": False,
-   "udp": True
+    "abbrv": "",
+    "description": "Network File System (protocol) over IPv6 Service",
+    "port": "973",
+    "status": "Unofficial",
+    "tcp": False,
+    "udp": True
 }
 
 PORT_INFO_W_ABBRV = [

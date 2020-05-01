@@ -9,12 +9,12 @@ from munch import Munch
 from core.configuration.data import ConfigurationData
 from core.lib.converters import bool_to_integer
 from core.packet_parsers.base import PacketParserInterface
-from core.static.CONSTANTS import LAYER4_PROTOCOLS
+from core.static.constants import LAYER4_PROTOCOLS
 from core.static.utils import StaticData
 
 
 class Layer4PacketParser(PacketParserInterface):
-    def __init__(self, config: ConfigurationData, static_data: StaticData = None, *args, **kwargs):
+    def __init__(self, *args, config: ConfigurationData, static_data: StaticData = None, **kwargs):
         self.config = config
         self.static_data = static_data or StaticData()
 
@@ -33,7 +33,7 @@ class Layer4PacketParser(PacketParserInterface):
             logging.debug('This a fragmented packet, so capturing raw bytes')
 
         except BaseException as ex:
-            logging.warning('Unable to extract Layer4 from `{}`. Error: `{}`'.format(type(packet), ex))
+            logging.warning('Unable to extract Layer4 from `%s`. Error: `%s`', type(packet), ex)
             raise ex
 
         return data
@@ -119,13 +119,13 @@ class Layer4PacketParser(PacketParserInterface):
             protocol_abbrv = data.get('abbrv')
             protocol_description = data.get('description')
 
-        return protocol_abbrv.replace(',', self.config.FieldDelimiter), \
-               protocol_description.replace(',', self.config.FieldDelimiter)
+        return protocol_abbrv.replace(',', self.config.FieldDelimiter),\
+            protocol_description.replace(',', self.config.FieldDelimiter)
 
 
 class TcpPacketParser(Layer4PacketParser):
-    def __init__(self, config: ConfigurationData, static_data: StaticData = None,  *args, **kwargs):
-        super(TcpPacketParser, self).__init__(config, static_data, *args, **kwargs)
+    def __init__(self, *args, config: ConfigurationData, static_data: StaticData = None, **kwargs):
+        super().__init__(self, *args, config=config, static_data=static_data, **kwargs)
 
     def extract_data(self, packet: TCP) -> Munch:
         tcp_packet_data = Munch()
@@ -154,8 +154,8 @@ class TcpPacketParser(Layer4PacketParser):
 
 
 class UDPPacketParser(Layer4PacketParser):
-    def __init__(self, config: ConfigurationData, static_data: StaticData = None, *args, **kwargs):
-        super(UDPPacketParser, self).__init__(config, static_data, *args, **kwargs)
+    def __init__(self, *args, config: ConfigurationData, static_data: StaticData = None, **kwargs):
+        super().__init__(self, *args, config=config, static_data=static_data, **kwargs)
 
     def extract_data(self, packet: Union[UDP, TCP]) -> Munch:
         return self.extract_common_data(protocol_type='udp', packet=packet)

@@ -28,7 +28,7 @@ class BaseIcmpPacketParser(PacketParserInterface):
                 icmp_code=packet.code
             )
         except BaseException as ex:
-            logging.warning('Unable to extract ICMP from `{}`.Error: `{}`'.format(type(packet), ex))
+            logging.warning('Unable to extract ICMP from `%s`. Error: `%s`', type(packet), ex)
             raise ex
 
         return data
@@ -53,7 +53,7 @@ class BaseIcmpPacketParser(PacketParserInterface):
 
 
 class Icmp6PacketParser(BaseIcmpPacketParser):
-    def __init__(self, config: ConfigurationData, *args, **kwargs):
+    def __init__(self, *args, config: ConfigurationData, **kwargs):
         super(Icmp6PacketParser, self).__init__(config, *args, **kwargs)
 
     def extract_data(self, packet: ICMP6) -> dict:
@@ -61,7 +61,7 @@ class Icmp6PacketParser(BaseIcmpPacketParser):
 
 
 class IcmpPacketParser(BaseIcmpPacketParser):
-    def __init__(self, config: ConfigurationData, *args, **kwargs):
+    def __init__(self, *args, config: ConfigurationData, **kwargs):
         super(IcmpPacketParser, self).__init__(config, *args, **kwargs)
 
     def extract_data(self, packet: ICMP) -> Munch:

@@ -24,7 +24,7 @@ class DnsPacketParser(PacketParserInterface):
             return DnsPacketParser.load_dns_packet_from_udp_packet(udp_packet)
 
         except BaseException as ex:
-            logging.warning('Can not extract DNS packet from UDP packet. Error: {}'.format(ex))
+            logging.warning('Can not extract DNS packet from UDP packet. Error: `%s`', ex)
             raise ex
 
     @staticmethod
@@ -33,7 +33,7 @@ class DnsPacketParser(PacketParserInterface):
             return DNS(udp_packet.data)
 
         except Exception as ex:
-            logging.warning('Can not extract DNS packet from UDP packet. Error: {}'.format(ex))
+            logging.warning('Can not extract DNS packet from UDP packet. Error: `%s`', ex)
             raise ex
 
     def extract_data(self, packet: DNS) -> Munch:
@@ -52,7 +52,7 @@ class DnsPacketParser(PacketParserInterface):
                 data.update(self.extract_data_from_dns_response(packet))
 
         except BaseException as ex:
-            logging.warning('Unable to extract DNS from `{}`. Error: `{}`'.format(type(packet), ex))
+            logging.warning('Unable to extract DNS from `%s`. Error: `%s`', type(packet), ex)
             raise ex
 
         return data
@@ -71,7 +71,7 @@ class DnsPacketParser(PacketParserInterface):
             data.dns_query_cls = self.config.FieldDelimiter.join([str(q.cls) for q in dns_packet.qd])
 
         except BaseException as ex:
-            logging.warning('Unable to extract DNS from `{}`. Error: `{}`'.format(type(dns_packet), ex))
+            logging.warning('Unable to extract DNS from `%s`. Error: `%s`', type(dns_packet), ex)
             raise ex
 
         return data
@@ -99,7 +99,7 @@ class DnsPacketParser(PacketParserInterface):
                 # TODO: Handle other types of dns answers:
                 # Ref: https://engineering-notebook.readthedocs.io/en/latest/engineering/dpkt.html#dns-answer
 
-            data.dns_ans_name = self.config.FieldDelimiter.join([name for name in dns_ans_name_list])
+            data.dns_ans_name = self.config.FieldDelimiter.join(dns_ans_name_list)
             # We are using only max value because in experience ttl is same even if there is separate ttl for each IP
             # address in DNS response
             if dns_ans_ttl:
@@ -112,7 +112,7 @@ class DnsPacketParser(PacketParserInterface):
             data.dns_ans_ip = self.config.FieldDelimiter.join([str(ip) for ip in dns_ans_ip_list])
 
         except Exception as ex:
-            logging.error('Unable to process dns answers packet. Error: {}'.format(ex))
+            logging.error('Unable to process dns answers packet. Error: `%s`', ex)
             raise ex
 
         return data

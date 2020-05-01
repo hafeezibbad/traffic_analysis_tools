@@ -3,7 +3,7 @@ from abc import ABC
 
 class BaseProcessorABC(ABC):
     @staticmethod
-    def process():
+    def process(input_file: str = None, output_file: str = None):
         pass
 
 

@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+from typing import Any, Dict, Union
 
 from munch import Munch, DefaultMunch
 
@@ -28,14 +29,14 @@ class JsonFileProcessor(FileProcessorBase):
                 error_type=FileErrorType.FILE_PROCESSING_ERROR
             )
 
-    def write(self, content: dict, file_path: str) -> bool:
+    def write(self, data: Union[Munch, Dict[str, Any]], output_file_path: str) -> bool:
         try:
-            with open(file_path, 'w') as output:
-                json.dump(content, output, indent=2, sort_keys=True)
+            with open(output_file_path, 'w') as output:
+                json.dump(data, output, indent=2, sort_keys=True)
 
                 return True
 
         except Exception as e:
-            logging.error('Unable to write json file to specified path: {}. Error: {}'.format(file_path, e))
+            logging.error('Unable to write json file to specified path: `%s`. Error: `%s`', output_file_path, e)
 
         return False

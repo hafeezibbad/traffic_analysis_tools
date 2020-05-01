@@ -1,5 +1,4 @@
-import json
-from typing import Union, Dict
+from typing import Union, Dict, Optional
 
 from typing_extensions import Literal
 
@@ -30,14 +29,17 @@ class PcapFileInfo(Model):
             self.packet_rate = self.packet_count / self.total_time
             self.average_packet_size = self.total_data / self.packet_count
 
-    def get_summary(self, output_format: Literal['json', 'csv'] = 'json') -> Union[Dict[str, str], str]:
+    def get_summary(self, output_format: Literal['json', 'csv'] = 'json') -> Optional[Union[Dict[str, str], str]]:
+        summary_data = None
         self.calculate_summary_stats()
         self.file_size = FileProcessorBase().get_file_size(file_path=self.file_name)
         if output_format.lower() == 'json':
-            return self.to_json()
+            summary_data = self.to_json()
 
-        elif output_format.lower() == 'csv':
-            return self.to_csv_string()
+        if output_format.lower() == 'csv':
+            summary_data = self.to_csv_string()
+
+        return summary_data
 
     def get_trace_file_info_csv_headers(self, delimiter: str = ',') -> str:
         return delimiter.join([

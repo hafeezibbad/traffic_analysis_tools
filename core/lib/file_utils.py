@@ -26,10 +26,12 @@ def search_file(directory: str = None, filename: str = None, recursive: bool = T
         Absolute path to file in given directory, if file is found, otherwise `None`
 
     """
+    print('1' * 80)
     if check_valid_path(directory, is_directory=True) is False or not filename:
         return None
 
     files = list_files_in_directory(directory=directory, recursive=recursive)
+    print('searching files in {}: {}'.format(directory, files))
     for f in files:
         if os.path.basename(f) == filename:      # Linux filesystem is case sensitive
             return os.path.abspath(f)
@@ -56,11 +58,11 @@ def get_unique_filename(directory: str = None, filename: str = '', max_tries: in
         None is returned if directory or filename is invalid, or None
     """
     if check_valid_path(directory, is_directory=True) is False:
-        logging.error('Invalid or non-existing directory: {} provided for file creation'.format(directory))
+        logging.error('Invalid or non-existing directory: `%s` provided for file creation', directory)
         return None
 
     if not filename:
-        logging.error('Invalid filename: {} provided for file creation'.format(filename))
+        logging.error('Invalid filename: `%s` provided for file creation', filename)
         return None
 
     _fname = ''.join(filename.split('.')[:-1]) + '-%03i.' + filename.split('.')[-1]
@@ -195,7 +197,7 @@ def search_file_in_directory(directory: str = None, filename: str = None, recurs
 
 def list_files_in_directory(
         directory: str = None,
-        file_extension: str = None,
+        extensions: List[str] = None,
         recursive: bool = True
 ) -> Optional[list]:
     """Recursive version for listdir which also gets files from subdirectories.
@@ -204,8 +206,8 @@ def list_files_in_directory(
     ----------
     directory: str
         Path to directory for searching the files
-    file_extension:  str
-        (if specified) Only lists the files with given extension.
+    extensions:  List[st]
+        (if specified) Only lists the files with given extensions.
     recursive: bool
         Flag to specify if directory should be search recursively? Default= True
 
@@ -223,12 +225,14 @@ def list_files_in_directory(
     files = []
     for f in os.listdir(directory):
         if recursive is True and os.path.isdir(os.path.join(directory, f)):
-            files.extend(list_files_in_directory(os.path.join(directory, f), file_extension, recursive))
+            files.extend(list_files_in_directory(os.path.join(directory, f), extensions, recursive))
 
-        elif file_extension is not None and f.split('.')[-1] == file_extension:
+        # If extensions are specified, only add files which have given extension
+        elif extensions and f.split('.')[-1] in extensions:
             files.append(os.path.abspath(os.path.join(directory, f)))
 
-        elif file_extension is None:
+        # No extensions specified, add all files
+        elif not extensions:
             files.append(os.path.abspath(os.path.join(directory, f)))
 
     return files
@@ -263,7 +267,7 @@ def extract_all_zips(
         recursive: bool = True,
         delete_original: str = False,
         strict: bool = False
-) -> int:
+) -> List[str]:
     """Looks for any zip files in a folder and extract those zipped files.
 
     Parameters
@@ -288,12 +292,11 @@ def extract_all_zips(
         If specified directory path does not exist or is not a directory.
     """
     if check_valid_path(directory, is_directory=True) is False:
-        return -1
+        return []
 
     extracted = []
-    count = 0
     while True:
-        zipped_files = list_files_in_directory(directory, file_extension='zip', recursive=recursive)
+        zipped_files = list_files_in_directory(directory, extensions=['zip'], recursive=recursive)
         if len(zipped_files) == 0:
             break
 
@@ -306,14 +309,13 @@ def extract_all_zips(
                     extracted.append(zf)
                     if delete_original:
                         os.remove(zf)   # Delete the original zipped file
-                    count += 1
 
             except Exception as ex:
                 if strict is True:
                     raise ex
-                logging.error('Unable to extract file:{0}. Error:{1}'.format(zf, ex))
+                logging.error('Unable to extract file: `%s`. Error: `%s`', zf, ex)
 
-    return count
+    return extracted
 
 
 def check_valid_path(
@@ -337,7 +339,7 @@ def check_valid_path(
     valid: bool
         True if path is valid based on specified criteria, false otherwise
     """
-    if path is None:
+    if not path:
         return False
 
     path = Path(path)

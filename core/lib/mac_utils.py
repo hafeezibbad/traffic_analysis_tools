@@ -8,7 +8,7 @@ import binascii
 from dpkt import compat_ord
 from netaddr import EUI
 
-from core.static.CONSTANTS import MAC_REGEX
+from core.static.constants import MAC_REGEX, EXCLUDED_MACS, EXCLUDED_MACS_W_WILDCARDS
 
 
 class MacAddressUtils:
@@ -25,7 +25,7 @@ class MacAddressUtils:
                 return mac
 
         except Exception as ex:
-            logging.error('Unable to convert mac (integer): {0} to string. Error: {1}'.format(mac_integer, ex))
+            logging.error('Unable to convert mac (integer): `%s` to string. Error: `%s`', mac_integer, ex)
 
         return None
 
@@ -64,6 +64,8 @@ class MacAddressUtils:
         if self.is_valid_mac(mac) is True:
             return mac
 
+        return None
+
     def convert_string_mac_to_byte_array(self, mac_address: str) -> Optional[bytearray]:
         """Converts mac address string in hex format to byte array.
 
@@ -91,7 +93,7 @@ class MacAddressUtils:
         if self.is_valid_mac(mac_address):
             return int(EUI(mac_address.replace(':', '-')))
 
-        logging.warning('Unable to convert ip: {} to integer representation')
+        logging.warning('Unable to convert ip: `%s` to integer representation', mac_address)
         return None
 
     def is_valid_mac(self, mac_address: str) -> bool:
@@ -122,6 +124,8 @@ class MacAddressUtils:
         if self.is_valid_mac(mac):
             return mac
 
+        return None
+
     def is_mac_unique(self, mac_address: str = None) -> bool:
         """
         This function checks whether the given MAC addresses is genuinely unique and not one of the "well known" MAC
@@ -130,8 +134,6 @@ class MacAddressUtils:
         :return: True if given MAC address is not a well known MAC address,
         False otherwise.
         """
-        from core.static.CONSTANTS import EXCLUDED_MACS, EXCLUDED_MACS_W_WILDCARDS
-
         if self.is_valid_mac(mac_address):
             return False
 

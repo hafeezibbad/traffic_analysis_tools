@@ -50,4 +50,3 @@ class PortMappingRequest(NatpmpRequest):
             self.public_port,
             self.lifetime
         )
-

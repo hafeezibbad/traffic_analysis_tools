@@ -103,16 +103,16 @@ class Layer4BaseParserTests(BasePacketParserTests):
             ignore_case=True
         )
 
-    def test_get_protocol_info_from_port_returns_none_if_status_data_does_not_contain_port(self):
+    def test_get_protocol_info_returns_none_if_status_data_does_not_contain_port(self):
         self.assertIsNone(self.layer4_packet_parser.get_protocol_info_from_port(port_number=35000, protocol_type='udp'))
 
-    def test_extract_protocol_info_from_protocol_data_returns_none_if_protocol_type_in_layer4_protocols(self):
+    def test_extract_protocol_info_returns_none_if_protocol_type_in_layer4_protocols(self):
         self.assertEqual(
             ('', ''),
             self.layer4_packet_parser.extract_protocol_info_from_protocol_data(data=dict(), protocol_type='dns')
         )
 
-    def test_extract_protocol_info_from_protocol_data_returns_none_if_no_data_for_protocol_type(self):
+    def test_extract_protocol_info_returns_none_if_no_data_for_protocol_type(self):
         mock_data = {
             'tcp': True,
             'udp': False,
@@ -124,7 +124,7 @@ class Layer4BaseParserTests(BasePacketParserTests):
             self.layer4_packet_parser.extract_protocol_info_from_protocol_data(data=mock_data, protocol_type='udp')
         )
 
-    def test_extract_protocol_info_from_protocol_data_works_as_expected(self):
+    def test_extract_protocol_info_works_as_expected(self):
         mock_data = {
             'tcp': True,
             'udp': False,
@@ -148,7 +148,7 @@ class Layer4BaseParserTests(BasePacketParserTests):
             self.layer4_packet_parser.get_protocol_info_from_protocol_data(data=mock_data, protocol_type='tcp')
         )
 
-    def test_get_protocol_info_from_protocol_data_works_as_expected_when_there_are_multiple_item_protocol_data(self):
+    def test_get_protocol_info_works_as_expected_with_multiple_item_in_protocol_data(self):
         mock_data = [
             {
                 'tcp': True,
