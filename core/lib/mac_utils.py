@@ -48,24 +48,34 @@ class MacAddressUtils:
         return None
 
     def convert_hexadecimal_mac_to_readable_mac(self, hexadecimal_mac: str) -> Optional[str]:
-        """
-        Convert mac address to readable string
-        :param hexadecimal_mac: Hex MAC address (e.g. '\x01\x02\x03\x04\x05\x06')
-          :type: hex string
-        :return mac: printable/readable mac string
-          :type: str
+        """Convert mac address to readable string.
+
+        Parameters
+        ----------
+        hexadecimal_mac: byte string
+            Hex MAC address (e.g. '\x01\x02\x03\x04\x05\x06')
+
+        Returns
+        --------
+        mac: str
+            printable/readable mac string
         """
         mac = ':'.join('%02x' % compat_ord(b) for b in hexadecimal_mac)
         if self.is_valid_mac(mac) is True:
             return mac
 
-        return None
-
     def convert_string_mac_to_byte_array(self, mac_address: str) -> Optional[bytearray]:
-        """
-        Converts mac address string in hex format to byte array.
-        :param mac_address: String mac address (semi-colon or dash separated
-        :return: Byte array
+        """Converts mac address string in hex format to byte array.
+
+        Parameters
+        ----------
+        mac_address: str
+            mac address (semi-colon or dash separated)
+
+        Returns
+        --------
+        mac_address: bytearray
+            MAC address in byte format
         """
         if self.is_valid_mac(mac_address) is False:
             return None
@@ -85,10 +95,17 @@ class MacAddressUtils:
         return None
 
     def is_valid_mac(self, mac_address: str) -> bool:
-        """
-        Checks if given string is a valid MAC address or not.
-        :param mac_address: String
-        :return: True if valid otherwise false
+        """Checks if given string is a valid MAC address or not.
+
+        Parameters
+        ----------
+        mac_address: str
+            MAC address in string format
+
+        Returns
+        --------
+        is_valid: bool
+            True if valid otherwise false
         """
         if not mac_address:
             return False
@@ -98,8 +115,7 @@ class MacAddressUtils:
         return False
 
     def generate_random_mac(self) -> Optional[str]:
-        """
-        This function generates a random mac address.
+        """This function generates a random mac address.
         :return: mac_address: String
         """
         mac = ':'.join(map(lambda x: "%02x" % x, [random.randint(0x00, 0xff) for _ in range(6)]))

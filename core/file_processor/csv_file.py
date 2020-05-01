@@ -1,4 +1,4 @@
-from core.file_process.base import FileProcessorABC
+from core.file_processor.base import FileProcessorABC
 
 
 class CsvFileProcessor(FileProcessorABC):

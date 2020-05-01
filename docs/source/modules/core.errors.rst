@@ -4,10 +4,10 @@ core.errors package
 Submodules
 ----------
 
-core.errors.file\_errors module
--------------------------------
+core.errors.generic\_errors module
+----------------------------------
 
-.. automodule:: core.errors.file_errors
+.. automodule:: core.errors.generic_errors
    :members:
    :undoc-members:
    :show-inheritance:

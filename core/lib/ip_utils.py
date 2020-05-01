@@ -13,10 +13,17 @@ from core.static.CONSTANTS import IPv4_REGEX, IPv6_REGEX
 
 class IpAddrUtils:
     def is_valid_ip(self, ip_address: str) -> bool:
-        """
-        Checks if give string is a valid IPv4 address or IPv6 address.
-        :param ip_address: String
-        :return: True if valid otherwise False
+        """Checks if give string is a valid IPv4 address or IPv6 address.
+
+        Parameters
+        ----------
+        ip_address: str
+            IP address, for example 192.168.1.1
+        Returns
+        -------
+        is_valid: bool
+            True if IP address is valid otherwise False
+
         """
         if re.compile(IPv4_REGEX).match(ip_address):
             return True
@@ -28,19 +35,29 @@ class IpAddrUtils:
 
     @staticmethod
     def generate_random_ip(self) -> Optional[str]:
-        """
-        Generates random IP addresses and returns in string format.
-        :return: IP address: String format.
+        """Generates random IP addresses and returns in string format.
+
+        Returns
+        -------
+        IP address: str, optional
+            Random IP address, for example, 192.168.1.1
         """
         ip = socket.inet_ntoa(struct.pack('>I', random.randint(1, 0xffffffff)))
         if self.is_valid_ip(ip):
             return ip
 
     def ip_to_int(self, ip_address: str) -> Optional[int]:
-        """
-        Converts IP address string to integer representation. For example, '192.168.100.1' --> 3232261121
-        :param ip_address: IP address in string form
-        :return: Integer representation of IP address string.
+        """Converts IP address string to integer representation. For example, '192.168.100.1' --> 3232261121
+
+        Parameters
+        -----------
+        ip_address: str
+            IP address of format 192.168.1.1
+
+        Returns
+        -------
+        ip_address: int
+            Integer representation of IP address string.
         """
         if self.is_valid_ip(ip_address) is True:
             return int(IPAddress(ip_address))
@@ -48,10 +65,17 @@ class IpAddrUtils:
         logging.warning('Unable to convert ip: {} to integer representation')
 
     def int_to_ip(self, ip_integer: Union[int, str]) -> Optional[str]:
-        """
-        Converts integer form of IP address to string form, for example, int_to_ip(3232261121) -> '192.168.100.1'
-        :param ip_integer: Integer representation of IP address.
-        :return: String representation of IP address.
+        """Converts integer form of IP address to string form, for example, int_to_ip(3232261121) -> '192.168.100.1'
+
+        Parameters
+        -----------
+        ip_address: str
+            IP address of format 192.168.1.1
+
+        Returns
+        -------
+        ip_address: int
+            Integer representation of IP address string.
         """
         try:
             ip_integer = int(ip_integer)
@@ -63,10 +87,18 @@ class IpAddrUtils:
             logging.error('Unable to convert IP (integer): {0} to string. Error: {1}'.format(ip_integer, ex))
 
     def get_ip_for_url(self, url: str = None) -> Optional[str]:
-        """
-        This function returns the ip address of any given url.
-        :param url: String
-        :return:
+        """This function returns the ip address of any given url.
+
+        Parameters
+        -----------
+        url: str
+            URL address
+
+        Returns
+        --------
+        ip_address: str
+            IP address hosting the given URL
+            None if hostname can not be resolved
         """
         try:
             if url is not None:
@@ -83,9 +115,12 @@ class IpAddrUtils:
         return None
 
     def generate_random_ip_with_mask(self) -> Optional[str]:
-        """
-        Generates random IP addresses and returns in string format.
-        :return: IP address: String format.
+        """Generates random IP addresses and returns in string format.
+
+        Returns
+        --------
+        IP address: str
+            IP address in string format, example, 192.168.1.1
         """
         ip = socket.inet_ntoa(struct.pack('>I', random.randint(1, 0xffffffff)))
         ip_address = '%s/%d' % (ip, random.randrange(8, 32))
@@ -93,10 +128,15 @@ class IpAddrUtils:
             return ip_address
 
     def inet_to_str(self, inet: bytes = '') -> Optional[str]:
-        """
-        Convert Inet address to a readable/printable string.
-        :param inet: inet network address.
-          :type: inet struct
+        """Convert Inet address to a readable/printable string.
+
+        Parameters
+        -----------
+        inet: bytes
+            inet network address struct
+
+        Returns
+        -------
         :return: Printable/readable MAC address
           :type: str
         """

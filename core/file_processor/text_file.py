@@ -1,4 +1,4 @@
-from core.file_process.base import FileProcessorBase
+from core.file_processor.base import FileProcessorBase
 
 
 class TextFileProcessor(FileProcessorBase):

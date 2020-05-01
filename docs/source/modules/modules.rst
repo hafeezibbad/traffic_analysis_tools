@@ -6,3 +6,4 @@ traffic_analysis_tools
 
    core
    scripts
+   tests
