@@ -1,4 +1,4 @@
-import os
-import sys
-
-sys.path.append(os.getcwd())
+"""
+This module contains scripts written for extracting and analyzing data from PCAP files containing IoT device traffic
+captures.
+"""
