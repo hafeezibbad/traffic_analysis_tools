@@ -7,7 +7,13 @@ $ pip install -r requirements.txt
 ```
 
 ## Documentation
-Detailed documentation about each module, script is available in `docs/` folder. 
+To generate documentation from repo, please perform following steps
+```bash
+$ cd docs           # Docs root directory
+$ make clean        # Remove outdated docs files
+$ make html         # Generate HTML documentation
+$ make view-docs    # Opens docs in Firefox
+``` 
 
 ## Scripts
 ### Required scripts
