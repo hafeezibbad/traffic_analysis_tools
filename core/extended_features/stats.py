@@ -1,6 +1,7 @@
 from math import log, e
 from typing import Union, List
 
+from munch import Munch
 from pandas import DataFrame
 from scipy.stats import entropy
 from numpy import ndarray
@@ -118,3 +119,73 @@ def make_bins(data: DATA_VECTOR, n_items: int) -> DATA_VECTOR:
         binned_data.append(data[i:])
 
     return binned_data
+
+
+def compile_data_frame_including_stats(data: DataFrame, column_prefix: str = None) -> DataFrame:
+    """This function adds summary statistics as additional columns in data frame.
+
+    Parameters
+    ----------
+    data: DataFrame
+        Data frame containing values for calculating stats
+    column_prefix:
+        Prefix which should be added to column names for summary stats
+
+    Returns
+    --------
+    data: DataFrame
+        Data frame object containing additional columns with statistics
+    """
+    if not column_prefix:
+        column_prefix = ''
+    else:
+        column_prefix = '{}_'.format(column_prefix)
+
+    stats_df = DataFrame(data=data)
+    stats = calculate_stats(data)
+    stats_df['{}min'.format(column_prefix)] = stats.min
+    stats_df['{}max'.format(column_prefix)] = stats.max
+    stats_df['{}sum'.format(column_prefix)] = stats.sum
+    stats_df['{}mean'.format(column_prefix)] = stats.mean
+    stats_df['{}std'.format(column_prefix)] = stats.std
+    stats_df['{}p25'.format(column_prefix)] = stats.p25
+    stats_df['{}p50'.format(column_prefix)] = stats.p50
+    stats_df['{}p75'.format(column_prefix)] = stats.p75
+    stats_df['{}p90'.format(column_prefix)] = stats.p90
+    stats_df['{}iqr'.format(column_prefix)] = stats.iqr
+    stats_df['{}entropy'.format(column_prefix)] = stats.entropy
+
+    return stats_df
+
+
+def calculate_stats(data: DATA_VECTOR) -> Munch:
+    """ Calculate summary statistics including sum, min, max, mean, 25/50/75/90 percentile, IQR, standard deviation,
+    and entropy.
+
+    Parameters
+    ----------
+    data: DATA_VECTOR
+        List of integer or float values to calculate the sum.
+
+    Returns
+    -------
+    stats: Munch
+        JSON (dictionary, munch) object containing statistics calculated from data.
+    """
+    stats = DefaultMunch(0)
+    if not data or not isinstance(data, (list, ndarray)):
+        return stats
+
+    if isinstance(data, list):
+        data = np.array(data)
+
+    stats.max = np.max(data)
+    stats.min = np.min(data)
+    stats.sum = np.sum(data)
+    stats.mean = np.mean(data)
+    stats.std = np.std(data)
+    stats.p25, stats.p50, stats.p75, stats.p90 = calculate_quantiles(data, percentiles=[25, 50, 75, 90])
+    stats.iqr = stats.p75 - stats.p25
+    stats.entropy = calculate_entropy(data)
+
+    return stats
