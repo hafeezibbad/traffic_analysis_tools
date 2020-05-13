@@ -1,11 +1,12 @@
 from math import log, e
 from typing import Union, List
 
-from munch import Munch
+from munch import Munch, DefaultMunch
 from pandas import DataFrame
 from scipy.stats import entropy
 from numpy import ndarray
 import numpy as np
+import pandas as pd
 
 from core.extended_features import DATA_VECTOR
 
@@ -158,7 +159,7 @@ def compile_data_frame_including_stats(data: DataFrame, column_prefix: str = Non
     return stats_df
 
 
-def calculate_stats(data: DATA_VECTOR) -> Munch:
+def calculate_stats(data: DATA_VECTOR = None) -> Munch:
     """ Calculate summary statistics including sum, min, max, mean, 25/50/75/90 percentile, IQR, standard deviation,
     and entropy.
 
@@ -189,3 +190,41 @@ def calculate_stats(data: DATA_VECTOR) -> Munch:
     stats.entropy = calculate_entropy(data)
 
     return stats
+
+
+def calculate_stats_over_n_items(data: DATA_VECTOR, n_items: int = None) -> DataFrame:
+    """ Calculate summary statistics over n items in the data object.
+
+    This function receives a list of values and calculates a set of statistics including sum, min, max, mean,
+    25/50/75/90 percentile, IQR, standard deviation, and entropy.
+    Example input: calculate_stats_over_n_items(data = [1, 3, 5, 2, 3, 5, 3, 2, 1, 3, 4, 5], n = 3). The function will
+    divide the input into list of 3 values each. For each set, it will calculate all statistics. The return will be
+    [values | max | min | sum | mean | stdev | q25 | q50 | q75 | q90 | iqr | entropy]
+
+    Parameters
+    ----------
+    data: DATA_VECTOR
+        ndarray/List of integer or float values to calculate the sum.
+
+    n_items: int
+        Size of subset for calculating stats
+        If n_items is None or n_items < len(data), stats are calculated over all the data provided.
+
+    Returns
+    -------
+    stats_df: DataFrame
+        Data frame containing summary statistics calculated from given data
+    """
+    if not n_items or len(data) <= n_items:
+        return compile_data_frame_including_stats(data)
+
+    data_bins = make_bins(data, n_items)
+    stats_df = None
+    for each in data_bins:
+        stats = compile_data_frame_including_stats(each, column_prefix=n_items)
+        if stats_df is None:
+            stats_df = stats
+        else:
+            stats_df = pd.concat([stats_df, stats], axis=0)  # Row wise stacking
+
+    return stats_df
