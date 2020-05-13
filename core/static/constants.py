@@ -121,6 +121,7 @@ URI_REGEX = "^(?:([A-Za-z][A-Za-z0-9+\\-.]*):(?://((?:(?:(?:%[0-9A-Fa-f]{2}|" \
             "[:@])*)*)|())(?:\\?((?:(?:(?:%[0-9A-Fa-f]{2}|[!$&'()*+" \
             ",;=A-Za-z0-9\\-._~])|[:@])|[/?])*))?(?:#((?:(?:(?:%" \
             "[0-9A-Fa-f]{2}|[!$&'()*+,;=A-Za-z0-9\\-._~])|[:@])|[/?])*))?)$"
+UPNP_VERSION_REGEX = r"UPnP\/\d\.\d"
 EXCLUDED_MACS = [
     'FF:FF:FF:FF:FF:FF',       # Broadcast
     '01:00:0C:CC:CC:CC',       # CISCO discovery protocol

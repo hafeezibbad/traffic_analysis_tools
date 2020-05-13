@@ -1,14 +1,16 @@
 import logging
+import re
 
-from typing import Union
+from typing import Union, Dict
 import dpkt
 from dpkt.ip import IP
 from dpkt.udp import UDP
-from munch import Munch
+from munch import Munch, DefaultMunch
 
 from core.configuration.data import ConfigurationData
 from core.packet_parsers.base import PacketParserInterface
 from core.pcap.upnp.upnp_request import UpnpRequest
+from core.static.constants import UPNP_VERSION_REGEX
 
 
 class UpnpPacketParser(PacketParserInterface):
@@ -40,7 +42,7 @@ class UpnpPacketParser(PacketParserInterface):
 
     def extract_fingerprint_from_notify_message(self, http_packet: dpkt.http.Request) -> Munch:
         # Note that the library will accept any case of header, they are lowercase in the result
-        fingerprint = Munch()
+        fingerprint = DefaultMunch('')
 
         fingerprint.upnp_packet_type = 1
         fingerprint.upnp_location = http_packet.headers.get("location")
@@ -61,10 +63,11 @@ class UpnpPacketParser(PacketParserInterface):
         fingerprint.upnp_st = http_packet.headers.get('st', '')
         fingerprint.upnp_man = http_packet.headers.get('man', '')
         fingerprint.upnp_mx = http_packet.headers.get('mx')
+        fingerprint.upnp_user_agent = http_packet.headers.get('user-agent')
 
         return fingerprint
 
-    def extract_fingerprint_from_request(self, http_packet: UpnpRequest) -> dict:
+    def extract_fingerprint_from_request(self, http_packet: UpnpRequest) -> Dict[str, str]:
         fingerprint = dict()
         try:
             if http_packet.method == "NOTIFY":
@@ -82,13 +85,49 @@ class UpnpPacketParser(PacketParserInterface):
 
         return fingerprint
 
-    def extract_fingerprint_from_response(self, upnp_packet: dpkt.http.Response) -> dict:
+    def extract_fingerprint_from_response(self, upnp_packet: dpkt.http.Response) -> Dict[str, str]:
         fingerprint = dict()
         if upnp_packet is None:
             return fingerprint
 
         fingerprint = self.extract_fingerprint_from_notify_message(upnp_packet)
         return fingerprint
+
+    def parse_upnp_server_information(self, upnp_server_data: str) -> Munch:
+        """Parse info available in UPnP message server field to extract os and production information.
+
+        Description of data available in server field (in UPnP packet) available here.
+        http://upnp.org/specs/arch/UPnP-arch-DeviceArchitecture-v1.1.pdf
+             SERVER
+                REQUIRED. Specified by UPnP vendor. String. Field value MUST begin with the following “product
+                tokens” (defined by HTTP/1.1). The first product token identifes the operating system in the form OS
+                name/OS version, the second token represents the UPnP version and MUST be UPnP/1.1, and the third
+                token identifes the product using the form product name/product version. For example,
+                “SERVER: unix/5.1 UPnP/1.1 MyProduct/1.0”. Control points MUST be prepared to accept a higher minor
+                version number of the UPnP version than the control point itself implements. For example,
+                control points implementing UDA version 1.0 will be able to interoperate with devices implementing
+                UDA version 1.1.
+
+        Parameters
+        ----------
+        upnp_server_data: str
+            Data extracted from server field in UPnP packet
+
+        Returns
+        --------
+        upnp_info: Munch
+            Munch object containing os_name, os_version, product_name, and product_version information.
+        """
+        upnp_info = DefaultMunch('')
+        upnp_data = re.split(UPNP_VERSION_REGEX, upnp_server_data)
+        if len(upnp_data) != 2:
+            return upnp_info
+        if upnp_data[0].lower() != 'Undefined':
+            upnp_info.upnp_os_name, _, upnp_info.upnp_os_version = upnp_data[0].strip().partition('/')
+        if upnp_data[1].lower() != 'Undefined':
+            upnp_info.upnp_product_name, _, upnp_info.upnp_product_version = upnp_data[1].strip().partition('/')
+
+        return upnp_info
 
     def extract_data(self, packet: Union[UpnpRequest, dpkt.http.Response]) -> Munch:
         """Extract data from UPnP response or response packet. The data is extracted from the packet based on
@@ -121,5 +160,10 @@ class UpnpPacketParser(PacketParserInterface):
 
         for key, value in fingerprint.items():
             data[key] = value
+
+        if 'upnp_server' in data:
+            data.update(self.parse_upnp_server_information(data.upnp_server))
+        if 'upnp_user_agent' in data:
+            data.update(self.parse_upnp_server_information(data.upnp_user_agent))
 
         return data
