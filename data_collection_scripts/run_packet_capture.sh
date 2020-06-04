@@ -6,7 +6,7 @@ usage(){
     echo "  -d: Path to directory for storing output files. If directory does not exist, it will be created. deafult: PWD"
     echo "  -p: Prefix for output file name (default:packet-capture)"
     echo "  -i: Identifier for interface(s) to run tcpdump. Multiple interfaces can be provided as comma-separated string"
-    echo "  -t: timeout for running tcpdump (default=86400)"
+    echo "  -t: timeout (in seconds) for running tcpdump (default=86400)"
     echo "  -r: Maximum iterations (default=99999, ~no limit)"
     echo "  -h: help"
     exit 1
@@ -61,6 +61,7 @@ if [ -L "${OUTPUT_DIR}" ] ; then
     exit 3
 fi
 
+
 if [ ! -d "${OUTPUT_DIR}" ]; then
     mkdir -p "${OUTPUT_DIR}"
 fi
@@ -70,14 +71,14 @@ fi
 IFS=","
 interfaces=($interface)
 
-# restore original IFS
-IFS=$OIFS
-
 # Uncomment following code to print the list of interfaces.
 # for ((i=0; i<${#interfaces[@]}; ++i)); 
 # do     
 #     echo "interface $i: ${interfaces[$i]}"; 
 # done
+
+# restore original IFS
+IFS=$OIFS
 
 i=1
 while [ $i -le $repetitions ]
@@ -88,8 +89,8 @@ do
 
     for intf in "${interfaces[@]}"
     do
-        sudo timeout $timeout tcpdump -i ${intf} -s 65535 -w "${prefix}-${intf}-${current_time}.pcap" &
-        sudo timeout $timeout tcpdump -i ${intf} -s 65535 -w "${prefix}-${intf}-${current_time}.pcap" &
+        sudo timeout $timeout tcpdump -i ${intf} -s 65535 -w "${prefix}-${intf}-${timeout}s-${current_time}.pcap" &
+        sudo timeout $timeout tcpdump -i ${intf} -s 65535 -w "${prefix}-${intf}-${timeout}s-${current_time}.pcap" &
     done
     # Since all processes are running in the background we need to pause execution for timeout period.
     sleep $timeout
