@@ -3,6 +3,7 @@
 
 usage(){
     echo "Usage: $0 -p <file-prefix> -i <interface(s)> -t <timeout> -r <repetitions>"
+    echo "  -d: Path to directory for storing output files. If directory does not exist, it will be created. deafult: PWD"
     echo "  -p: Prefix for output file name (default:packet-capture)"
     echo "  -i: Identifier for interface(s) to run tcpdump. Multiple interfaces can be provided as comma-separated string"
     echo "  -t: timeout for running tcpdump (default=86400)"
@@ -16,9 +17,13 @@ prefix="packet-capture"
 interface=""
 repetitions=9999
 OIFS=$IFS
+OUTPUT_DIR=$PWD
 
-while getopts ":p:i:t:r:h" opt; do
+while getopts "d:p:i:t:r:h" opt; do
     case ${opt} in
+        d)
+            OUTPUT_DIR=$OPTARG
+            ;;
         p)
             prefix=$OPTARG
             ;;
@@ -43,19 +48,30 @@ done
 
 if [ "$EUID" -ne 0 ]; then 
     echo "This script should run as root" 1>&2
-    exit 2
-fi
-
-if [ -z "$interface" ]; then 
-    echo "-i interface not provided for running tcpdump" 1>&2
     exit 1
 fi
 
+if [ -z "${interface}" ]; then 
+    echo "-i interface not provided for running tcpdump" 1>&2
+    exit 2
+fi
+
+if [ -L "${OUTPUT_DIR}" ] ; then
+    echo "Output directory points to a symbolic link" 1>&2
+    exit 3
+fi
+
+if [ ! -d "${OUTPUT_DIR}" ]; then
+    mkdir -p "${OUTPUT_DIR}"
+fi
 
 # Override IFS to convert comma-separated list of interfaces to array
 # reference: https://bash.cyberciti.biz/guide/$IFS
 IFS=","
 interfaces=($interface)
+
+# restore original IFS
+IFS=$OIFS
 
 # Uncomment following code to print the list of interfaces.
 # for ((i=0; i<${#interfaces[@]}; ++i)); 
@@ -63,15 +79,13 @@ interfaces=($interface)
 #     echo "interface $i: ${interfaces[$i]}"; 
 # done
 
-# restore original IFS
-IFS=$OIFS
-
 i=1
 while [ $i -le $repetitions ]
 do
     echo "Running repetition #$i"
     current_time=`date +%Y-%m-%d-%H-%M-%S`
-    
+    cd "${OUTPUT_DIR}"
+
     for intf in "${interfaces[@]}"
     do
         sudo timeout $timeout tcpdump -i ${intf} -s 65535 -w "${prefix}-${intf}-${current_time}.pcap" &
