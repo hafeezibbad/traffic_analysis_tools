@@ -15,7 +15,7 @@ config = config_manager.load_data_from_configuration_file(file_path=os.path.join
 config.p0f_wd = os.path.join(PROJECT_DIR_PATH, config.p0f_wd)
 config.use_numeric_values = True
 pcap_processor = PcapProcessor(config=config)
-
+PCAP_DIR_PATH
 # Read and process the file
 start_time = time.time()
 trace_info = pcap_processor.process(
