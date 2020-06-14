@@ -8,15 +8,15 @@ from numpy import ndarray
 import numpy as np
 import pandas as pd
 
-from core.extended_features import DATA_VECTOR
+from core.extended_features import DATA_VECTOR_TYPE
 
 
-def calculate_entropy(data: DATA_VECTOR) -> float:
+def calculate_entropy(data: DATA_VECTOR_TYPE) -> float:
     return calculate_entropy_using_numpy(data)  # Use faster method
 
 
 # Fastest method
-def calculate_entropy_using_numpy(data: DATA_VECTOR, base=None) -> float:
+def calculate_entropy_using_numpy(data: DATA_VECTOR_TYPE, base=None) -> float:
     """Calculate entropy of a given set of values using numpy and math.
 
     Reference: https://stackoverflow.com/a/45091961
@@ -44,17 +44,17 @@ def calculate_entropy_using_numpy(data: DATA_VECTOR, base=None) -> float:
     if n_classes <= 1:
         return 0
 
-    entropy = 0
+    _entropy = 0
 
     base = e if base is None else base
     for i in probabilities:
-        entropy -= i * log(i, base)
+        _entropy -= i * log(i, base)
 
-    return entropy
+    return _entropy
 
 
 # Simplest method to calculate entropy
-def calculate_entropy_using_scipy(data: DATA_VECTOR, base=None):
+def calculate_entropy_using_scipy(data: DATA_VECTOR_TYPE, base=None):
     """Calculate entropy of a given set of values using scipy.stats.entropy
 
     Reference: https://stackoverflow.com/a/45091961
@@ -75,7 +75,7 @@ def calculate_entropy_using_scipy(data: DATA_VECTOR, base=None):
     return entropy(counts, base=base)
 
 
-def calculate_quantiles(data: DATA_VECTOR, percentiles: List[int] = None) -> Union[int, float, complex, ndarray]:
+def calculate_quantiles(data: DATA_VECTOR_TYPE, percentiles: List[int] = None) -> Union[int, float, complex, ndarray]:
     """Calculate quantiles on input data.
 
     Parameters
@@ -96,7 +96,7 @@ def calculate_quantiles(data: DATA_VECTOR, percentiles: List[int] = None) -> Uni
     return np.percentile(data, percentiles)
 
 
-def make_bins(data: DATA_VECTOR, n_items: int) -> DATA_VECTOR:
+def make_bins(data: DATA_VECTOR_TYPE, n_items: int) -> DATA_VECTOR_TYPE:
     """Divide input data vector to n bins where each bin contains n items. Last bucket may contain < n items.
 
     Parameters
@@ -159,7 +159,7 @@ def compile_data_frame_including_stats(data: DataFrame, column_prefix: str = Non
     return stats_df
 
 
-def calculate_stats(data: DATA_VECTOR = None) -> Munch:
+def calculate_stats(data: DATA_VECTOR_TYPE = None) -> Munch:
     """ Calculate summary statistics including sum, min, max, mean, 25/50/75/90 percentile, IQR, standard deviation,
     and entropy.
 
@@ -192,7 +192,7 @@ def calculate_stats(data: DATA_VECTOR = None) -> Munch:
     return stats
 
 
-def calculate_stats_over_n_items(data: DATA_VECTOR, n_items: int = None) -> DataFrame:
+def calculate_stats_over_n_items(data: DATA_VECTOR_TYPE, n_items: int = None) -> DataFrame:
     """ Calculate summary statistics over n items in the data object.
 
     This function receives a list of values and calculates a set of statistics including sum, min, max, mean,

@@ -1,14 +1,20 @@
 import datetime
-from core.static.constants import DATE_TIME_FORMAT
+from core.static.patterns import DATE_TIME_FORMAT
 
 
 def get_date_identifier(timestamp: float) -> str:
     """
-    Extract the identifier from starting date of trace
-    :param timestamp: starting time for the trace.
-     :type: integer
-    :return identifier: id for the trace file results.
-     :type: string
+    Extract the identifier from starting date of trace.
+
+    Parameter
+    ---------
+    timestamp: integer
+        starting time for the trace.
+
+     Return
+     ------
+    identifier: string
+        id for the trace file results.
     """
     date_str = datetime.datetime.fromtimestamp(timestamp).strftime(DATE_TIME_FORMAT)
 
@@ -18,18 +24,34 @@ def get_date_identifier(timestamp: float) -> str:
 def timestamp_to_formatted_date(seconds: float, str_format: str = "%Y-%m-%d %H:%M:%S"):
     """
     Convert the seconds from epoch to human readable date.
-    :param seconds: seconds from epoch
-     :type: integer
-    :param str_format: Format of human readable date string.
-     :type: string
-    :return: Date string in human readable format
-     :type: string
+
+    Parameter
+    ---------
+    seconds: integer
+     seconds from epoch
+    str_format: str
+        Format of human readable date string.
+    Return
+    --------
+    datetime: string
+        Date string in human readable format
     """
     return datetime.datetime.utcfromtimestamp(seconds).strftime(str_format)
 
 
 def hex_to_integer(hex_value: str) -> int:
-    """Converts hex value (e.g. 888e) to integer value ()"""
+    """Converts hex value to integer value.
+
+    Example: hex_to_integer('888e') => 34958
+    Parameter
+    ---------
+    hex_value: string
+        String representation of hex value, for example '888e'
+    Return
+    ------
+    value: integer
+        Integer representation of given hex value
+    """
     if not hex_value:
         return -1
 
@@ -37,7 +59,7 @@ def hex_to_integer(hex_value: str) -> int:
 
 
 def bool_to_integer(boolean_flag: bool) -> int:
-    """Convert a boolean flag to integer (0, or 1) if the value is not boolean, returns 0"""
+    """Convert a boolean flag to integer (0 or 1) if the value is not boolean, returns 0"""
     if boolean_flag is True:
         return 1
 

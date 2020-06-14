@@ -9,7 +9,7 @@ from munch import Munch
 from core.configuration.data import ConfigurationData
 from core.lib.converters import bool_to_integer
 from core.packet_parsers.base import PacketParserInterface
-from core.static.constants import LAYER4_PROTOCOLS
+from core.static.patterns import LAYER4_PROTOCOLS
 from core.static.utils import StaticData
 
 

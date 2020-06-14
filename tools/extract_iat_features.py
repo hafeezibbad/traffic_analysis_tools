@@ -6,7 +6,7 @@ from pandas import DataFrame
 
 sys.path.append(os.getcwd())
 
-from core.extended_features.time_based_feature_set import calculate_inter_arrival_time, \
+from core.extended_features.time_based_feature_set import \
     compile_data_frame_including_stats, calculate_stats, calculate_stats_over_n_items
 from core.pandas_utils.dataframe_utils import load_csv_to_dataframe
 from core.extended_features.stats import calculate_entropy, calculate_quantiles, make_bins

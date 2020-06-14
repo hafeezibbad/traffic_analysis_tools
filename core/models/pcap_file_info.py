@@ -29,7 +29,9 @@ class PcapFileInfo(Model):
             self.packet_rate = self.packet_count / self.total_time
             self.average_packet_size = self.total_data / self.packet_count
 
-    def get_summary(self, output_format: Literal['json', 'csv'] = 'json') -> Optional[Union[Dict[str, str], str]]:
+    def get_summary(
+            self, output_format: Literal['json', 'csv'] = 'json'
+    ) -> Optional[Union[Dict[str, str], str]]:
         summary_data = None
         self.calculate_summary_stats()
         self.file_size = FileProcessorBase().get_file_size(file_path=self.file_name)

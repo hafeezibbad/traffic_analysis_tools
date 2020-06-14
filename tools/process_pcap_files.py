@@ -4,6 +4,7 @@ import sys
 import logging
 import time
 
+
 sys.path.append(os.getcwd())
 
 from typing import Optional, Union, Dict, Any, Tuple
@@ -11,11 +12,11 @@ from typing import Optional, Union, Dict, Any, Tuple
 import click
 
 from munch import Munch
-from pip.utils import logging
 
 from core.analyzer.pcap_processor import PcapProcessor
 from core.configuration.data import ConfigurationData
 from core.configuration.manager import ConfigurationManager
+from core.errors.generic_errors import GenericError
 from core.lib.common import write_json_to_file
 from core.lib.file_utils import list_files_in_directory, get_filename_and_ext, remove_file
 from core.lib.logging_utils import setup_logging
@@ -24,7 +25,7 @@ from core.static.utils import StaticData
 
 
 def configure_logging(log_file_path: str = None, verbose: bool = False):
-    log_file_path = log_file_path or 'process-pcap-files.log'
+    log_file_path = log_file_path or 'process-pcap-files'
     _dirname = os.path.dirname(log_file_path) or os.getcwd()
     _filename = os.path.basename(log_file_path)
 
@@ -62,9 +63,9 @@ def process_pcap(
         pcap_file: str = '',
         results_file_path: str = '',
         overwrite_results: bool = True
-) -> Tuple[Optional[Union[Munch, dict]], float]:
+) -> Tuple[Optional[PcapFileInfo], float]:
     gc.collect()    # Force garbage collection to minimize memory collection
-    if os.path.exists(pcap_file or ''):
+    if os.path.exists(pcap_file or '') is False:
         logging.error('Invalid pcap file path specified: `{}`'.format(pcap_file))
         exit(-1)
 
@@ -75,7 +76,12 @@ def process_pcap(
     logging.debug('Starting to process pcap file: `{}`'.format(pcap_file))
 
     st = time.time()
-    pcap_summary = pcap_processor.process(input_file=pcap_file, output_file=results_file_path)
+
+    try:
+        pcap_summary = pcap_processor.process(input_file=pcap_file, output_file=results_file_path)
+    except GenericError as ex:
+        logging.error(ex.message)
+
     processing_time = time.time() - st
 
     logging.info('Processed `{}` in `{}` seconds'.format(pcap_file, processing_time))
@@ -122,7 +128,7 @@ def process_pcap_files(
             overwrite_results=overwrite_results
         )
         summary_data = get_summary_for_pcap_processor(pcap_summary, processing_time)
-        logging.debug(summary_data)
+        logging.debug('Summary data from pcap file: `{}`\n%s', summary_data)
         summary_results['items'].append(summary_data)
 
         if remove_original is True:
@@ -155,8 +161,6 @@ def process(
         overwrite,
         verbose
 ):
-    print(config_file_path, source_directory, output_directory, verbose)
-    exit(1)
     # configure logging
     configure_logging(log_file_path=log_file_path, verbose=verbose)
 

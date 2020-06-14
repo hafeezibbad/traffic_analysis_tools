@@ -8,7 +8,7 @@ from urllib.parse import urlparse
 
 from netaddr import IPAddress
 
-from core.static.constants import IPv4_REGEX, IPv6_REGEX
+from core.static.patterns import IP4_REGEX, IP6_REGEX
 
 
 class IpAddrUtils:
@@ -25,10 +25,10 @@ class IpAddrUtils:
             True if IP address is valid otherwise False
 
         """
-        if re.compile(IPv4_REGEX).match(ip_address):
+        if re.compile(IP4_REGEX).match(ip_address):
             return True
 
-        if re.compile(IPv6_REGEX).match(ip_address):
+        if re.compile(IP6_REGEX).match(ip_address):
             return True
 
         return False

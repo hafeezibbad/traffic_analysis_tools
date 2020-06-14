@@ -86,5 +86,3 @@ class StatsTests(unittest.TestCase):
         stats = calculate_stats_over_n_items(data=TEST_DATA_VECTOR, n_items=15)
         for k, b in stats.items():
             self.assertAlmostEqual(TEST_DATA_STATS[k], v, places=7)
-
-

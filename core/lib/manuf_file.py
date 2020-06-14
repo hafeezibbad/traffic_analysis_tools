@@ -3,7 +3,7 @@ from typing import Optional
 from urllib.error import HTTPError, URLError
 from urllib.request import urlopen
 
-from core.static.constants import WIRESHARK_MANUF_FILE
+from core.static.patterns import WIRESHARK_MANUF_FILE
 
 
 def get_oui_info(manufs: dict, mac: str) -> Optional[str]:

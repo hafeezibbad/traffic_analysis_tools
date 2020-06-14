@@ -78,21 +78,25 @@ class PcapProcessor(BaseProcessor):
         initial_ts = 0
         count = 0
         total_data = 0
-        for ts, buff in captures:
-            if initial_ts == 0:
-                initial_ts = ts
-            pcap_file_info.stop_time = ts
-            try:
-                count += 1
-                total_data += len(buff)
+        try:
+            for ts, buff in captures:
+                if initial_ts == 0:
+                    initial_ts = ts
+                pcap_file_info.stop_time = ts
+                try:
+                    count += 1
+                    total_data += len(buff)
 
-                packet_data = self.extract_stats_from_packet(ts=ts, packet=buff, initial_timestamp=initial_ts)
-                if packet_data is None:
-                    pass
-                result_file.write(packet_data.to_csv_string(delimiter=self.config.ResultFileDelimiter) + '\n')
+                    packet_data = self.extract_stats_from_packet(ts=ts, packet=buff, initial_timestamp=initial_ts)
+                    if packet_data is None:
+                        pass
+                    result_file.write(packet_data.to_csv_string(delimiter=self.config.ResultFileDelimiter) + '\n')
 
-            except Exception as ex:
-                raise GenericError(message='Unable to process packet at ts:{} Error: {}'.format(ts, ex)) from ex
+                except Exception as ex:
+                    logging.error('Unable to process packate at ts: `%s`. Error `%s`'.format(ts, ex))
+
+        except Exception as ex:
+            raise GenericError(message='Unable to process pcap file `%s`. Error `%s`'.format(pcap_file, ex)) from ex
 
         logging.info('%s packets processed from %s', count, input_file)
         pcap_file.close()
@@ -244,6 +248,7 @@ class PcapProcessor(BaseProcessor):
             packet_data = self.dpkt_utils.extract_data_from_layer7_packet(layer7_packet, packet_data)
 
         except Exception as ex:
-            logging.error('Error in processing packet at ref_time: `%s`. Error: `%s`', packet_data.ref_time, ex)
+            logging.error('Error in processing packet at ref_time: `%s`. Error: `%s`',
+                          packet_data.ref_time, ex)
 
         return packet_data

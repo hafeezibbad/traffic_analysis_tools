@@ -357,7 +357,7 @@ def check_valid_path(
 
 def remove_file(file_path: str = None) -> bool:
     # FIXME: Add support for deleting multiple files and recursively using regex
-    error_message = 'Unable to remove file at path `{file_path}`. Reason: `{reason}`'
+    error_message = 'Unable to remove file at path `%s`. Reason: `%s`'
 
     try:
         os.remove(file_path)
@@ -365,12 +365,12 @@ def remove_file(file_path: str = None) -> bool:
         return True
 
     except TypeError:
-        logging.error(error_message.format(file_path=file_path, reason='Invalid file path'))
+        logging.error(error_message, file_path, 'Invalid file path')
 
     except FileNotFoundError:
-        logging.error(error_message.format(file_path=file_path, reason='File does not exist at specified path'))
+        logging.error(error_message, file_path, 'File does not exist at specified path')
 
     except PermissionError:
-        logging.error(error_message.format(file_path=file_path, reason='Not enough permissions to modify/delete file'))
+        logging.error(error_message, file_path, 'Not enough permissions to modify/delete file')
 
     return False

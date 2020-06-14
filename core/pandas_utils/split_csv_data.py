@@ -3,7 +3,7 @@ import time
 import os
 
 from pathlib import Path
-from typing import Any, List, Union, Dict, Callable, Optional
+from typing import Any, List, Union, Dict, Callable
 from munch import DefaultMunch
 import pandas as pd
 from pandas import DataFrame
@@ -66,7 +66,7 @@ def extract_data_as_separate_csv(
     if output_folder.exists() is False:
         os.makedirs(output_folder, exist_ok=True)
 
-    data = load_csv_to_dataframe(file_path, fill_empty_values=True, verify_columns_exist=filter_columns)
+    data = load_csv_to_dataframe(file_path, fill_empty_values=True, verify_columns=filter_columns)
     base_filename_id = file_path.name.strip().split('.')[0]
     summary_data = DefaultMunch()
 

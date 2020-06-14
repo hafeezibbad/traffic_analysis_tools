@@ -10,7 +10,7 @@ from munch import Munch, DefaultMunch
 from core.configuration.data import ConfigurationData
 from core.packet_parsers.base import PacketParserInterface
 from core.pcap.upnp.upnp_request import UpnpRequest
-from core.static.constants import UPNP_VERSION_REGEX
+from core.static.patterns import UPNP_VERSION_REGEX
 
 
 class UpnpPacketParser(PacketParserInterface):
@@ -46,12 +46,14 @@ class UpnpPacketParser(PacketParserInterface):
 
         fingerprint.upnp_packet_type = 1
         fingerprint.upnp_location = http_packet.headers.get("location")
-        fingerprint.upnp_server = http_packet.headers.get("server")
-        if "cache-control" in http_packet.headers:
-            fingerprint.upnp_cache = int(http_packet.headers.get("cache-control").split('=')[1])
         fingerprint.upnp_uns = http_packet.headers.get("usn")
         fingerprint.upnp_nt = http_packet.headers.get("nt")
         fingerprint.upnp_nts = http_packet.headers.get("nts")
+
+        if http_packet.headers.get('server'):
+            fingerprint.update(self.parse_upnp_header_information(http_packet.headers.get('server')))
+        if "cache-control" in http_packet.headers:
+            fingerprint.upnp_cache = int(http_packet.headers.get("cache-control").split('=')[1])
 
         return fingerprint
 
@@ -64,6 +66,8 @@ class UpnpPacketParser(PacketParserInterface):
         fingerprint.upnp_man = http_packet.headers.get('man', '')
         fingerprint.upnp_mx = http_packet.headers.get('mx')
         fingerprint.upnp_user_agent = http_packet.headers.get('user-agent')
+        if http_packet.headers.get('user-agent'):
+            fingerprint.update(self.parse_upnp_header_information(http_packet.headers.get('user-agent')))
 
         return fingerprint
 
@@ -93,7 +97,7 @@ class UpnpPacketParser(PacketParserInterface):
         fingerprint = self.extract_fingerprint_from_notify_message(upnp_packet)
         return fingerprint
 
-    def parse_upnp_server_information(self, upnp_server_data: str) -> Munch:
+    def parse_upnp_header_information(self, upnp_header_data: str = None) -> Munch:
         """Parse info available in UPnP message server field to extract os and production information.
 
         Description of data available in server field (in UPnP packet) available here.
@@ -107,11 +111,19 @@ class UpnpPacketParser(PacketParserInterface):
                 version number of the UPnP version than the control point itself implements. For example,
                 control points implementing UDA version 1.0 will be able to interoperate with devices implementing
                 UDA version 1.1.
+            USER-AGENT
+                OPTIONAL. Specified by UPnP vendor. String. Field value MUST begin with the following “product tokens”
+                (defined by HTTP/1.1). The first product token identifes the operating system in the form OS name/OS
+                version, the second token represents the UPnP version and MUST be UPnP/1.1, and the third token
+                identifes the product using the form  product name/product version. For example, “USER-AGENT:
+                unix/5.1 UPnP/1.1 MyProduct/1.0”. Control points MUST be prepared to accept a higher minor version
+                number of the UPnP version than the control point itself implements. For example, control points
+                implementing UDA version 1.0 will be able to interoperate with devices implementing UDA version 1.1.
 
         Parameters
         ----------
-        upnp_server_data: str
-            Data extracted from server field in UPnP packet
+        upnp_header_data: str
+            Data extracted from server field in UPnP packet. Default=None
 
         Returns
         --------
@@ -119,13 +131,26 @@ class UpnpPacketParser(PacketParserInterface):
             Munch object containing os_name, os_version, product_name, and product_version information.
         """
         upnp_info = DefaultMunch('')
-        upnp_data = re.split(UPNP_VERSION_REGEX, upnp_server_data)
+        if not upnp_header_data:
+            return upnp_info
+
+        upnp_data = re.split(UPNP_VERSION_REGEX, upnp_header_data)
         if len(upnp_data) != 2:
             return upnp_info
+
         if upnp_data[0].lower() != 'Undefined':
-            upnp_info.upnp_os_name, _, upnp_info.upnp_os_version = upnp_data[0].strip().partition('/')
+            _data = re.sub(',\s', '', upnp_data[0])
+            upnp_info.upnp_os_name, _, upnp_info.upnp_os_version = \
+                _data.strip().replace(',', '').partition('/')
+
         if upnp_data[1].lower() != 'Undefined':
-            upnp_info.upnp_product_name, _, upnp_info.upnp_product_version = upnp_data[1].strip().partition('/')
+            _data = re.sub(',\s', '', upnp_data[1])
+            upnp_info.upnp_product_name, _, upnp_info.upnp_product_version = \
+                _data.strip().replace(',', '').partition('/')
+
+        m = re.search(UPNP_VERSION_REGEX, upnp_header_data)
+        if m:
+            upnp_info.upnp_version = m.group(0).split('/')[1]
 
         return upnp_info
 
@@ -160,10 +185,5 @@ class UpnpPacketParser(PacketParserInterface):
 
         for key, value in fingerprint.items():
             data[key] = value
-
-        if 'upnp_server' in data:
-            data.update(self.parse_upnp_server_information(data.upnp_server))
-        if 'upnp_user_agent' in data:
-            data.update(self.parse_upnp_server_information(data.upnp_user_agent))
 
         return data

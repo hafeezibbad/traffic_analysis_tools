@@ -8,7 +8,8 @@ import binascii
 from dpkt import compat_ord
 from netaddr import EUI
 
-from core.static.constants import MAC_REGEX, EXCLUDED_MACS, EXCLUDED_MACS_W_WILDCARDS
+from core.static.patterns import MAC_REGEX
+from core.static.constants import EXCLUDED_MACS, EXCLUDED_MACS_W_WILDCARDS
 
 
 class MacAddressUtils:

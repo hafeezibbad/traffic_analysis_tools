@@ -100,7 +100,6 @@ class PacketData(Model):
     # Layer 7: UPnP message, SSDP Protocol
     upnp_packet_type: Optional[int]   # 1: Notify Request 2: M-SEARCH request, 3: Response
     upnp_location: Optional[str]   # URL where an XML formatted file can be downloaded
-    upnp_server: Optional[str]
     upnp_cache: Optional[int]    # Cache-Control
     upnp_uns: Optional[str]
     upnp_nt: Optional[str]
@@ -109,6 +108,11 @@ class PacketData(Model):
     upnp_st: Optional[str]
     upnp_man: Optional[str]
     upnp_mx: Optional[str]
+    upnp_version: Optional[str]
+    upnp_os_name: Optional[str]
+    upnp_os_version: Optional[str]
+    upnp_product_name: Optional[str]
+    upnp_product_version: Optional[str]
 
     @staticmethod
     def is_valid_value(value) -> bool:
@@ -227,7 +231,6 @@ class PacketData(Model):
                 # Layer 7: UPnP message, SSDP Protocol
                 self.upnp_packet_type,
                 self.upnp_location,
-                self.upnp_server,
                 self.upnp_cache,
                 self.upnp_uns,
                 self.upnp_nt,
@@ -235,7 +238,12 @@ class PacketData(Model):
                 self.upnp_host,
                 self.upnp_st,
                 self.upnp_man,
-                self.upnp_mx
+                self.upnp_mx,
+                self.upnp_version,
+                self.upnp_os_name,
+                self.upnp_os_version,
+                self.upnp_product_name,
+                self.upnp_product_version
         ]:
             if attr is not None and attr is not False:
                 values.append(str(attr))
@@ -354,7 +362,6 @@ class PacketData(Model):
             # Layer 7: UPnP message, SSDP Protocol
             "upnp_packet_type",  # 1: HTTP Request, 2: HTTP Response
             "upnp_location",
-            "upnp_server",
             "upnp_cache",
             "upnp_uns",
             "upnp_nt",
@@ -362,5 +369,10 @@ class PacketData(Model):
             "upnp_host",
             "upnp_st",
             "upnp_man",
-            "upnp_mx"
+            "upnp_mx",
+            "upnp_version",
+            "upnp_os_name",
+            "upnp_os_version",
+            "upnp_product_name",
+            "upnp_product_version"
         ]])

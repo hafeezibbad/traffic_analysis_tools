@@ -2,7 +2,7 @@ import re
 
 from core.lib.ip_utils import IpAddrUtils
 from core.lib.mac_utils import MacAddressUtils
-from core.static.constants import EMAIL_REGEX
+from core.static.patterns import EMAIL_REGEX
 
 
 class StrictNonEmptyStr(str):
