@@ -67,11 +67,9 @@ def process_pcap(
     gc.collect()    # Force garbage collection to minimize memory collection
     if os.path.exists(pcap_file or '') is False:
         logging.error('Invalid pcap file path specified: `{}`'.format(pcap_file))
-        exit(-1)
 
     if os.path.exists(results_file_path) is True and overwrite_results is False:
-        logging.error('Results file already exist at path: `{}`'.format(results_file_path))
-        exit(-1)
+        logging.info('Results file already exist at path: `{}`'.format(results_file_path))
 
     logging.debug('Starting to process pcap file: `{}`'.format(pcap_file))
 
@@ -148,7 +146,7 @@ def process_pcap_files(
               help='Path to store log file. If only filename is provided, it will be stored in PWD')
 @click.option('--output-suffix', default='data', type=str, help='Suffix added to processed file')
 @click.option('--remove-original', is_flag=True, default=False, help="Remove source pcap file after processing")
-@click.option('--overwrite', is_flag=True, default=True,
+@click.option('--overwrite', is_flag=True, default=False,
               help="Overwrite result files if they already exist in output folder.")
 @click.option('-v', '--verbose', is_flag=True, default=False, help="Print debug logs")
 def process(
