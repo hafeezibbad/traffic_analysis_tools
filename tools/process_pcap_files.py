@@ -19,24 +19,22 @@ from core.configuration.manager import ConfigurationManager
 from core.errors.generic_errors import GenericError
 from core.lib.common import write_json_to_file
 from core.lib.file_utils import list_files_in_directory, get_filename_and_ext, remove_file
-from core.lib.logging_utils import setup_logging
 from core.models.pcap_file_info import PcapFileInfo
 from core.static.utils import StaticData
 
 
 def configure_logging(log_file_path: str = None, verbose: bool = False):
-    log_file_path = log_file_path or 'process-pcap-files'
-    _dirname = os.path.dirname(log_file_path) or os.getcwd()
-    _filename = os.path.basename(log_file_path)
-
-    logger = setup_logging(
-        name=__name__,
-        log_directory=_dirname,
-        file_name=_filename
-    )
+    logging_args = dict(format='%(asctime)s - %(name)s %(levelname)s - %(message)s')
+    if log_file_path is not None:
+        logging_args['filename'] = log_file_path
+        logging_args['filemode'] = 'w'
 
     if verbose is True:
-        logger.setLevel('DEBUG')
+        logging_args['level'] = logging.DEBUG
+    else:
+        logging_args['level'] = logging.INFO
+
+    logging.basicConfig(**logging_args)
 
 
 def load_configuration(config_file_path: str = None) -> Optional[ConfigurationData]:
@@ -52,7 +50,7 @@ def get_results_file_path(
         suffix: str = 'data'
 ) -> str:
     filename, ext = get_filename_and_ext(pcap_file_path)
-    results_file_name = os.path.basename(pcap_file_path)[:-len(ext)+1] + '_{}.csv'.format(suffix)
+    results_file_name = os.path.basename(pcap_file_path)[:-len(ext)-1] + '_{}.csv'.format(suffix)
     results_file_path = os.path.join(output_directory, results_file_name)
 
     return results_file_path
@@ -66,23 +64,28 @@ def process_pcap(
 ) -> Tuple[Optional[PcapFileInfo], float]:
     gc.collect()    # Force garbage collection to minimize memory collection
     if os.path.exists(pcap_file or '') is False:
-        logging.error('Invalid pcap file path specified: `{}`'.format(pcap_file))
+        logging.error('Invalid pcap file path specified: `%s`', pcap_file)
 
     if os.path.exists(results_file_path) is True and overwrite_results is False:
-        logging.info('Results file already exist at path: `{}`'.format(results_file_path))
+        logging.debug('this is debug log')
+        logging.info('Results file already exist at path: `%s`. skipping because overwrite is `%s`',
+                     results_file_path, overwrite_results)
+        return None, 0
 
-    logging.debug('Starting to process pcap file: `{}`'.format(pcap_file))
+    logging.debug('Starting to process pcap file: `%s`', pcap_file)
 
     st = time.time()
 
     try:
         pcap_summary = pcap_processor.process(input_file=pcap_file, output_file=results_file_path)
+
     except GenericError as ex:
         logging.error(ex.message)
+        return None, 0
 
     processing_time = time.time() - st
 
-    logging.info('Processed `{}` in `{}` seconds'.format(pcap_file, processing_time))
+    logging.info('Processed `%s` in `%s` seconds', pcap_file, processing_time)
 
     return pcap_summary, processing_time
 
@@ -125,12 +128,15 @@ def process_pcap_files(
             results_file_path=result_file_path,
             overwrite_results=overwrite_results
         )
+        if pcap_summary is None:
+            continue
+
         summary_data = get_summary_for_pcap_processor(pcap_summary, processing_time)
-        logging.debug('Summary data from pcap file: `{}`\n%s', summary_data)
+        logging.debug('Summary data from pcap file: `%s`', summary_data)
         summary_results['items'].append(summary_data)
 
         if remove_original is True:
-            logging.info('Removing source pcap file at `{}`'.format(pcap_file))
+            logging.info('Removing source pcap file at `%s`', pcap_file)
             remove_file(pcap_file)
 
     return summary_results

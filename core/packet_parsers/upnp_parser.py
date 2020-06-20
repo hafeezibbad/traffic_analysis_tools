@@ -65,7 +65,6 @@ class UpnpPacketParser(PacketParserInterface):
         fingerprint.upnp_st = http_packet.headers.get('st', '')
         fingerprint.upnp_man = http_packet.headers.get('man', '')
         fingerprint.upnp_mx = http_packet.headers.get('mx')
-        fingerprint.upnp_user_agent = http_packet.headers.get('user-agent')
         if http_packet.headers.get('user-agent'):
             fingerprint.update(self.parse_upnp_header_information(http_packet.headers.get('user-agent')))
 

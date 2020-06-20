@@ -10,7 +10,8 @@ def setup_logging(
         log_directory: str = os.getcwd(),
         file_name: str = 'log_file',
         max_file_size: int = 10000000,
-        backup_count: int = 5
+        backup_count: int = 5,
+        verbose: bool = False
 ) -> Logger:
     """Setup logging for class.
 
@@ -34,7 +35,10 @@ def setup_logging(
     """
 
     logger = logging.getLogger(name)
-    logger.setLevel(logging.INFO)
+    if verbose is True:
+        logger.setLevel(logging.DEBUG)
+    else:
+        logger.setLevel(logging.INFO)
 
     log_format = logging.Formatter('%(asctime)s - %(name)s %(levelname)s - %(message)s')
 
@@ -43,7 +47,7 @@ def setup_logging(
         os.makedirs(log_directory, exist_ok=True)
 
     log_fh = RotatingFileHandler(
-        os.path.join(log_directory, file_name + '.log'),
+        os.path.join(log_directory, file_name),
         maxBytes=max_file_size,
         backupCount=backup_count
     )
