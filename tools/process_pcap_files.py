@@ -67,12 +67,11 @@ def process_pcap(
         logging.error('Invalid pcap file path specified: `%s`', pcap_file)
 
     if os.path.exists(results_file_path) is True and overwrite_results is False:
-        logging.debug('this is debug log')
         logging.info('Results file already exist at path: `%s`. skipping because overwrite is `%s`',
                      results_file_path, overwrite_results)
         return None, 0
 
-    logging.debug('Starting to process pcap file: `%s`', pcap_file)
+    logging.info('Starting to process pcap file: `%s`', pcap_file)
 
     st = time.time()
 

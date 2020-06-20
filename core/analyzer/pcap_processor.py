@@ -96,7 +96,7 @@ class PcapProcessor(BaseProcessor):
                     logging.error('Unable to process packate at ts: `%s`. Error `%s`'.format(ts, ex))
 
         except Exception as ex:
-            raise GenericError(message='Unable to process pcap file `%s`. Error `%s`'.format(pcap_file, ex)) from ex
+            raise GenericError(message='Unable to process pcap file `{}`. Error `{}`'.format(pcap_file, ex)) from ex
 
         logging.info('%s packets processed from %s', count, input_file)
         pcap_file.close()
