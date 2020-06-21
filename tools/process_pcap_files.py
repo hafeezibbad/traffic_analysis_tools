@@ -46,12 +46,14 @@ def load_configuration(config_file_path: str = None) -> Optional[ConfigurationDa
 
 def get_results_file_path(
         pcap_file_path: str = '',
+        source_directory: str = '',
         output_directory: str = '',
         suffix: str = 'data'
 ) -> str:
     filename, ext = get_filename_and_ext(pcap_file_path)
     results_file_name = os.path.basename(pcap_file_path)[:-len(ext)-1] + '_{}.csv'.format(suffix)
-    results_file_path = os.path.join(output_directory, results_file_name)
+    sub_directory_path = os.path.dirname(pcap_file_path).replace(source_directory + '/', '')
+    results_file_path = os.path.join(output_directory, sub_directory_path, results_file_name)
 
     return results_file_path
 
@@ -119,6 +121,7 @@ def process_pcap_files(
         try:
             result_file_path = get_results_file_path(
                 pcap_file_path=pcap_file,
+                source_directory=source_directory,
                 output_directory=output_directory,
                 suffix=results_file_suffix
             )
@@ -141,6 +144,8 @@ def process_pcap_files(
 
         except Exception as ex:
             logging.error('Error processing pcap file: `%s`. Error `%s`', pcap_file, ex)
+
+        exit(0)
 
     return summary_results
 
