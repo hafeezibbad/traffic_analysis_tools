@@ -116,27 +116,31 @@ def process_pcap_files(
 
     summary_results = dict(items=[])
     for pcap_file in pcap_files:
-        result_file_path = get_results_file_path(
-            pcap_file_path=pcap_file,
-            output_directory=output_directory,
-            suffix=results_file_suffix
-        )
-        pcap_summary, processing_time = process_pcap(
-            pcap_processor=pcap_processor,
-            pcap_file=pcap_file,
-            results_file_path=result_file_path,
-            overwrite_results=overwrite_results
-        )
-        if pcap_summary is None:
-            continue
+        try:
+            result_file_path = get_results_file_path(
+                pcap_file_path=pcap_file,
+                output_directory=output_directory,
+                suffix=results_file_suffix
+            )
+            pcap_summary, processing_time = process_pcap(
+                pcap_processor=pcap_processor,
+                pcap_file=pcap_file,
+                results_file_path=result_file_path,
+                overwrite_results=overwrite_results
+            )
+            if pcap_summary is None:
+                continue
 
-        summary_data = get_summary_for_pcap_processor(pcap_summary, processing_time)
-        logging.debug('Summary data from pcap file: `%s`', summary_data)
-        summary_results['items'].append(summary_data)
+            summary_data = get_summary_for_pcap_processor(pcap_summary, processing_time)
+            logging.debug('Summary data from pcap file: `%s`', summary_data)
+            summary_results['items'].append(summary_data)
 
-        if remove_original is True:
-            logging.info('Removing source pcap file at `%s`', pcap_file)
-            remove_file(pcap_file)
+            if remove_original is True:
+                logging.info('Removing source pcap file at `%s`', pcap_file)
+                remove_file(pcap_file)
+
+        except Exception as ex:
+            logging.error('Error processing pcap file: `%s`. Error `%s`', pcap_file, ex)
 
     return summary_results
 
