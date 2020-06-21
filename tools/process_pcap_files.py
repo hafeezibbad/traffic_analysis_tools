@@ -145,8 +145,6 @@ def process_pcap_files(
         except Exception as ex:
             logging.error('Error processing pcap file: `%s`. Error `%s`', pcap_file, ex)
 
-        exit(0)
-
     return summary_results
 
 
